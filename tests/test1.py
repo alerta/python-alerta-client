@@ -9,3 +9,7 @@ print repr(alert)
 
 id = client.send(alert)
 print id
+
+client.ack(id)
+client.tag(id, ['one','two','three'])
+
