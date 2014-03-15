@@ -13,40 +13,20 @@ class ApiClient(object):
 
         self.endpoint = 'http://%s:%s%s' % (host, port, root)
 
-    def query(self):
+    def query(self, **kwargs):
 
-        pass
+        r = self._get('/alerts', kwargs)
+        return r
 
-    def send(self, data):
+    def send(self, alert):
 
-        r = self._post('/alert', data=json.dumps(data, cls=AlertEncoder))
+        r = self._post('/alert', data=json.dumps(alert, cls=AlertEncoder))
         return r['receivedAlert']['_id']
 
-    def open(self, alertid):
+    def show(self, alertid):
 
-        self.update_status(alertid, 'open')
-
-    def ack(self, alertid):
-
-        self.update_status(alertid, 'ack')
-
-    def unack(self, alertid):
-
-        self.open(alertid)
-
-    def assign(self, alertid):
-
-        self.update_status(alertid, 'assigned')
-
-    def close(self, alertid):
-
-        self.update_status(alertid, 'closed')
-
-    def update_status(self, alertid, status):
-
-        data = {"status": status}
-        r = self._post('/alert/%s/status' % alertid, data=json.dumps(data))
-        return r['status']
+        r = self._get('/alert/%s' % alertid)
+        return r
 
     def tag(self, alertid, tags):
 
@@ -57,27 +37,67 @@ class ApiClient(object):
         r = self._post('/alert/%s/tag' % alertid, data=json.dumps(data))
         return r['status']
 
+    def open(self, alertid):
+
+        self.status(alertid, 'open')
+
+    def ack(self, alertid):
+
+        self.status(alertid, 'ack')
+
+    def unack(self, alertid):
+
+        self.open(alertid)
+
+    def assign(self, alertid):
+
+        self.status(alertid, 'assigned')
+
+    def close(self, alertid):
+
+        self.status(alertid, 'closed')
+
+    def status(self, alertid, status):
+
+        data = {"status": status}
+        r = self._post('/alert/%s/status' % alertid, data=json.dumps(data))
+        return r['status']
+
     def delete(self, alertid):
 
         self._delete('/alert', alertid)
 
-    def _get(self, path, filter=[]):
+    def heartbeats(self):
+        """
+        Get list of heartbeats
+        """
+        r = self._get('/heartbeats')
+        return r
 
-        url = self.endpoint + path + '?_expand&' + urllib.urlencode(filter)
+    def heartbeat(self, heartbeat):
+        """
+        Send a heartbeat
+        """
+        r = self._post('/heartbeat', data=json.dumps(heartbeat, cls=HeartbeatEncoder))
+        return r
+
+    def _get(self, path, params=None):
+
+        url = self.endpoint + path + urllib.urlencode(params)
         response = requests.get(url).json()
 
-        return response
+        try:
+            response.raise_for_status()
+        except requests.HTTPError:
+            raise
+
+        return response.json()
 
     def _post(self, path, data=None):
 
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
         response = requests.post(url, data=data, headers=headers)
-
-        print url
-        print data
-        print response
-        print response.text
 
         try:
             response.raise_for_status()
