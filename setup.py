@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 import setuptools
 from alerta import __version__
 
