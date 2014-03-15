@@ -65,7 +65,7 @@ class ApiClient(object):
 
     def delete(self, alertid):
 
-        self._delete('/alert', alertid)
+        self._delete('/alert/%s' % alertid)
 
     def heartbeats(self):
         """
@@ -81,9 +81,9 @@ class ApiClient(object):
         r = self._post('/heartbeat', data=json.dumps(heartbeat, cls=HeartbeatEncoder))
         return r
 
-    def _get(self, path, params=None):
+    def _get(self, path, query=None):
 
-        url = self.endpoint + path + urllib.urlencode(params)
+        url = self.endpoint + path + urllib.urlencode(query)
         response = requests.get(url).json()
 
         try:
@@ -106,9 +106,9 @@ class ApiClient(object):
 
         return response.json()
 
-    def _delete(self, path, alertid):
+    def _delete(self, path):
 
-        url = self.endpoint + path + '/' + alertid
+        url = self.endpoint + path
         response = requests.delete(url)
 
         try:
