@@ -9,82 +9,80 @@ from heartbeat import HeartbeatEncoder
 
 class ApiClient(object):
 
-    def __init__(self, host='api.alerta.io', port=80, root='/api'):
+    def __init__(self, host='api.alerta.io', port=80, root='/api', secure=False):
 
-        self.endpoint = 'http://%s:%s%s' % (host, port, root)
+        if secure:
+            self.endpoint = 'https://%s:%s%s' % (host, port, root)
+        else:
+            self.endpoint = 'http://%s:%s%s' % (host, port, root)
 
-    def query(self, **kwargs):
+    def get_alerts(self, **kwargs):
 
-        r = self._get('/alerts', kwargs)
-        return r
+        return self._get('/alerts', kwargs)
 
-    def send(self, alert):
+    def send_alert(self, alert):
 
-        r = self._post('/alert', data=json.dumps(alert, cls=AlertEncoder))
-        return r['receivedAlert']['_id']
+        return self._post('/alert', data=json.dumps(alert, cls=AlertEncoder))
 
-    def show(self, alertid):
+    def get_alert(self, alertid):
 
-        r = self._get('/alert/%s' % alertid)
-        return r
+        return self._get('/alert/%s' % alertid)
 
-    def tag(self, alertid, tags):
+    def tag_alert(self, alertid, tags):
 
         if not isinstance(tags, list):
             raise
 
-        data = {"tags": tags}
-        r = self._post('/alert/%s/tag' % alertid, data=json.dumps(data))
-        return r['status']
+        return self._post('/alert/%s/tag' % alertid, data=json.dumps({"tags": tags}))
 
-    def open(self, alertid):
+    def open_alert(self, alertid):
 
-        self.status(alertid, 'open')
+        self.update_status(alertid, 'open')
 
-    def ack(self, alertid):
+    def ack_alert(self, alertid):
 
-        self.status(alertid, 'ack')
+        self.update_status(alertid, 'ack')
 
-    def unack(self, alertid):
+    def unack_alert(self, alertid):
 
-        self.open(alertid)
+        self.open_alert(alertid)
 
-    def assign(self, alertid):
+    def assign_alert(self, alertid):
 
-        self.status(alertid, 'assigned')
+        self.update_status(alertid, 'assigned')
 
-    def close(self, alertid):
+    def close_alert(self, alertid):
 
-        self.status(alertid, 'closed')
+        self.update_status(alertid, 'closed')
 
-    def status(self, alertid, status):
+    def update_status(self, alertid, status):
 
-        data = {"status": status}
-        r = self._post('/alert/%s/status' % alertid, data=json.dumps(data))
-        return r['status']
+        return self._post('/alert/%s/status' % alertid, data=json.dumps({"status": status}))
 
-    def delete(self, alertid):
+    def delete_alert(self, alertid):
 
-        self._delete('/alert/%s' % alertid)
+        return self._delete('/alert/%s' % alertid)
 
-    def heartbeats(self):
-        """
-        Get list of heartbeats
-        """
-        r = self._get('/heartbeats')
-        return r
-
-    def heartbeat(self, heartbeat):
+    def send_heartbeat(self, heartbeat):
         """
         Send a heartbeat
         """
-        r = self._post('/heartbeat', data=json.dumps(heartbeat, cls=HeartbeatEncoder))
-        return r
+        return self._post('/heartbeat', data=json.dumps(heartbeat, cls=HeartbeatEncoder))
+
+    def get_heartbeats(self):
+        """
+        Get list of heartbeats
+        """
+        return self._get('/heartbeats')
+
+    def delete_heartbeat(self, heartbeatid):
+
+        return self._delete('/heartbeat/%s' % heartbeatid)
 
     def _get(self, path, query=None):
 
-        url = self.endpoint + path + urllib.urlencode(query)
-        response = requests.get(url).json()
+        url = self.endpoint + path + '?_expand&' + urllib.urlencode(query)
+        response = requests.get(url)
 
         try:
             response.raise_for_status()
