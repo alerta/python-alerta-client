@@ -1,0 +1,17 @@
+[default]
+timezone = Europe/London
+colour = yes
+output = text
+
+[proifle production]
+api_url = https://api.alerta.io
+timezone = Australia/Sydney
+
+[profile backup]
+api_url = http://dc2.alerta.io
+
+[profile testing]
+api_url = http://qa.alerta.io:8080/api
+
+[profile development]
+api_url = http://localhost:8080/api

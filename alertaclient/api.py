@@ -81,7 +81,7 @@ class ApiClient(object):
 
     def _get(self, path, query=None):
 
-        url = self.endpoint + path + '?_expand&' + urllib.urlencode(query)
+        url = self.endpoint + path + '?' + urllib.urlencode(query)
         response = requests.get(url)
 
         try:
