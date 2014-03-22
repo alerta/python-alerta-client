@@ -1,20 +1,35 @@
 
 import json
 import urllib
+import urlparse
 import requests
-
-from alert import AlertEncoder
-from heartbeat import HeartbeatEncoder
 
 
 class ApiClient(object):
 
     def __init__(self, host='api.alerta.io', port=80, root='/api', secure=False):
 
+        self.host = host
+        self.port = port or 80
+        self.root = root
+        self.secure = secure
+
+        self.netloc = '%s:%s' % (self.host, self.port)
+
         if secure:
-            self.endpoint = 'https://%s:%s%s' % (host, port, root)
+            self.endpoint = urlparse.urlunparse(("https", self.netloc, self.root, '', '', ''))
         else:
-            self.endpoint = 'http://%s:%s%s' % (host, port, root)
+            self.endpoint = urlparse.urlunparse(("http", self.netloc, self.root, '', '', ''))
+
+        print self.endpoint
+
+    def __repr__(self):
+
+        return 'ApiClient(host=%r, port=%r, root=%r, secure=%r)' % (self.host, self.port, self.root, self.secure)
+
+    def __str__(self):
+
+        return 'ApiClient(endpoint=%s)' % self.endpoint
 
     def get_alerts(self, **kwargs):
 
@@ -22,7 +37,7 @@ class ApiClient(object):
 
     def send_alert(self, alert):
 
-        return self._post('/alert', data=json.dumps(alert, cls=AlertEncoder))
+        return self._post('/alert', data=str(alert))
 
     def get_alert(self, alertid):
 
@@ -67,7 +82,7 @@ class ApiClient(object):
         """
         Send a heartbeat
         """
-        return self._post('/heartbeat', data=json.dumps(heartbeat, cls=HeartbeatEncoder))
+        return self._post('/heartbeat', data=str(heartbeat))
 
     def get_heartbeats(self):
         """

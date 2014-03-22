@@ -5,7 +5,7 @@ import datetime
 import json
 from uuid import uuid4
 
-from alerta.common.utils import DateEncoder
+from utils import DateEncoder
 
 DEFAULT_TIMEOUT = 300  # seconds
 

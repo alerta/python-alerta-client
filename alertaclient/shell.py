@@ -3,7 +3,12 @@ import os
 import sys
 import argparse
 import datetime
+import urlparse
 import ConfigParser
+
+from api import ApiClient
+from alert import Alert
+from heartbeat import Heartbeat
 
 __version__ = '3.0.0'
 
@@ -12,6 +17,19 @@ DEFAULT_CONF_FILE = '~/.alerta.conf'
 
 
 class AlertCommand(object):
+
+    def __init__(self):
+
+        self.api = None
+
+    def set_api(self, url):
+
+        o = urlparse.urlparse(url)
+        if o.scheme == "https":
+            secure = True
+        else:
+            secure = False
+        self.api = ApiClient(host=o.hostname, port=o.port, root=o.path, secure=secure)
 
     def config(self, args):
 
@@ -23,7 +41,21 @@ class AlertCommand(object):
 
     def sender(self, args):
 
-        pass
+        if args.heartbeat:
+
+            heartbeat = Heartbeat(
+                origin=args.origin,
+                tags=args.tags,
+                timeout=args.timeout
+            )
+            print self.api.send_heartbeat(heartbeat)
+
+        else:
+
+            alert = Alert(
+
+            )
+            return self.api.send_alert(alert)
 
 
 def main():
@@ -37,24 +69,6 @@ def main():
         'timezone': 'Europe/London',
         'output': 'text'
     }
-
-    config_file = os.environ.get('ALERTA_CONF_FILE') or DEFAULT_CONF_FILE
-
-    print 'Reading %s' % config_file
-    config = ConfigParser.SafeConfigParser(defaults=defaults)
-    config.read( os.path.expanduser(config_file))
-
-    # DEFAULTS
-    print config.defaults()
-
-    # PROFILES
-    print config.sections()
-    for section in config.sections():
-        if section.startswith('profile '):
-            profile = section.replace('profile ', '')
-            for option in config.options(section):
-                print '[%s] %s = %s' % (profile, option, config.get(section, option))
-
 
     # ARGUMENTS
     parser = argparse.ArgumentParser(
@@ -113,6 +127,11 @@ def main():
         help='service affected eg. the application name, "Web", "Network", "Storage", "Database", "Security"'
     )
     parser_sender.add_argument(
+        '-t',
+        '--text',
+        help='Freeform alert text eg. "Host not responding to ping."'
+    )
+    parser_sender.add_argument(
         '-T',
         '--tag',
         action='append',
@@ -129,19 +148,54 @@ def main():
         help='List of Key=Value attribute pairs eg. "priority=high", "moreInfo=..."'
     )
     parser_sender.add_argument(
-        '-t',
-        '--text',
-        help='Freeform alert text eg. "Host not responding to ping."'
+        '-O',
+        '--origin',
+        default=None,
+        help='Origin of alert or heartbeat. Usually in form of "app/host"'
     )
     parser_sender.add_argument(
-        'filter',
-        nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. prority=high service=Network'
+        '--timeout',
+        default=None,
+        help='Timeout in seconds before an "open" alert will be automatically "expired" or "deleted"'
+    )
+    parser_sender.add_argument(
+        '-H',
+        '--heartbeat',
+        action='store_true',
+        default=False,
+        help='Send heartbeat to server. Use in conjunction with "--origin" and "--tags"'
     )
     parser_sender.set_defaults(func=cli.sender)
 
     args = parser.parse_args()
+    print args
+
+
+
+    config_file = os.environ.get('ALERTA_CONF_FILE') or DEFAULT_CONF_FILE
+
+    print 'Reading %s' % config_file
+    config = ConfigParser.SafeConfigParser(defaults=defaults)
+    config.read( os.path.expanduser(config_file))
+
+    # DEFAULTS
+    print config.defaults()
+
+    # PROFILES
+    print config.sections()
+    for section in config.sections():
+        if section.startswith('profile '):
+            profile = section.replace('profile ', '')
+            for option in config.options(section):
+                print '[%s] %s = %s' % (profile, option, config.get(section, option))
+
+
+    print defaults['api_url']
+
+
+    cli.set_api(url='http://localhost:8080/api')
+
+
     args.func(args)
 
 

@@ -11,13 +11,10 @@ import yaml
 
 from email import utils
 
-from alerta.common import log as logging
-from alerta.common import config
-from alerta.common import status_code, severity_code
-from alerta.common.utils import DateEncoder
+import severity_code
+import status_code
+from utils import DateEncoder
 
-LOG = logging.getLogger(__name__)
-CONF = config.CONF
 
 prog = os.path.basename(sys.argv[0])
 
@@ -32,10 +29,6 @@ class Alert(object):
     def __init__(self, resource, event, environment=None, severity=severity_code.NORMAL, correlate=None,
                  status=status_code.UNKNOWN, service=None, group=None, value=None, text=None, tags=None,
                  attributes={}, origin=None, event_type=None, create_time=None, timeout=86400, raw_data=None):
-
-        config.register_opts(Alert.alert_opts)
-
-        prog = os.path.basename(sys.argv[0])
 
         if not resource:
             raise ValueError('Missing mandatory value for resource')
