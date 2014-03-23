@@ -3,6 +3,7 @@ import os
 import sys
 import argparse
 import time
+import pytz
 import datetime
 import ConfigParser
 import json
@@ -39,7 +40,7 @@ class AlertCommand(object):
         now = datetime.datetime.utcnow()
         from_time = now
 
-        query = dict([x.split('=') for x in args.filter if '=' in x])
+        query = dict([x.split('=', 1) for x in args.filter if '=' in x])
 
         while True:
             try:
@@ -56,7 +57,7 @@ class AlertCommand(object):
                 if args.output == "json":
                     dump_alerts(alerts)
                 elif args.output == "text":
-                    show_alerts(alerts)
+                    show_alerts(alerts, args)
                 elif args.output == "table":
                     table_alerts(alerts)
                 else:
@@ -130,10 +131,49 @@ def dump_alerts(alerts):
     print json.dumps(alerts, indent=4)
 
 
-def show_alerts(alerts):
+_COLOR_MAP = {
+    "critical": '\033[91m',
+    "major": '\033[95m',
+    "minor": '\033[93m',
+    "warning": '\033[96m',
+    "indeterminate": '\033[92m',
+    "clear": '\033[92m',
+    "normal": '\033[92m',
+    "informational": '\033[92m',
+    "debug": '\033[90m',
+    "auth": '\033[90m',
+    "unknown": '\033[90m',
+}
+_ENDC = '\033[0m'
+
+
+def show_alerts(alerts, args):
+
+    tz = pytz.timezone(args.timezone)
+
+    if args.color:
+        end_color = _ENDC
 
     for alert in alerts:
-        print alert
+        line_color = ''
+        end_color = ''
+
+        last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+        last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
+
+        if args.color:
+            line_color = _COLOR_MAP[alert['severity']]
+        print(line_color + '%s|%s|%s|%5d|%-5s|%-10s|%-18s|%12s|%16s|%12s' % (
+            alert['id'][0:8],
+            last_receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
+            alert['severity'],
+            alert['duplicateCount'],
+            alert['environment'],
+            ','.join(alert.get('service', '')),
+            alert['resource'],
+            alert['group'],
+            alert['event'],
+            alert['value']) + end_color)
 
 
 def table_alerts(alerts):
@@ -158,7 +198,7 @@ def table_alerts(alerts):
                 alert['severity'],
                 alert['duplicateCount'],
                 alert['environment'],
-                "service", #','.join(alert['service']),
+                ','.join(alert.get('service', '')),
                 alert['resource'],
                 alert['group'],
                 alert['event'],
