@@ -124,6 +124,7 @@ def main():
 
         config = ConfigParser.SafeConfigParser(defaults=defaults)
         config.read(os.path.expanduser(config_file))
+        defaults['profile'] = args.profile
         defaults = dict(config.defaults())
 
         print 'defaults after reading in config -> %s' % defaults
@@ -189,6 +190,7 @@ def main():
         '--no-colour',
         action='store_false',
         default=defaults['color'],
+        dest='color',
         help=argparse.SUPPRESS
     )
     subparsers = parser.add_subparsers(metavar='COMMAND', help='query, sender or config')
