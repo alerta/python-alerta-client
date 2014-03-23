@@ -31,9 +31,9 @@ class Alert(object):
                  attributes={}, origin=None, event_type=None, create_time=None, timeout=86400, raw_data=None):
 
         if not resource:
-            raise ValueError('Missing mandatory value for resource')
+            raise ValueError('Missing mandatory value for "resource"')
         if not event:
-            raise ValueError('Missing mandatory value for event')
+            raise ValueError('Missing mandatory value for "event"')
         if any(['.' in key for key in attributes.keys()]) or any(['$' in key for key in attributes.keys()]):
             raise ValueError('Attribute keys must not contain "." or "$"')
 

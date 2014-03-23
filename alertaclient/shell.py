@@ -36,36 +36,54 @@ class AlertCommand(object):
     def sender(self, args):
 
         if args.heartbeat:
+            try:
+                heartbeat = Heartbeat(
+                    origin=args.origin,
+                    tags=args.tags,
+                    timeout=args.timeout
+                )
+            except Exception as e:
+                print >>sys.stderr, "ERROR: %s" % e
+                sys.exit(1)
 
-            heartbeat = Heartbeat(
-                origin=args.origin,
-                tags=args.tags,
-                timeout=args.timeout
-            )
-            print self.api.send(heartbeat)
+            try:
+                response = self.api.send(heartbeat)
+            except Exception as e:
+                print >>sys.stderr, "ERROR: %s" % e
+            else:
+                print response
 
         else:
+            try:
+                alert = Alert(
+                    resource=args.resource,
+                    event=args.event,
+                    environment=args.environment,
+                    severity=args.severity,
+                    correlate=args.correlate,
+                    status=args.status,
+                    service=args.service,
+                    group=args.group,
+                    value=args.value,
+                    text=args.text,
+                    tags=args.tags,
+                    attributes=dict([attrib.split('=') for attrib in args.attributes]),
+                    origin=args.origin,
+                    event_type=args.event_type,
+                    # create_time=args.create_time,
+                    timeout=args.timeout,
+                    raw_data=args.raw_data
+                )
+            except Exception as e:
+                print >>sys.stderr, "ERROR: %s" % e
+                sys.exit(1)
 
-            alert = Alert(
-                resource=args.resource,
-                event=args.event,
-                environment=args.environment,
-                severity=args.severity,
-                correlate=args.correlate,
-                status=args.status,
-                service=args.service,
-                group=args.group,
-                value=args.value,
-                text=args.text,
-                tags=args.tags,
-                attributes=dict([attrib.split('=') for attrib in args.attributes]),
-                origin=args.origin,
-                event_type=args.event_type,
-                # create_time=args.create_time,
-                timeout=args.timeout,
-                raw_data=args.raw_data
-            )
-            print self.api.send(alert)
+            try:
+                response = self.api.send(alert)
+            except Exception as e:
+                print >>sys.stderr, "ERROR: %s" % e
+            else:
+                print response
 
 
 def main():
