@@ -4,6 +4,7 @@ import sys
 import argparse
 import datetime
 import ConfigParser
+import json
 
 from api import ApiClient
 from alert import Alert
@@ -29,11 +30,41 @@ class AlertCommand(object):
 
     def config(self, args):
 
-        pass
+        print args
 
     def query(self, args):
 
-        pass
+        now = datetime.datetime.utcnow()
+        from_time = now
+
+        query = dict([x.split('=') for x in args.filter if '=' in x])
+
+        while True:
+            try:
+                response = self.api.get_alerts(**query)
+            except Exception as e:
+                print >>sys.stderr, "ERROR: %s" % e
+                sys.exit(1)
+
+            if response['status'] == "error":
+                print >>sys.stderr, "ERROR: %s" % response['message']
+                sys.exit(1)
+            else:
+                alerts = response['alerts']
+                if args.output == "json":
+                    dump_alerts(alerts)
+                elif args.output == "text":
+                    show_alerts(alerts)
+                elif args.output == "table":
+                    table_alerts(alerts)
+                else:
+                    print >>sys.stderr, "ERROR: Unknown output format"
+                    sys.exit(1)
+
+            if args.watch:
+                pass  # FIXME
+            else:
+                break
 
     def sender(self, args):
 
@@ -88,10 +119,22 @@ class AlertCommand(object):
                 print response
 
 
-def main():
+def dump_alerts(alerts):
 
-    print
-    print '---'
+    print json.dumps(alerts, indent=4)
+
+
+def show_alerts(alerts):
+
+    for alert in alerts:
+        print alert
+
+
+def table_alerts(alerts):
+
+    pass
+
+def main():
 
     cli = AlertCommand()
 
@@ -115,29 +158,29 @@ def main():
     )
     args, left = profile_parser.parse_known_args()
 
-    print 'defaults before reading in config -> %s' % defaults
+    # print 'defaults before reading in config -> %s' % defaults
     config_file = defaults['config_file']
 
     if config_file:
 
-        print 'Reading %s...' % config_file
+        # print 'Reading %s...' % config_file
 
         config = ConfigParser.SafeConfigParser(defaults=defaults)
         config.read(os.path.expanduser(config_file))
 
         defaults = dict(config.defaults())
 
-        print 'defaults after reading in config -> %s' % defaults
+        # print 'defaults after reading in config -> %s' % defaults
 
         if args.profile:
             defaults['profile'] = args.profile
             # PROFILES
             for section in config.sections():
-                print 'Found -> %s' % section
+                # print 'Found -> %s' % section
                 if section.startswith('profile '):
-                    print 'Reading -> %s' % section
+                    # print 'Reading -> %s' % section
                     if args.profile == section.replace('profile ', ''):
-                        print '*** Matched %s' % args.profile
+                        # print '*** Matched %s' % args.profile
                         defaults['debug'] = config.getboolean(section, 'debug')
                         defaults['endpoint'] = config.get(section, 'endpoint')
                         defaults['output'] = config.get(section, 'output')
@@ -202,11 +245,10 @@ def main():
 
     parser_query = subparsers.add_parser('query', help='List alerts based on query filter')
     parser_query.add_argument(
-        '-i',
-        '--id',
-        action='append',
-        dest='id',
-        help='Alert ID (can use 8-char abbrev id)'
+        '-w',
+        '--watch',
+        action='store_true',
+        help='watch'
     )
     parser_query.add_argument(
         'filter',
@@ -320,23 +362,23 @@ def main():
 
     args.output = 'json' if args.json else args.output
     args.timezone = DEFAULT_TIMEZONE
-    print 'ARGS > %s' % args
+    # print 'ARGS > %s' % args
 
 
 
-    print defaults['endpoint']
-
-    print 'config_file => %s' % defaults['config_file']
-    print 'profile  => %s' % args.profile
-    print 'endpoint => %s' % args.endpoint
-    print 'output   => %s' % args.output
-    print 'color    => %s' % args.color
-    print 'debug    => %s' % args.debug
-    print 'timezone => %s' % args.timezone
+    # print defaults['endpoint']
+    #
+    # print 'config_file => %s' % defaults['config_file']
+    # print 'profile  => %s' % args.profile
+    # print 'endpoint => %s' % args.endpoint
+    # print 'output   => %s' % args.output
+    # print 'color    => %s' % args.color
+    # print 'debug    => %s' % args.debug
+    # print 'timezone => %s' % args.timezone
 
     cli.set_api(url='http://localhost:8080/api')
 
-    #args.func(args)
+    args.func(args)
 
 
 if __name__ == '__main__':
