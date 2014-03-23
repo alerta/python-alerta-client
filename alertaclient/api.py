@@ -22,6 +22,13 @@ class ApiClient(object):
 
         return self._post('/alert', data=str(alert))
 
+    def send(self, msg):
+
+        if msg.event_type == 'Heartbeat':
+            return self.send_heartbeat(msg)
+        else:
+            return self.send_alert(msg)
+
     def get_alert(self, alertid):
 
         return self._get('/alert/%s' % alertid)

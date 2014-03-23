@@ -42,14 +42,30 @@ class AlertCommand(object):
                 tags=args.tags,
                 timeout=args.timeout
             )
-            print self.api.send_heartbeat(heartbeat)
+            print self.api.send(heartbeat)
 
         else:
 
             alert = Alert(
-
+                resource=args.resource,
+                event=args.event,
+                environment=args.environment,
+                severity=args.severity,
+                correlate=args.correlate,
+                status=args.status,
+                service=args.service,
+                group=args.group,
+                value=args.value,
+                text=args.text,
+                tags=args.tags,
+                attributes=dict([attrib.split('=') for attrib in args.attributes]),
+                origin=args.origin,
+                event_type=args.event_type,
+                # create_time=args.create_time,
+                timeout=args.timeout,
+                raw_data=args.raw_data
             )
-            return self.api.send_alert(alert)
+            print self.api.send(alert)
 
 
 def main():
@@ -58,7 +74,7 @@ def main():
 
     defaults = {
         'profile': None,
-        'api_url': 'http://api.alerta.io',
+        'endpoint': 'http://api.alerta.io',
         'color': 'yes',
         'timezone': 'Europe/London',
         'output': 'text'
@@ -109,16 +125,51 @@ def main():
 
     parser_sender = subparsers.add_parser('sender', help='Send alert to server')
     parser_sender.add_argument(
+        '-r',
+        '--resource',
+        help='resource'
+    )
+    parser_sender.add_argument(
+        '-e',
+        '--event',
+        help='event'
+    )
+    parser_sender.add_argument(
         '-E',
         '--environment',
         action='append',
         help='environment eg. "production", "development", "testing"'
     )
     parser_sender.add_argument(
+        '-s',
+        '--severity',
+        help='severity'
+    )
+    parser_sender.add_argument(
+        '-C',
+        '--correlate',
+        action='append',
+        help='correlate'
+    )
+    parser_sender.add_argument(
+        '--status',
+        help='status should not normally be defined eg. "open", "closed"'
+    )
+    parser_sender.add_argument(
         '-S',
         '--service',
         action='append',
         help='service affected eg. the application name, "Web", "Network", "Storage", "Database", "Security"'
+    )
+    parser_sender.add_argument(
+        '-g',
+        '--group',
+        help='group'
+    )
+    parser_sender.add_argument(
+        '-v',
+        '--value',
+        help='value'
     )
     parser_sender.add_argument(
         '-t',
@@ -148,9 +199,10 @@ def main():
         help='Origin of alert or heartbeat. Usually in form of "app/host"'
     )
     parser_sender.add_argument(
-        '--timeout',
-        default=None,
-        help='Timeout in seconds before an "open" alert will be automatically "expired" or "deleted"'
+        '--type',
+        dest='event_type',
+        default='exceptionAlert',
+        help='event type eg. "exceptionAlert", "serviceAlert"'
     )
     parser_sender.add_argument(
         '-H',
@@ -158,6 +210,16 @@ def main():
         action='store_true',
         default=False,
         help='Send heartbeat to server. Use in conjunction with "--origin" and "--tags"'
+    )
+    parser_sender.add_argument(
+        '--timeout',
+        default=None,
+        help='Timeout in seconds before an "open" alert will be automatically "expired" or "deleted"'
+    )
+    parser_sender.add_argument(
+        '--raw-data',
+        default=None,
+        help='raw data'
     )
     parser_sender.set_defaults(func=cli.sender)
 
@@ -184,11 +246,9 @@ def main():
                 print '[%s] %s = %s' % (profile, option, config.get(section, option))
 
 
-    print defaults['api_url']
-
+    print defaults['endpoint']
 
     cli.set_api(url='http://localhost:8080/api')
-
 
     args.func(args)
 
