@@ -3,7 +3,6 @@ import os
 import sys
 import argparse
 import datetime
-import urlparse
 import ConfigParser
 
 from api import ApiClient
@@ -24,12 +23,7 @@ class AlertCommand(object):
 
     def set_api(self, url):
 
-        o = urlparse.urlparse(url)
-        if o.scheme == "https":
-            secure = True
-        else:
-            secure = False
-        self.api = ApiClient(host=o.hostname, port=o.port, root=o.path, secure=secure)
+        self.api = ApiClient(endpoint=url)
 
     def config(self, args):
 

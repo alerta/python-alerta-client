@@ -1,35 +1,18 @@
 
 import json
 import urllib
-import urlparse
 import requests
 
 
 class ApiClient(object):
 
-    def __init__(self, host='api.alerta.io', port=80, root='/api', secure=False):
+    def __init__(self, endpoint):
 
-        self.host = host
-        self.port = port or 80
-        self.root = root
-        self.secure = secure
-
-        self.netloc = '%s:%s' % (self.host, self.port)
-
-        if secure:
-            self.endpoint = urlparse.urlunparse(("https", self.netloc, self.root, '', '', ''))
-        else:
-            self.endpoint = urlparse.urlunparse(("http", self.netloc, self.root, '', '', ''))
-
-        print self.endpoint
+        self.endpoint = endpoint
 
     def __repr__(self):
 
-        return 'ApiClient(host=%r, port=%r, root=%r, secure=%r)' % (self.host, self.port, self.root, self.secure)
-
-    def __str__(self):
-
-        return 'ApiClient(endpoint=%s)' % self.endpoint
+        return 'ApiClient(endpoint=%r)' % self.endpoint
 
     def get_alerts(self, **kwargs):
 
