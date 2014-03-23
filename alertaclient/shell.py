@@ -12,9 +12,10 @@ from heartbeat import Heartbeat
 __version__ = '3.0.0'
 
 DEFAULT_CONF_FILE = '~/.alerta.conf'
-DEFAULT_ENDPOINT_URL = 'http://api.alerta.io'
+DEFAULT_ENDPOINT_URL = 'prog://system'
 DEFAULT_OUTPUT = 'text'
 DEFAULT_TIMEZONE = 'Europe/London'
+
 
 class AlertCommand(object):
 
@@ -103,15 +104,49 @@ def main():
         'output': DEFAULT_OUTPUT,
         'debug': False
     }
-    print 'System Defaults based on Env Vars...'
-    print defaults
-    print
 
-    # ARGUMENTS
+    profile_parser = argparse.ArgumentParser(
+        add_help=False
+    )
+    profile_parser.add_argument(
+        '--profile',
+        default=defaults['profile'],
+        help='Define profile section to use in configuration file %s' % defaults['config_file']
+    )
+    args, left = profile_parser.parse_known_args()
+
+    print 'defaults before reading in config -> %s' % defaults
+
+    if args.profile:
+
+        config_file = defaults['config_file']
+        print 'Reading %s...' % config_file
+
+        config = ConfigParser.SafeConfigParser(defaults=defaults)
+        config.read(os.path.expanduser(config_file))
+        defaults = dict(config.defaults())
+
+        print 'defaults after reading in config -> %s' % defaults
+
+        # PROFILES
+        for section in config.sections():
+            print 'Found -> %s' % section
+            if section.startswith('profile '):
+                print 'Reading -> %s' % section
+                if args.profile == section.replace('profile ', ''):
+                    print '*** Matched %s' % args.profile
+                    defaults['debug'] = config.getboolean(section, 'debug')
+                    defaults['endpoint'] = config.get(section, 'endpoint')
+                    defaults['output'] = config.get(section, 'output')
+                    defaults['color'] = config.getboolean(section, 'color')
+                    defaults['timezone'] = config.get(section, 'timezone')
+
     parser = argparse.ArgumentParser(
         prog='alert',
         description="Alerta client unified command-line tool",
+        parents=[profile_parser]
     )
+    parser.set_defaults(**defaults)
     parser.add_argument(
         '--debug',
         action='store_true',
@@ -133,13 +168,9 @@ def main():
         '--json',
         '-j',
         action='store_true',
-        help='Output type JSON. Equivalent to "--output json"'
+        help='Output format of JSON. Shortcut for "--output json"'
     )
-    parser.add_argument(
-        '--profile',
-        default=defaults['profile'],
-        help='profile section'
-    )
+
     parser.add_argument(
         '--version',
         action='version',
@@ -158,7 +189,7 @@ def main():
         '--no-colour',
         action='store_false',
         default=defaults['color'],
-        help='color'
+        help=argparse.SUPPRESS
     )
     subparsers = parser.add_subparsers(metavar='COMMAND', help='query, sender or config')
 
@@ -281,30 +312,13 @@ def main():
     )
     parser_sender.set_defaults(func=cli.sender)
 
-    args = parser.parse_args()
+    args = parser.parse_args(left)
+
     args.output = 'json' if args.json else args.output
     args.timezone = DEFAULT_TIMEZONE
     print 'ARGS > %s' % args
 
-    config_file = defaults['config_file']
 
-    print 'Reading %s...' % config_file
-    config = ConfigParser.SafeConfigParser(defaults=defaults)
-    config.read(os.path.expanduser(config_file))
-
-    # DEFAULTS
-    print config.defaults()
-
-    # PROFILES
-    for section in config.sections():
-        if section.startswith('profile '):
-            if args.profile == section.replace('profile ', ''):
-                args.debug = config.getboolean(section, 'debug')
-                args.endpoint = config.get(section, 'endpoint')
-                args.output = config.get(section, 'output')
-                if config.has_option(section, 'color'):
-                    args.color = config.getboolean(section, 'color')
-                args.timezone = config.get(section, 'timezone')
 
     print defaults['endpoint']
 
@@ -316,10 +330,9 @@ def main():
     print 'debug    => %s' % args.debug
     print 'timezone => %s' % args.timezone
 
-
     cli.set_api(url='http://localhost:8080/api')
 
-    args.func(args)
+    #args.func(args)
 
 
 if __name__ == '__main__':
