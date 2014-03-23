@@ -11,10 +11,11 @@ import yaml
 
 from email import utils
 
-import severity_code
-import status_code
 from utils import DateEncoder
 
+
+DEFAULT_SEVERITY = "normal"  # "normal", "ok" or "clear"
+DEFAULT_TIMEOUT = 86400
 
 prog = os.path.basename(sys.argv[0])
 
@@ -26,8 +27,8 @@ class Alert(object):
         'parser_dir': '/etc/alerta/parsers',
     }
 
-    def __init__(self, resource, event, environment=None, severity=severity_code.NORMAL, correlate=None,
-                 status=status_code.UNKNOWN, service=None, group=None, value=None, text=None, tags=None,
+    def __init__(self, resource, event, environment=None, severity=None, correlate=None,
+                 status=None, service=None, group=None, value=None, text=None, tags=None,
                  attributes={}, origin=None, event_type=None, create_time=None, timeout=86400, raw_data=None):
 
         if not resource:
@@ -41,11 +42,11 @@ class Alert(object):
         self.resource = resource
         self.event = event
         self.environment = environment or ""
-        self.severity = severity
+        self.severity = severity or DEFAULT_SEVERITY
         self.correlate = correlate or list()
         if correlate and event not in correlate:
             self.correlate.append(event)
-        self.status = status
+        self.status = status or 'unknown'
         self.service = service or list()
         self.group = group or 'Misc'
         self.value = value or 'n/a'
@@ -56,7 +57,7 @@ class Alert(object):
         self.event_type = event_type or 'exceptionAlert'
         self.create_time = create_time or datetime.datetime.utcnow()
         self.receive_time = None
-        self.timeout = timeout or CONF.global_timeout
+        self.timeout = timeout or DEFAULT_TIMEOUT
         self.raw_data = raw_data
 
     def get_id(self, short=False):
@@ -131,9 +132,9 @@ class Alert(object):
             resource=alert.get('resource', None),
             event=alert.get('event', None),
             environment=alert.get('environment', None),
-            severity=severity_code.parse_severity(alert.get('severity', severity_code.NORMAL)),
+            severity=alert.get('severity', DEFAULT_SEVERITY),
             correlate=alert.get('correlate', None),
-            status=status_code.parse_status(alert.get('status', status_code.UNKNOWN)),
+            status=alert.get('status', "unknown"),
             service=alert.get('service', list()),
             group=alert.get('group', None),
             value=alert.get('value', None),
@@ -270,7 +271,7 @@ class AlertDocument(object):
         self.origin = origin or '%s/%s' % (prog, os.uname()[1])
         self.event_type = event_type or 'exceptionAlert'
         self.create_time = create_time or datetime.datetime.utcnow()
-        self.timeout = timeout or CONF.global_timeout
+        self.timeout = timeout or DEFAULT_TIMEOUT
         self.raw_data = raw_data
 
         self.duplicate_count = duplicate_count
@@ -377,9 +378,9 @@ class AlertDocument(object):
             resource=alert.get('resource', None),
             event=alert.get('event', None),
             environment=alert.get('environment', None),
-            severity=severity_code.parse_severity(alert.get('severity', severity_code.NORMAL)),
+            severity=alert.get('severity', DEFAULT_SEVERITY),
             correlate=alert.get('correlate', None),
-            status=status_code.parse_status(alert.get('status', status_code.UNKNOWN)),
+            status=alert.get('status', "unknown"),
             service=alert.get('service', list()),
             group=alert.get('group', None),
             value=alert.get('value', None),

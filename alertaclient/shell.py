@@ -2,9 +2,11 @@
 import os
 import sys
 import argparse
+import time
 import datetime
 import ConfigParser
 import json
+import prettytable
 
 from api import ApiClient
 from alert import Alert
@@ -62,7 +64,11 @@ class AlertCommand(object):
                     sys.exit(1)
 
             if args.watch:
-                pass  # FIXME
+                try:
+                    time.sleep(2)
+                except (KeyboardInterrupt, SystemExit):
+                    sys.exit(0)
+                query['from-date'] = response['lastTime']
             else:
                 break
 
@@ -132,7 +138,36 @@ def show_alerts(alerts):
 
 def table_alerts(alerts):
 
-    pass
+    pt = prettytable.PrettyTable([
+        "Alert ID",
+        "Last Receive Time",
+        "Severity",
+        "Dupl.",
+        "Environment",
+        "Service",
+        "Resource",
+        "Group",
+        "Event",
+        "Value"
+    ])
+    col_text = []
+    for alert in alerts:
+            pt.add_row([
+                alert['id'],
+                alert['lastReceiveTime'],
+                alert['severity'],
+                alert['duplicateCount'],
+                alert['environment'],
+                "service", #','.join(alert['service']),
+                alert['resource'],
+                alert['group'],
+                alert['event'],
+                alert['value']
+            ])
+        # if 'text' in CONF.show:
+        #     col_text.append(text)
+            print pt
+
 
 def main():
 
@@ -245,10 +280,14 @@ def main():
 
     parser_query = subparsers.add_parser('query', help='List alerts based on query filter')
     parser_query.add_argument(
+        '--show',
+        help='Show '
+    )
+    parser_query.add_argument(
         '-w',
         '--watch',
         action='store_true',
-        help='watch'
+        help='Periodically poll for new  alerts every 2 seconds'
     )
     parser_query.add_argument(
         'filter',
