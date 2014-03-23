@@ -2,6 +2,9 @@
 import json
 import urllib
 import requests
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 class ApiClient(object):
@@ -88,6 +91,7 @@ class ApiClient(object):
 
         url = self.endpoint + path + '?' + urllib.urlencode(query)
         response = requests.get(url)
+        LOG.debug('Response Body: %s', response)
 
         try:
             response.raise_for_status()

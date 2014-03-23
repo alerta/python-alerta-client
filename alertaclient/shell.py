@@ -8,10 +8,13 @@ import datetime
 import ConfigParser
 import json
 import prettytable
+import logging
 
 from api import ApiClient
 from alert import Alert
 from heartbeat import Heartbeat
+
+LOG = logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 __version__ = '3.0.0'
 
@@ -19,6 +22,23 @@ DEFAULT_CONF_FILE = '~/.alerta.conf'
 DEFAULT_ENDPOINT_URL = 'prog://system'
 DEFAULT_OUTPUT = 'text'
 DEFAULT_TIMEZONE = 'Europe/London'
+
+_COLOR_MAP = {
+    "critical": '\033[91m',
+    "major": '\033[95m',
+    "minor": '\033[93m',
+    "warning": '\033[96m',
+    "indeterminate": '\033[92m',
+    "clear": '\033[92m',
+    "normal": '\033[92m',
+    "informational": '\033[92m',
+    "debug": '\033[90m',
+    "auth": '\033[90m',
+    "unknown": '\033[90m',
+}
+_ENDC = '\033[0m'
+
+NOT_SET = '<not set>'
 
 
 class AlertCommand(object):
@@ -54,12 +74,16 @@ class AlertCommand(object):
                 sys.exit(1)
             else:
                 alerts = response['alerts']
-                if args.output == "json":
-                    dump_alerts(alerts)
+                if args.ack:
+                    self.ack_alerts(alerts)
+                elif args.delete:
+                    self.delete_alerts(alerts)
+                elif args.output == "json":
+                    self.dump_alerts(alerts)
                 elif args.output == "text":
-                    show_alerts(alerts, args)
+                    self.show_alerts(alerts, args)
                 elif args.output == "table":
-                    table_alerts(alerts)
+                    self.table_alerts(alerts)
                 else:
                     print >>sys.stderr, "ERROR: Unknown output format"
                     sys.exit(1)
@@ -110,7 +134,6 @@ class AlertCommand(object):
                     attributes=dict([attrib.split('=') for attrib in args.attributes]),
                     origin=args.origin,
                     event_type=args.event_type,
-                    # create_time=args.create_time,
                     timeout=args.timeout,
                     raw_data=args.raw_data
                 )
@@ -125,90 +148,80 @@ class AlertCommand(object):
             else:
                 print response
 
+    def ack_alerts(self, alerts):
 
-def dump_alerts(alerts):
+        for alert in alerts:
+            self.api.ack_alert(alert['id'])
 
-    print json.dumps(alerts, indent=4)
+    def delete_alerts(self, alerts):
 
+        for alert in alerts:
+            self.api.delete_alert(alert['id'])
 
-_COLOR_MAP = {
-    "critical": '\033[91m',
-    "major": '\033[95m',
-    "minor": '\033[93m',
-    "warning": '\033[96m',
-    "indeterminate": '\033[92m',
-    "clear": '\033[92m',
-    "normal": '\033[92m',
-    "informational": '\033[92m',
-    "debug": '\033[90m',
-    "auth": '\033[90m',
-    "unknown": '\033[90m',
-}
-_ENDC = '\033[0m'
+    def dump_alerts(self, alerts):
 
-NOT_SET = '<not set>'
+        print json.dumps(alerts, indent=4)
 
+    def show_alerts(self, alerts, args):
 
-def show_alerts(alerts, args):
-
-    tz = pytz.timezone(args.timezone)
-
-    if args.color:
-        end_color = _ENDC
-
-    for alert in alerts:
-        line_color = ''
-        end_color = ''
-
-        last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-        last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
+        tz = pytz.timezone(args.timezone)
 
         if args.color:
-            line_color = _COLOR_MAP[alert['severity']]
-        print(line_color + '%s|%s|%s|%5d|%-5s|%-10s|%-18s|%12s|%16s|%12s' % (
-            alert['id'][0:8],
-            last_receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
-            alert['severity'],
-            alert['duplicateCount'],
-            alert.get('environment', NOT_SET),
-            ','.join(alert.get('service', NOT_SET)),
-            alert['resource'],
-            alert.get('group', NOT_SET),
-            alert['event'],
-            alert.get('value', NOT_SET) + end_color))
+            end_color = _ENDC
 
+        for alert in alerts:
+            line_color = ''
+            end_color = ''
 
-def table_alerts(alerts):
+            last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+            last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
 
-    pt = prettytable.PrettyTable([
-        "Alert ID",
-        "Last Receive Time",
-        "Severity",
-        "Dupl.",
-        "Environment",
-        "Service",
-        "Resource",
-        "Group",
-        "Event",
-        "Value"
-    ])
-    col_text = []
-    for alert in alerts:
-            pt.add_row([
-                alert['id'],
-                alert['lastReceiveTime'],
+            if args.color:
+                line_color = _COLOR_MAP[alert['severity']]
+            print(line_color + '%s|%s|%s|%5d|%-5s|%-10s|%-18s|%12s|%16s|%12s' % (
+                alert['id'][0:8],
+                last_receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
                 alert['severity'],
                 alert['duplicateCount'],
                 alert.get('environment', NOT_SET),
-                ','.join(alert.get('service', '')),
+                ','.join(alert.get('service', NOT_SET)),
                 alert['resource'],
                 alert.get('group', NOT_SET),
                 alert['event'],
-                alert.get('value', NOT_SET)
-            ])
-        # if 'text' in CONF.show:
-        #     col_text.append(text)
-            print pt
+                alert.get('value', NOT_SET) + end_color))
+
+
+    def table_alerts(self, alerts):
+
+        pt = prettytable.PrettyTable([
+            "Alert ID",
+            "Last Receive Time",
+            "Severity",
+            "Dupl.",
+            "Environment",
+            "Service",
+            "Resource",
+            "Group",
+            "Event",
+            "Value"
+        ])
+        col_text = []
+        for alert in alerts:
+                pt.add_row([
+                    alert['id'],
+                    alert['lastReceiveTime'],
+                    alert['severity'],
+                    alert['duplicateCount'],
+                    alert.get('environment', NOT_SET),
+                    ','.join(alert.get('service', '')),
+                    alert['resource'],
+                    alert.get('group', NOT_SET),
+                    alert['event'],
+                    alert.get('value', NOT_SET)
+                ])
+            # if 'text' in CONF.show:
+            #     col_text.append(text)
+                print pt
 
 
 def main():
@@ -332,6 +345,18 @@ def main():
         help='Periodically poll for new  alerts every 2 seconds'
     )
     parser_query.add_argument(
+        '-K',
+        '--ack',
+        action='store_true',
+        help='Acknowledge alerts that match the query filter'
+    )
+    parser_query.add_argument(
+        '-X',
+        '--delete',
+        action='store_true',
+        help='Delete alerts that match the query filter'
+    )
+    parser_query.add_argument(
         'filter',
         nargs='*',
         metavar='KEY=VALUE',
@@ -444,7 +469,11 @@ def main():
     args.output = 'json' if args.json else args.output
     # print 'ARGS > %s' % args
 
-
+    # if args.debug:
+    #     LOG.setLevel(logging.DEBUG)
+    #     LOG.debug("Alerta CLI version: %s", __version__)
+    # else:
+    #     LOG.setLevel(logging.ERROR)
 
     # print defaults['endpoint']
     #
