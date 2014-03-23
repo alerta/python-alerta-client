@@ -282,6 +282,7 @@ def main():
     parser_sender.set_defaults(func=cli.sender)
 
     args = parser.parse_args()
+    args.output = 'json' if args.json else args.output
     args.timezone = DEFAULT_TIMEZONE
     print 'ARGS > %s' % args
 
@@ -304,8 +305,6 @@ def main():
                 if config.has_option(section, 'color'):
                     args.color = config.getboolean(section, 'color')
                 args.timezone = config.get(section, 'timezone')
-
-    args.output = 'json' if args.json else args.output
 
     print defaults['endpoint']
 
