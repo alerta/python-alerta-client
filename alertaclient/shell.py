@@ -146,6 +146,8 @@ _COLOR_MAP = {
 }
 _ENDC = '\033[0m'
 
+NOT_SET = '<not set>'
+
 
 def show_alerts(alerts, args):
 
@@ -168,12 +170,12 @@ def show_alerts(alerts, args):
             last_receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
             alert['severity'],
             alert['duplicateCount'],
-            alert['environment'],
-            ','.join(alert.get('service', '')),
+            alert.get('environment', NOT_SET),
+            ','.join(alert.get('service', NOT_SET)),
             alert['resource'],
-            alert['group'],
+            alert.get('group', NOT_SET),
             alert['event'],
-            alert['value']) + end_color)
+            alert.get('value', NOT_SET) + end_color))
 
 
 def table_alerts(alerts):
@@ -197,12 +199,12 @@ def table_alerts(alerts):
                 alert['lastReceiveTime'],
                 alert['severity'],
                 alert['duplicateCount'],
-                alert['environment'],
+                alert.get('environment', NOT_SET),
                 ','.join(alert.get('service', '')),
                 alert['resource'],
-                alert['group'],
+                alert.get('group', NOT_SET),
                 alert['event'],
-                alert['value']
+                alert.get('value', NOT_SET)
             ])
         # if 'text' in CONF.show:
         #     col_text.append(text)
@@ -440,7 +442,6 @@ def main():
     args = parser.parse_args(left)
 
     args.output = 'json' if args.json else args.output
-    args.timezone = DEFAULT_TIMEZONE
     # print 'ARGS > %s' % args
 
 
