@@ -193,6 +193,64 @@ class AlertCommand(object):
             if 'text' in args.show:
                 print(line_color + '   |%s' % (alert['text'].encode('utf-8')) + end_color)
 
+            if 'details' in args.show:
+                print(
+                    line_color + '    severity | %s -> %s' % (
+                        alert['previousSeverity'],
+                        alert['severity']) + end_color)
+                print(line_color + '    trend    | %s' % alert['trendIndication'] + end_color)
+                print(line_color + '    status   | %s' % alert['status'] + end_color)
+                print(line_color + '    resource | %s' % alert['resource'] + end_color)
+                print(line_color + '    group    | %s' % alert['group'] + end_color)
+                print(line_color + '    event    | %s' % alert['event'] + end_color)
+                print(line_color + '    value    | %s' % alert['value'] + end_color)
+
+                for key, value in alert['attributes'].items():
+                    print(line_color + '            %s | %s' % (key, value) + end_color)
+
+                print(line_color + '      time created  | %s' % (
+                    alert['createTime'] + end_color))
+                print(line_color + '      time received | %s' % (
+                    alert['receiveTime']) + end_color)
+                print(line_color + '      last received | %s' % (
+                    alert['lastReceiveTime']) + end_color)
+                #print(line_color + '      latency       | %sms' % latency + end_color)
+                print(line_color + '      timeout       | %ss' % alert['timeout'] + end_color)
+
+                print(line_color + '          alert id     | %s' % alert['id'] + end_color)
+                print(line_color + '          last recv id | %s' % alert['lastReceiveId'] + end_color)
+                print(line_color + '          environment  | %s' % alert['environment'] + end_color)
+                print(line_color + '          service      | %s' % (','.join(alert['service'])) + end_color)
+                print(line_color + '          resource     | %s' % alert['resource'] + end_color)
+                print(line_color + '          type         | %s' % alert['type'] + end_color)
+                print(line_color + '          repeat       | %s' % alert['repeat'] + end_color)
+                print(line_color + '          origin       | %s' % alert['origin'] + end_color)
+                print(line_color + '          correlate    | %s' % (','.join(alert['correlate'])) + end_color)
+
+            if 'raw' in args.show:
+                print(line_color + '   | %s' % alert['rawData'] + end_color)
+
+            if 'history' in args.show:
+                for hist in alert['history']:
+                    if 'event' in hist:
+                        receive_time = datetime.datetime.strptime(hist.get('receiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+                        receive_time = receive_time.replace(tzinfo=pytz.utc)
+                        print(line_color + '  %s|%s|%s|%-18s|%12s|%16s|%12s' % (
+                            hist['id'][0:8],
+                            receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
+                            hist['severity'],
+                            alert['resource'],
+                            alert['group'],
+                            hist['event'],
+                            hist['value']
+                        ) + end_color)
+                        print(line_color + '    |%s' % (alert['text'].encode('utf-8')) + end_color)
+                    if 'status' in hist:
+                        update_time = datetime.datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+                        update_time = update_time.replace(tzinfo=pytz.utc)
+                        print(line_color + '    %s|%-8s| %s' % (
+                            update_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'), hist['status'], hist['text']) + end_color)
+
     def table_alerts(self, alerts, args):
 
         pt = prettytable.PrettyTable([
@@ -341,7 +399,7 @@ def main():
         '--show',
         dest='show',
         action='append',
-        help='Show "text", "times", "details", "raw", "history"'
+        help='Show "text", "details", "raw", "history"'
     )
     parser_query.add_argument(
         '-w',
