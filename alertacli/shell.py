@@ -19,7 +19,7 @@ LOG = logging.getLogger('alerta')
 __version__ = '3.0.0'
 
 DEFAULT_CONF_FILE = '~/.alerta.conf'
-DEFAULT_ENDPOINT_URL = 'prog://system'
+DEFAULT_ENDPOINT_URL = 'http://localhost:8080'
 DEFAULT_OUTPUT = 'text'
 DEFAULT_TIMEZONE = 'Europe/London'
 
@@ -56,9 +56,6 @@ class AlertCommand(object):
         print args
 
     def query(self, args):
-
-        now = datetime.datetime.utcnow()
-        from_time = now
 
         query = dict([x.split('=', 1) for x in args.filter if '=' in x])
         query['sort-by'] = 'lastReceiveTime'
@@ -310,29 +307,19 @@ def main():
     )
     args, left = profile_parser.parse_known_args()
 
-    # print 'defaults before reading in config -> %s' % defaults
     config_file = defaults['config_file']
-
     if config_file:
-
-        # print 'Reading %s...' % config_file
 
         config = ConfigParser.SafeConfigParser(defaults=defaults)
         config.read(os.path.expanduser(config_file))
 
         defaults = dict(config.defaults())
 
-        # print 'defaults after reading in config -> %s' % defaults
-
         if args.profile:
             defaults['profile'] = args.profile
-            # PROFILES
             for section in config.sections():
-                # print 'Found -> %s' % section
                 if section.startswith('profile '):
-                    # print 'Reading -> %s' % section
                     if args.profile == section.replace('profile ', ''):
-                        # print '*** Matched %s' % args.profile
                         defaults['debug'] = config.getboolean(section, 'debug')
                         defaults['endpoint'] = config.get(section, 'endpoint')
                         defaults['output'] = config.get(section, 'output')
@@ -530,7 +517,6 @@ def main():
     args = parser.parse_args(left)
 
     args.output = 'json' if args.json else args.output
-    #print 'ARGS > %s' % args
 
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     root = logging.getLogger()
@@ -542,16 +528,6 @@ def main():
     else:
         root.setLevel(logging.ERROR)
         LOG.setLevel(logging.ERROR)
-
-    # print defaults['endpoint']
-    #
-    # print 'config_file => %s' % defaults['config_file']
-    # print 'profile  => %s' % args.profile
-    # print 'endpoint => %s' % args.endpoint
-    # print 'output   => %s' % args.output
-    # print 'color    => %s' % args.color
-    # print 'debug    => %s' % args.debug
-    # print 'timezone => %s' % args.timezone
 
     cli.set_api(url=args.endpoint)
 
