@@ -61,6 +61,7 @@ class AlertCommand(object):
         from_time = now
 
         query = dict([x.split('=', 1) for x in args.filter if '=' in x])
+        query['sort-by'] = 'lastReceiveTime'
 
         while True:
             try:
@@ -184,16 +185,16 @@ class AlertCommand(object):
                 alert['severity'],
                 alert['duplicateCount'],
                 alert.get('environment', NOT_SET),
-                ','.join(alert.get('service', NOT_SET)),
+                ','.join(alert.get('service', [NOT_SET])),
                 alert['resource'],
                 alert.get('group', NOT_SET),
                 alert['event'],
                 alert.get('value', NOT_SET) + end_color)
             )
-            if 'text' in args.show:
+            if args.show and 'text' in args.show:
                 print(line_color + '   |%s' % (alert['text'].encode('utf-8')) + end_color)
 
-            if 'details' in args.show:
+            if args.show and 'details' in args.show:
                 print(
                     line_color + '    severity | %s -> %s' % (
                         alert['previousSeverity'],
@@ -227,10 +228,10 @@ class AlertCommand(object):
                 print(line_color + '          origin       | %s' % alert['origin'] + end_color)
                 print(line_color + '          correlate    | %s' % (','.join(alert['correlate'])) + end_color)
 
-            if 'raw' in args.show:
+            if args.show and 'raw' in args.show:
                 print(line_color + '   | %s' % alert['rawData'] + end_color)
 
-            if 'history' in args.show:
+            if args.show and 'history' in args.show:
                 for hist in alert['history']:
                     if 'event' in hist:
                         receive_time = datetime.datetime.strptime(hist.get('receiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -441,7 +442,6 @@ def main():
     parser_sender.add_argument(
         '-E',
         '--environment',
-        action='append',
         help='environment eg. "production", "development", "testing"'
     )
     parser_sender.add_argument(
