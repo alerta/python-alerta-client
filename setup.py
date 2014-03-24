@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import setuptools
-from alertaclient import __version__
+from alerta.client import __version__
 
 with open('README.rst') as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="alertaclient",
+    name="alerta-api",
     version=__version__,
     description="Alerta client API for python",
     long_description=long_description,
