@@ -14,7 +14,6 @@ from api import ApiClient
 from alert import Alert
 from heartbeat import Heartbeat
 
-LOG = logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 __version__ = '3.0.0'
 
@@ -467,13 +466,19 @@ def main():
     args = parser.parse_args(left)
 
     args.output = 'json' if args.json else args.output
-    # print 'ARGS > %s' % args
+    #print 'ARGS > %s' % args
 
-    # if args.debug:
-    #     LOG.setLevel(logging.DEBUG)
-    #     LOG.debug("Alerta CLI version: %s", __version__)
-    # else:
-    #     LOG.setLevel(logging.ERROR)
+    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    root = logging.getLogger()
+    LOG = logging.getLogger('alerta')
+
+    if args.debug:
+        root.setLevel(logging.DEBUG)
+        LOG.setLevel(logging.DEBUG)
+        LOG.debug("Alerta cli version: %s", __version__)
+    else:
+        root.setLevel(logging.ERROR)
+        LOG.setLevel(logging.ERROR)
 
     # print defaults['endpoint']
     #
