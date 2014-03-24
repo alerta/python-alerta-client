@@ -19,7 +19,7 @@ LOG = logging.getLogger('alerta')
 __version__ = '3.0.0'
 
 DEFAULT_CONF_FILE = '~/.alerta.conf'
-DEFAULT_ENDPOINT_URL = 'http://localhost:8080'
+DEFAULT_ENDPOINT_URL = 'http://localhost:8080/api'
 DEFAULT_OUTPUT = 'text'
 DEFAULT_TIMEZONE = 'Europe/London'
 
