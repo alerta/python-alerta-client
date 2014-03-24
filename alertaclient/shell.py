@@ -169,7 +169,7 @@ class AlertCommand(object):
 
         tz = pytz.timezone(args.timezone)
 
-        for alert in alerts:
+        for alert in reversed(alerts):
             line_color = ''
             end_color = _ENDC
 
