@@ -17,7 +17,9 @@ setuptools.setup(
     url="http://github.com/alerta/alertacli",
     packages=setuptools.find_packages(exclude=['tests']),
     install_requires=[
-        'requests'
+        'requests',
+        'pytz',
+        'prettytable'
     ],
     keywords="alerta command line",
     classifiers=[
@@ -27,5 +29,6 @@ setuptools.setup(
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Topic :: System :: Monitoring',
-    ]
+    ],
+    scripts=['bin/alert']
 )

@@ -4,19 +4,24 @@ import sys
 import time
 import datetime
 import json
+
 from uuid import uuid4
-import re
-import fnmatch
-
 from email import utils
-
-from utils import DateEncoder
-
 
 DEFAULT_SEVERITY = "normal"  # "normal", "ok" or "clear"
 DEFAULT_TIMEOUT = 86400
 
 prog = os.path.basename(sys.argv[0])
+
+
+# Extend JSON Encoder to support ISO 8601 format dates
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+
+        if isinstance(obj, (datetime.date, datetime.datetime)):
+            return obj.strftime('%Y-%m-%dT%H:%M:%S') + ".%03dZ" % (obj.microsecond // 1000)
+        else:
+            return json.JSONEncoder.default(self, obj)
 
 
 class Alert(object):

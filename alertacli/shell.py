@@ -10,7 +10,7 @@ import json
 import prettytable
 import logging
 
-from api import ApiClient
+from client import ApiClient
 from alert import Alert
 from heartbeat import Heartbeat
 
