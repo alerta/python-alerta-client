@@ -9,7 +9,7 @@ LOG = logging.getLogger(__name__)
 
 class ApiClient(object):
 
-    def __init__(self, endpoint):
+    def __init__(self, endpoint="http://localhost:8080/api"):
 
         self.endpoint = endpoint
 
