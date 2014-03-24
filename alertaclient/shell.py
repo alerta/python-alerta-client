@@ -14,6 +14,7 @@ from api import ApiClient
 from alert import Alert
 from heartbeat import Heartbeat
 
+LOG = logging.getLogger('alerta')
 
 __version__ = '3.0.0'
 
@@ -65,11 +66,11 @@ class AlertCommand(object):
             try:
                 response = self.api.get_alerts(**query)
             except Exception as e:
-                print >>sys.stderr, "ERROR: %s" % e
+                LOG.error(e)
                 sys.exit(1)
 
             if response['status'] == "error":
-                print >>sys.stderr, "ERROR: %s" % response['message']
+                LOG.error(response['message'])
                 sys.exit(1)
             else:
                 alerts = response['alerts']
@@ -82,9 +83,9 @@ class AlertCommand(object):
                 elif args.output == "text":
                     self.show_alerts(alerts, args)
                 elif args.output == "table":
-                    self.table_alerts(alerts)
+                    self.table_alerts(alerts, args)
                 else:
-                    print >>sys.stderr, "ERROR: Unknown output format"
+                    LOG.warning('Unknown output format. Try "--output text".')
                     sys.exit(1)
 
             if args.watch:
@@ -106,13 +107,14 @@ class AlertCommand(object):
                     timeout=args.timeout
                 )
             except Exception as e:
-                print >>sys.stderr, "ERROR: %s" % e
+                LOG.error(e)
                 sys.exit(1)
 
             try:
                 response = self.api.send(heartbeat)
             except Exception as e:
-                print >>sys.stderr, "ERROR: %s" % e
+                LOG.error(e)
+                sys.exit(1)
             else:
                 print response
 
@@ -137,13 +139,14 @@ class AlertCommand(object):
                     raw_data=args.raw_data
                 )
             except Exception as e:
-                print >>sys.stderr, "ERROR: %s" % e
+                LOG.error(e)
                 sys.exit(1)
 
             try:
                 response = self.api.send(alert)
             except Exception as e:
-                print >>sys.stderr, "ERROR: %s" % e
+                LOG.error(e)
+                sys.exit(1)
             else:
                 print response
 
@@ -165,18 +168,16 @@ class AlertCommand(object):
 
         tz = pytz.timezone(args.timezone)
 
-        if args.color:
-            end_color = _ENDC
-
         for alert in alerts:
             line_color = ''
-            end_color = ''
+            end_color = _ENDC
 
             last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
             last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
 
             if args.color:
                 line_color = _COLOR_MAP[alert['severity']]
+
             print(line_color + '%s|%s|%s|%5d|%-5s|%-10s|%-18s|%12s|%16s|%12s' % (
                 alert['id'][0:8],
                 last_receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
@@ -187,10 +188,12 @@ class AlertCommand(object):
                 alert['resource'],
                 alert.get('group', NOT_SET),
                 alert['event'],
-                alert.get('value', NOT_SET) + end_color))
+                alert.get('value', NOT_SET) + end_color)
+            )
+            if 'text' in args.show:
+                print(line_color + '   |%s' % (alert['text'].encode('utf-8')) + end_color)
 
-
-    def table_alerts(self, alerts):
+    def table_alerts(self, alerts, args):
 
         pt = prettytable.PrettyTable([
             "Alert ID",
@@ -218,9 +221,10 @@ class AlertCommand(object):
                     alert['event'],
                     alert.get('value', NOT_SET)
                 ])
-            # if 'text' in CONF.show:
-            #     col_text.append(text)
-                print pt
+                if 'text' in args.show:
+                    col_text.append(alert['text'])
+        pt.add_column("Text", col_text)
+        print pt
 
 
 def main():
@@ -335,7 +339,9 @@ def main():
     parser_query = subparsers.add_parser('query', help='List alerts based on query filter')
     parser_query.add_argument(
         '--show',
-        help='Show '
+        dest='show',
+        action='append',
+        help='Show "text", "times", "details", "raw", "history"'
     )
     parser_query.add_argument(
         '-w',
@@ -470,7 +476,6 @@ def main():
 
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     root = logging.getLogger()
-    LOG = logging.getLogger('alerta')
 
     if args.debug:
         root.setLevel(logging.DEBUG)
@@ -490,7 +495,7 @@ def main():
     # print 'debug    => %s' % args.debug
     # print 'timezone => %s' % args.timezone
 
-    cli.set_api(url='http://localhost:8080/api')
+    cli.set_api(url=args.endpoint)
 
     args.func(args)
 

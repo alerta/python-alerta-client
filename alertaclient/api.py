@@ -91,7 +91,10 @@ class ApiClient(object):
 
         url = self.endpoint + path + '?' + urllib.urlencode(query)
         response = requests.get(url)
-        LOG.debug('Response Body: %s', response)
+
+        LOG.debug('Content type from response: %s', response.headers['content-type'])
+        LOG.debug('Response Headers: %s', response.headers)
+        LOG.debug('Response Body: %s', response.text)
 
         try:
             response.raise_for_status()

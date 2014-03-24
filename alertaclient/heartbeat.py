@@ -73,14 +73,14 @@ class Heartbeat(object):
         try:
             heartbeat = json.loads(heartbeat)
         except ValueError, e:
-            print >>sys.stderr, 'Could not parse heartbeat: %s - %s' % (e, heartbeat)
+            LOG.error('Could not parse heartbeat - %s: %s', e, heartbeat)
             raise
 
         if heartbeat.get('createTime', None):
             try:
                 heartbeat['createTime'] = datetime.datetime.strptime(heartbeat['createTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
             except ValueError, e:
-                print >>sys.stderr, 'Could not parse datetime string "%s"' % e
+                LOG.error('Could not parse date time string: %s', e)
                 raise
 
         return Heartbeat(
