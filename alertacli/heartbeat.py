@@ -3,11 +3,20 @@ import os
 import sys
 import datetime
 import json
+
 from uuid import uuid4
 
-from utils import DateEncoder
-
 DEFAULT_TIMEOUT = 300  # seconds
+
+
+# Extend JSON Encoder to support ISO 8601 format dates
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+
+        if isinstance(obj, (datetime.date, datetime.datetime)):
+            return obj.strftime('%Y-%m-%dT%H:%M:%S') + ".%03dZ" % (obj.microsecond // 1000)
+        else:
+            return json.JSONEncoder.default(self, obj)
 
 
 class Heartbeat(object):
