@@ -17,6 +17,7 @@ setuptools.setup(
     url="http://github.com/alerta/alertacli",
     packages=setuptools.find_packages(exclude=['tests']),
     install_requires=[
+        'argparse',
         'requests',
         'pytz',
         'prettytable'
