@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 
 import setuptools
-from alertacli import __version__
+from alertaclient import __version__
 
 with open('README.rst') as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="alertacli",
+    name="alertaclient",
     version=__version__,
     description="Alerta unified command-line tool",
     long_description=long_description,
     license="MIT",
     author="Nick Satterly",
     author_email="nick.satterly@theguardian.com",
-    url="http://github.com/alerta/alertacli",
+    url="http://github.com/alerta/alertaclient",
     packages=setuptools.find_packages(exclude=['tests']),
     install_requires=[
         'argparse',

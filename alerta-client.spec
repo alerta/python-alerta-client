@@ -1,5 +1,5 @@
-%define name alerta-cli
-%define version 1.0.0
+%define name alerta-client
+%define version 3.0.0
 %define release 1
 
 Name: %{name}
@@ -7,7 +7,7 @@ Summary: Alerta command-line tool
 Version: %{version}
 Release: %{release}
 Source0: %{name}-%{version}.tar.gz
-License: Apache License 2.0
+License: MIT
 Group: Utilities/System
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
@@ -25,22 +25,22 @@ Zabbix, and displays them on an alert console.
 %setup
 
 %build
-/usr/bin/virtualenv --no-site-packages alerta
-alerta/bin/pip install -r requirements.txt --upgrade
-alerta/bin/python setup.py install --single-version-externally-managed --root=/
-/usr/bin/virtualenv --relocatable alerta
+/usr/bin/virtualenv --no-site-packages alertaclient
+alertaclient/bin/pip install -r requirements.txt --upgrade
+alertaclient/bin/python setup.py install --single-version-externally-managed --root=/
+/usr/bin/virtualenv --relocatable alertaclient
 
 %install
-%__mkdir_p %{buildroot}/opt/alerta
+%__mkdir_p %{buildroot}/opt/alertaclient
 cp -r %{_builddir}/%{name}-%{version}/alerta %{buildroot}/opt
 
 %clean
 rm -rf %{buildroot}
 
 %files
-/opt/alerta/*
+/opt/alertaclient/*
 %defattr(-,root,root)
 
 %changelog
-* Thu Mar 21 2013 Nick Satterly <nick.satterly@theguardian.com> - 1.0.0-1
+* Thu Mar 27 2013 Nick Satterly <nick.satterly@theguardian.com> - 3.0.0-1
 - Package alerta relase 3.0 command-line tools
