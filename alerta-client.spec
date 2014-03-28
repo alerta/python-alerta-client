@@ -1,6 +1,6 @@
 %define name alerta-client
 %define version 3.0.0
-%define release 2
+%define release 3
 
 Name: %{name}
 Summary: Alerta command-line tool
@@ -14,7 +14,7 @@ Prefix: /opt
 BuildArch: x86_64
 Vendor: Nick Satterly <nick.satterly@theguardian.com>
 Url: https://github.com/alerta/python-alerta-client
-BuildRequires: python-devel, python-setuptools, python-pip, python-virtualenv
+BuildRequires: python-devel, python-setuptools, python-virtualenv
 
 %description
 Command-line tool for Alerta monitoring framework.
@@ -49,5 +49,5 @@ getent passwd alerta >/dev/null || \
 exit 0
 
 %changelog
-* Thu Mar 27 2013 Nick Satterly <nick.satterly@theguardian.com> - 3.0.0-2
+* Thu Mar 27 2013 Nick Satterly <nick.satterly@theguardian.com> - 3.0.0-3
 - Package alerta relase 3.0 command-line tools
