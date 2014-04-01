@@ -113,6 +113,7 @@ class AlertCommand(object):
             sys.exit(0)
 
         tz = pytz.timezone(args.timezone)
+
         for alert in reversed(alerts):
             line_color = ''
             end_color = _ENDC
@@ -135,6 +136,41 @@ class AlertCommand(object):
                 alert['event'],
                 alert.get('value', NOT_SET) + end_color)
             )
+            print(line_color + '   |%s' % (alert['text'].encode('utf-8')) + end_color)
+
+            if args.details:
+                print(
+                    line_color + '    severity | %s -> %s' % (
+                        alert['previousSeverity'],
+                        alert['severity']) + end_color)
+                print(line_color + '    trend    | %s' % alert['trendIndication'] + end_color)
+                print(line_color + '    status   | %s' % alert['status'] + end_color)
+                print(line_color + '    resource | %s' % alert['resource'] + end_color)
+                print(line_color + '    group    | %s' % alert['group'] + end_color)
+                print(line_color + '    event    | %s' % alert['event'] + end_color)
+                print(line_color + '    value    | %s' % alert['value'] + end_color)
+
+                for key, value in alert['attributes'].items():
+                    print(line_color + '            %s | %s' % (key, value) + end_color)
+
+                print(line_color + '      time created  | %s' % (
+                    alert['createTime'] + end_color))
+                print(line_color + '      time received | %s' % (
+                    alert['receiveTime']) + end_color)
+                print(line_color + '      last received | %s' % (
+                    alert['lastReceiveTime']) + end_color)
+                #print(line_color + '      latency       | %sms' % latency + end_color)
+                print(line_color + '      timeout       | %ss' % alert['timeout'] + end_color)
+
+                print(line_color + '          alert id     | %s' % alert['id'] + end_color)
+                print(line_color + '          last recv id | %s' % alert['lastReceiveId'] + end_color)
+                print(line_color + '          environment  | %s' % alert['environment'] + end_color)
+                print(line_color + '          service      | %s' % (','.join(alert['service'])) + end_color)
+                print(line_color + '          resource     | %s' % alert['resource'] + end_color)
+                print(line_color + '          type         | %s' % alert['type'] + end_color)
+                print(line_color + '          repeat       | %s' % alert['repeat'] + end_color)
+                print(line_color + '          origin       | %s' % alert['origin'] + end_color)
+                print(line_color + '          correlate    | %s' % (','.join(alert['correlate'])) + end_color)
 
         return response.get('lastTime', '')
 
@@ -481,6 +517,11 @@ def main():
     parser_send.set_defaults(func=cli.send)
 
     parser_query = subparsers.add_parser('query', help='List alerts based on query filter')
+    parser_query.add_argument(
+        '--details',
+        action='store_true',
+        help='Show alert details'
+    )
     parser_query.add_argument(
         'filter',
         nargs='*',
