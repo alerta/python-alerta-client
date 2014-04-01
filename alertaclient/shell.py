@@ -7,7 +7,6 @@ import pytz
 import datetime
 import ConfigParser
 import json
-import prettytable
 import logging
 
 from client import ApiClient
@@ -16,7 +15,7 @@ from heartbeat import Heartbeat
 
 LOG = logging.getLogger('alerta')
 
-__version__ = '3.0.0'
+__version__ = '3.0.1'
 
 DEFAULT_CONF_FILE = '~/.alerta.conf'
 DEFAULT_ENDPOINT_URL = 'http://localhost:8080/api'
@@ -51,51 +50,7 @@ class AlertCommand(object):
 
         self.api = ApiClient(endpoint=url)
 
-    def config(self, args):
-
-        print args
-
-    def query(self, args):
-
-        query = dict([x.split('=', 1) for x in args.filter if '=' in x])
-        query['sort-by'] = 'lastReceiveTime'
-
-        while True:
-            try:
-                response = self.api.get_alerts(**query)
-            except Exception as e:
-                LOG.error(e)
-                sys.exit(1)
-
-            if response['status'] == "error":
-                LOG.error(response['message'])
-                sys.exit(1)
-            else:
-                alerts = response['alerts']
-                if args.ack:
-                    self.ack_alerts(alerts)
-                elif args.delete:
-                    self.delete_alerts(alerts)
-                elif args.output == "json":
-                    self.dump_alerts(alerts)
-                elif args.output == "text":
-                    self.show_alerts(alerts, args)
-                elif args.output == "table":
-                    self.table_alerts(alerts, args)
-                else:
-                    LOG.warning('Unknown output format. Try "--output text".')
-                    sys.exit(1)
-
-            if args.watch:
-                try:
-                    time.sleep(2)
-                except (KeyboardInterrupt, SystemExit):
-                    sys.exit(0)
-                query['from-date'] = response['lastTime']
-            else:
-                break
-
-    def sender(self, args):
+    def send(self, args):
 
         if args.heartbeat:
             try:
@@ -148,24 +103,16 @@ class AlertCommand(object):
             else:
                 print response
 
-    def ack_alerts(self, alerts):
+    def query(self, args):
 
-        for alert in alerts:
-            self.api.ack_alert(alert['id'])
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
 
-    def delete_alerts(self, alerts):
-
-        for alert in alerts:
-            self.api.delete_alert(alert['id'])
-
-    def dump_alerts(self, alerts):
-
-        print json.dumps(alerts, indent=4)
-
-    def show_alerts(self, alerts, args):
+        if args.output == "json":
+            print json.dumps(alerts, indent=4)
+            sys.exit(0)
 
         tz = pytz.timezone(args.timezone)
-
         for alert in reversed(alerts):
             line_color = ''
             end_color = _ENDC
@@ -188,99 +135,142 @@ class AlertCommand(object):
                 alert['event'],
                 alert.get('value', NOT_SET) + end_color)
             )
-            if args.show and 'text' in args.show:
-                print(line_color + '   |%s' % (alert['text'].encode('utf-8')) + end_color)
 
-            if args.show and 'details' in args.show:
-                print(
-                    line_color + '    severity | %s -> %s' % (
-                        alert['previousSeverity'],
-                        alert['severity']) + end_color)
-                print(line_color + '    trend    | %s' % alert['trendIndication'] + end_color)
-                print(line_color + '    status   | %s' % alert['status'] + end_color)
-                print(line_color + '    resource | %s' % alert['resource'] + end_color)
-                print(line_color + '    group    | %s' % alert['group'] + end_color)
-                print(line_color + '    event    | %s' % alert['event'] + end_color)
-                print(line_color + '    value    | %s' % alert['value'] + end_color)
+        return response.get('lastTime', datetime.datetime.utcnow())
 
-                for key, value in alert['attributes'].items():
-                    print(line_color + '            %s | %s' % (key, value) + end_color)
+    def watch(self, args):
 
-                print(line_color + '      time created  | %s' % (
-                    alert['createTime'] + end_color))
-                print(line_color + '      time received | %s' % (
-                    alert['receiveTime']) + end_color)
-                print(line_color + '      last received | %s' % (
-                    alert['lastReceiveTime']) + end_color)
-                #print(line_color + '      latency       | %sms' % latency + end_color)
-                print(line_color + '      timeout       | %ss' % alert['timeout'] + end_color)
+        query = args.filter
+        while True:
+            last_time = self.query(args)
+            print 'last time > %s' % last_time
+            try:
+                time.sleep(2)
+            except (KeyboardInterrupt, SystemExit):
+                sys.exit(0)
+            query['from-date'] = last_time
 
-                print(line_color + '          alert id     | %s' % alert['id'] + end_color)
-                print(line_color + '          last recv id | %s' % alert['lastReceiveId'] + end_color)
-                print(line_color + '          environment  | %s' % alert['environment'] + end_color)
-                print(line_color + '          service      | %s' % (','.join(alert['service'])) + end_color)
-                print(line_color + '          resource     | %s' % alert['resource'] + end_color)
-                print(line_color + '          type         | %s' % alert['type'] + end_color)
-                print(line_color + '          repeat       | %s' % alert['repeat'] + end_color)
-                print(line_color + '          origin       | %s' % alert['origin'] + end_color)
-                print(line_color + '          correlate    | %s' % (','.join(alert['correlate'])) + end_color)
+    def raw(self, args):
 
-            if args.show and 'raw' in args.show:
-                print(line_color + '   | %s' % alert['rawData'] + end_color)
+        query = dict([x.split('=', 1) for x in args.filter if '=' in x])
+        query['sort-by'] = 'lastReceiveTime'
 
-            if args.show and 'history' in args.show:
-                for hist in alert['history']:
-                    if 'event' in hist:
-                        receive_time = datetime.datetime.strptime(hist.get('receiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-                        receive_time = receive_time.replace(tzinfo=pytz.utc)
-                        print(line_color + '  %s|%s|%s|%-18s|%12s|%16s|%12s' % (
-                            hist['id'][0:8],
-                            receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
-                            hist['severity'],
-                            alert['resource'],
-                            alert['group'],
-                            hist['event'],
-                            hist['value']
-                        ) + end_color)
-                        print(line_color + '    |%s' % (alert['text'].encode('utf-8')) + end_color)
-                    if 'status' in hist:
-                        update_time = datetime.datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-                        update_time = update_time.replace(tzinfo=pytz.utc)
-                        print(line_color + '    %s|%-8s| %s' % (
-                            update_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'), hist['status'], hist['text']) + end_color)
+        try:
+            response = self.api.get_alerts(**query)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
 
-    def table_alerts(self, alerts, args):
+        if response['status'] == "error":
+            LOG.error(response['message'])
+            sys.exit(1)
 
-        pt = prettytable.PrettyTable([
-            "Alert ID",
-            "Last Receive Time",
-            "Severity",
-            "Dupl.",
-            "Environment",
-            "Service",
-            "Resource",
-            "Group",
-            "Event",
-            "Value"
-        ])
-        col_text = []
+        alerts = response['alerts']
+
+        if args.output == "json":
+            print json.dumps(alerts, indent=4)
+            sys.exit(0)
+
+        for alert in reversed(alerts):
+            line_color = ''
+            end_color = _ENDC
+
+            print(line_color + alert['rawData'] + end_color)
+
+    def history(self, args):
+
+        query = dict([x.split('=', 1) for x in args.filter if '=' in x])
+        query['sort-by'] = 'lastReceiveTime'
+
+        try:
+            response = self.api.get_alerts(**query)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == "error":
+            LOG.error(response['message'])
+            sys.exit(1)
+
+        alerts = response['alerts']
+
+        if args.output == "json":
+            print json.dumps(alerts, indent=4)
+            sys.exit(0)
+
+        # FIXME: history should interleave alerts based on history updateTime
+
+        for alert in reversed(alerts):
+            line_color = ''
+            end_color = _ENDC
+
+            tz = pytz.timezone(args.timezone)
+
+            last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+            last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
+
+            if args.color:
+                line_color = _COLOR_MAP[alert['severity']]
+            for hist in alert['history']:
+                if 'event' in hist:
+                    receive_time = datetime.datetime.strptime(hist.get('receiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+                    receive_time = receive_time.replace(tzinfo=pytz.utc)
+                    print(line_color + '  %s|%s|%s|%-18s|%12s|%16s|%12s' % (
+                        hist['id'][0:8],
+                        receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
+                        hist['severity'],
+                        alert['resource'],
+                        alert['group'],
+                        hist['event'],
+                        hist['value']
+                    ) + end_color)
+                    print(line_color + '    |%s' % (alert['text'].encode('utf-8')) + end_color)
+                if 'status' in hist:
+                    update_time = datetime.datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+                    update_time = update_time.replace(tzinfo=pytz.utc)
+                    print(line_color + '    %s|%-8s| %s' % (
+                        update_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'), hist['status'], hist['text']) + end_color)
+
+    def tag(self, args):
+
+        alerts = self._alerts(args.filter)['alerts']
         for alert in alerts:
-                pt.add_row([
-                    alert['id'],
-                    alert['lastReceiveTime'],
-                    alert['severity'],
-                    alert['duplicateCount'],
-                    alert.get('environment', NOT_SET),
-                    ','.join(alert.get('service', '')),
-                    alert['resource'],
-                    alert.get('group', NOT_SET),
-                    alert['event'],
-                    alert.get('value', NOT_SET)
-                ])
-                if 'text' in args.show:
-                    col_text.append(alert['text'])
-        pt.add_column("Text", col_text)
-        print pt
+            self.api.tag_alert(alert['id'], args.tags)
+
+    def ack(self, args):
+
+        alerts = self._alerts(args.filter)['alerts']
+        for alert in alerts:
+            self.api.ack_alert(alert['id'])
+
+    def close(self, args):
+
+        alerts = self._alerts(args.filter)['alerts']
+        for alert in alerts:
+            self.api.close_alert(alert['id'])
+
+    def delete(self, args):
+
+        alerts = self._alerts(args.filter)['alerts']
+        for alert in alerts:
+            self.api.delete_alert(alert['id'])
+
+    def _alerts(self, filter):
+
+        query = dict([x.split('=', 1) for x in filter if '=' in x])
+        query['sort-by'] = 'lastReceiveTime'
+
+        try:
+            response = self.api.get_alerts(**query)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == "error":
+            LOG.error(response['message'])
+            sys.exit(1)
+
+        return response
 
 
 def main():
@@ -377,36 +367,108 @@ def main():
         dest='color',
         help=argparse.SUPPRESS
     )
-    subparsers = parser.add_subparsers(metavar='COMMAND', help='query, sender or config')
+    subparsers = parser.add_subparsers(metavar='COMMAND', help='query, send or config')
 
-    parser_query = subparsers.add_parser('config', help='Dump config of unified command-line tool')
-    parser_query.set_defaults(func=cli.config)
+    parser_send = subparsers.add_parser('send', help='Send alert to server')
+    parser_send.add_argument(
+        '-r',
+        '--resource',
+        help='resource under alarm'
+    )
+    parser_send.add_argument(
+        '-e',
+        '--event',
+        help='event'
+    )
+    parser_send.add_argument(
+        '-E',
+        '--environment',
+        help='environment eg. "production", "development", "testing"'
+    )
+    parser_send.add_argument(
+        '-s',
+        '--severity',
+        help='severity'
+    )
+    parser_send.add_argument(
+        '-C',
+        '--correlate',
+        action='append',
+        help='correlate'
+    )
+    parser_send.add_argument(
+        '--status',
+        help='status should not normally be defined eg. "open", "closed"'
+    )
+    parser_send.add_argument(
+        '-S',
+        '--service',
+        action='append',
+        help='service affected eg. the application name, "Web", "Network", "Storage", "Database", "Security"'
+    )
+    parser_send.add_argument(
+        '-g',
+        '--group',
+        help='group'
+    )
+    parser_send.add_argument(
+        '-v',
+        '--value',
+        help='value'
+    )
+    parser_send.add_argument(
+        '-t',
+        '--text',
+        help='Freeform alert text eg. "Host not responding to ping."'
+    )
+    parser_send.add_argument(
+        '-T',
+        '--tag',
+        action='append',
+        dest='tags',
+        default=list(),
+        help='List of tags eg. "London", "os:linux", "AWS/EC2".'
+    )
+    parser_send.add_argument(
+        '-A',
+        '--attribute',
+        action='append',
+        dest='attributes',
+        default=list(),
+        help='List of Key=Value attribute pairs eg. "priority=high", "moreInfo=..."'
+    )
+    parser_send.add_argument(
+        '-O',
+        '--origin',
+        default=None,
+        help='Origin of alert or heartbeat. Usually in form of "app/host"'
+    )
+    parser_send.add_argument(
+        '--type',
+        dest='event_type',
+        default='exceptionAlert',
+        help='event type eg. "exceptionAlert", "serviceAlert"'
+    )
+    parser_send.add_argument(
+        '-H',
+        '--heartbeat',
+        action='store_true',
+        default=False,
+        help='Send heartbeat to server. Use in conjunction with "--origin" and "--tags"'
+    )
+    parser_send.add_argument(
+        '--timeout',
+        default=None,
+        help='Timeout in seconds before an "open" alert will be automatically "expired" or "deleted"'
+    )
+    parser_send.add_argument(
+        '--raw-data',
+        default=None,
+        help='raw data'
+    )
+    parser_send.set_defaults(func=cli.send)
 
     parser_query = subparsers.add_parser('query', help='List alerts based on query filter')
-    parser_query.add_argument(
-        '--show',
-        dest='show',
-        action='append',
-        help='Show "text", "details", "raw", "history"'
-    )
-    parser_query.add_argument(
-        '-w',
-        '--watch',
-        action='store_true',
-        help='Periodically poll for new  alerts every 2 seconds'
-    )
-    parser_query.add_argument(
-        '-K',
-        '--ack',
-        action='store_true',
-        help='Acknowledge alerts that match the query filter'
-    )
-    parser_query.add_argument(
-        '-X',
-        '--delete',
-        action='store_true',
-        help='Delete alerts that match the query filter'
-    )
     parser_query.add_argument(
         'filter',
         nargs='*',
@@ -415,59 +477,35 @@ def main():
     )
     parser_query.set_defaults(func=cli.query)
 
-    parser_sender = subparsers.add_parser('sender', help='Send alert to server')
-    parser_sender.add_argument(
-        '-r',
-        '--resource',
-        help='resource under alarm'
+    parser_watch = subparsers.add_parser('watch', help='Watch alerts based on query filter')
+    parser_watch.add_argument(
+        'filter',
+        nargs='*',
+        metavar='KEY=VALUE',
+        help='eg. stack=soulmates'
     )
-    parser_sender.add_argument(
-        '-e',
-        '--event',
-        help='event'
+    parser_watch.set_defaults(func=cli.watch)
+
+    parser_raw = subparsers.add_parser('raw', help='Show alert raw data')
+    parser_raw.add_argument(
+        'filter',
+        nargs='*',
+        metavar='KEY=VALUE',
+        help='eg. id=5108bc20'
     )
-    parser_sender.add_argument(
-        '-E',
-        '--environment',
-        help='environment eg. "production", "development", "testing"'
+    parser_raw.set_defaults(func=cli.raw)
+
+    parser_history = subparsers.add_parser('history', help='Show alert history')
+    parser_history.add_argument(
+        'filter',
+        nargs='*',
+        metavar='KEY=VALUE',
+        help='eg. id=5108bc20'
     )
-    parser_sender.add_argument(
-        '-s',
-        '--severity',
-        help='severity'
-    )
-    parser_sender.add_argument(
-        '-C',
-        '--correlate',
-        action='append',
-        help='correlate'
-    )
-    parser_sender.add_argument(
-        '--status',
-        help='status should not normally be defined eg. "open", "closed"'
-    )
-    parser_sender.add_argument(
-        '-S',
-        '--service',
-        action='append',
-        help='service affected eg. the application name, "Web", "Network", "Storage", "Database", "Security"'
-    )
-    parser_sender.add_argument(
-        '-g',
-        '--group',
-        help='group'
-    )
-    parser_sender.add_argument(
-        '-v',
-        '--value',
-        help='value'
-    )
-    parser_sender.add_argument(
-        '-t',
-        '--text',
-        help='Freeform alert text eg. "Host not responding to ping."'
-    )
-    parser_sender.add_argument(
+    parser_history.set_defaults(func=cli.history)
+
+    parser_tag = subparsers.add_parser('tag', help='Tag alerts')
+    parser_tag.add_argument(
         '-T',
         '--tag',
         action='append',
@@ -475,44 +513,40 @@ def main():
         default=list(),
         help='List of tags eg. "London", "os:linux", "AWS/EC2".'
     )
-    parser_sender.add_argument(
-        '-A',
-        '--attribute',
-        action='append',
-        dest='attributes',
-        default=list(),
-        help='List of Key=Value attribute pairs eg. "priority=high", "moreInfo=..."'
+    parser_tag.add_argument(
+        'filter',
+        nargs='*',
+        metavar='KEY=VALUE',
+        help='eg. id=5108bc20'
     )
-    parser_sender.add_argument(
-        '-O',
-        '--origin',
-        default=None,
-        help='Origin of alert or heartbeat. Usually in form of "app/host"'
+    parser_tag.set_defaults(func=cli.tag)
+
+    parser_ack = subparsers.add_parser('ack', help='Acknowledge alerts')
+    parser_tag.add_argument(
+        'filter',
+        nargs='*',
+        metavar='KEY=VALUE',
+        help='eg. id=5108bc20'
     )
-    parser_sender.add_argument(
-        '--type',
-        dest='event_type',
-        default='exceptionAlert',
-        help='event type eg. "exceptionAlert", "serviceAlert"'
+    parser_ack.set_defaults(func=cli.ack)
+
+    parser_close = subparsers.add_parser('close', help='Close alerts')
+    parser_close.add_argument(
+        'filter',
+        nargs='*',
+        metavar='KEY=VALUE',
+        help='eg. id=5108bc20'
     )
-    parser_sender.add_argument(
-        '-H',
-        '--heartbeat',
-        action='store_true',
-        default=False,
-        help='Send heartbeat to server. Use in conjunction with "--origin" and "--tags"'
+    parser_close.set_defaults(func=cli.close)
+
+    parser_delete = subparsers.add_parser('delete', help='Delete alerts')
+    parser_delete.add_argument(
+        'filter',
+        nargs='*',
+        metavar='KEY=VALUE',
+        help='eg. id=5108bc20'
     )
-    parser_sender.add_argument(
-        '--timeout',
-        default=None,
-        help='Timeout in seconds before an "open" alert will be automatically "expired" or "deleted"'
-    )
-    parser_sender.add_argument(
-        '--raw-data',
-        default=None,
-        help='raw data'
-    )
-    parser_sender.set_defaults(func=cli.sender)
+    parser_delete.set_defaults(func=cli.delete)
 
     args = parser.parse_args(left)
 
