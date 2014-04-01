@@ -272,6 +272,10 @@ class AlertCommand(object):
 
         return response
 
+    def version(self, args):
+
+        print 'alerta client %s' % __version__
+
 
 def main():
 
@@ -345,19 +349,12 @@ def main():
         action='store_true',
         help='Output format of JSON. Shortcut for "--output json"'
     )
-
-    parser.add_argument(
-        '--version',
-        action='version',
-        version='%(prog)s cli v' + __version__,
-        help='version'
-    )
     parser.add_argument(
         '--color',
         '--colour',
         action='store_true',
         default=defaults['color'],
-        help='color'
+        help='Color-coded output based on severity'
     )
     parser.add_argument(
         '--no-color',
@@ -547,6 +544,9 @@ def main():
         help='eg. id=5108bc20'
     )
     parser_delete.set_defaults(func=cli.delete)
+
+    parser_version = subparsers.add_parser('version', help='Show alerta version info')
+    parser_version.set_defaults(func=cli.version)
 
     args = parser.parse_args(left)
 
