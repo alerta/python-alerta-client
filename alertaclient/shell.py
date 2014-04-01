@@ -103,9 +103,9 @@ class AlertCommand(object):
             else:
                 print response
 
-    def query(self, args):
+    def query(self, args, from_date=None):
 
-        response = self._alerts(args.filter)
+        response = self._alerts(args.filter, from_date)
         alerts = response['alerts']
 
         if args.output == "json":
@@ -136,19 +136,17 @@ class AlertCommand(object):
                 alert.get('value', NOT_SET) + end_color)
             )
 
-        return response.get('lastTime', datetime.datetime.utcnow())
+        return response.get('lastTime', '')
 
     def watch(self, args):
 
-        query = args.filter
+        from_date = None
         while True:
-            last_time = self.query(args)
-            print 'last time > %s' % last_time
+            from_date = self.query(args, from_date)
             try:
                 time.sleep(2)
             except (KeyboardInterrupt, SystemExit):
                 sys.exit(0)
-            query['from-date'] = last_time
 
     def raw(self, args):
 
@@ -255,10 +253,15 @@ class AlertCommand(object):
         for alert in alerts:
             self.api.delete_alert(alert['id'])
 
-    def _alerts(self, filter):
+    def _alerts(self, filter, from_date=None):
 
         query = dict([x.split('=', 1) for x in filter if '=' in x])
-        query['sort-by'] = 'lastReceiveTime'
+
+        if from_date:
+            query['from-date'] = from_date
+
+        if 'sort-by' not in query:
+            query['sort-by'] = 'lastReceiveTime'
 
         try:
             response = self.api.get_alerts(**query)
@@ -320,21 +323,6 @@ def main():
                         defaults['color'] = config.getboolean(section, 'color')
                         defaults['timezone'] = config.get(section, 'timezone')
 
-
-    epilog = """
-    Query parameters can be used to filter the results by any valid alert attribute.
-
-    environment=PROD	equality - return alerts whose environment field has the value of PROD
-    environment!=PROD	invert - return alerts whose environment does not have the value PROD
-    service=~frontend.*	regex - return alerts whose service field starts with frontend
-    service!=~frontend.*	invert regex - return alerts whose service field does not start with frontend
-    Special query parameters include 'limit', 'sort-by', 'from-date' and 'q' (for a free-form mongo query).
-
-    limit=5	return the five most recent alerts for the filter
-    sort-by=resource	sort the results by alert resource
-    from-date=2014-01-07T11:11:24.135Z	return alerts from a certain date and time onwards
-    q={"$or":[{"service":"Nova"},{"resource":{"$regex":"nova"}}]}	return Nova service alerts or resource with nova
-    """
     parser = argparse.ArgumentParser(
         prog='alert',
         usage='alert [OPTIONS] COMMAND [FILTERS]',
@@ -346,8 +334,7 @@ def main():
                '    event=~.*down      Show alerts with event ending in "down"\n'
                '    event!=~.*down     Show alerts with event not ending in "down"\n\n'
                '    Special query parameters include "limit", "sort-by", "from-date" and "q" (a\n'
-               '    json-compliant mongo query).'
-               '',
+               '    json-compliant mongo query).\n',
         formatter_class=argparse.RawTextHelpFormatter,
         parents=[profile_parser]
     )
