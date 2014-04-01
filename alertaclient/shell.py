@@ -297,7 +297,7 @@ def main():
     profile_parser.add_argument(
         '--profile',
         default=defaults['profile'],
-        help='Define profile section to use in configuration file %s' % defaults['config_file']
+        help='Select profile to apply from %s' % defaults['config_file']
     )
     args, left = profile_parser.parse_known_args()
 
@@ -320,9 +320,35 @@ def main():
                         defaults['color'] = config.getboolean(section, 'color')
                         defaults['timezone'] = config.get(section, 'timezone')
 
+
+    epilog = """
+    Query parameters can be used to filter the results by any valid alert attribute.
+
+    environment=PROD	equality - return alerts whose environment field has the value of PROD
+    environment!=PROD	invert - return alerts whose environment does not have the value PROD
+    service=~frontend.*	regex - return alerts whose service field starts with frontend
+    service!=~frontend.*	invert regex - return alerts whose service field does not start with frontend
+    Special query parameters include 'limit', 'sort-by', 'from-date' and 'q' (for a free-form mongo query).
+
+    limit=5	return the five most recent alerts for the filter
+    sort-by=resource	sort the results by alert resource
+    from-date=2014-01-07T11:11:24.135Z	return alerts from a certain date and time onwards
+    q={"$or":[{"service":"Nova"},{"resource":{"$regex":"nova"}}]}	return Nova service alerts or resource with nova
+    """
     parser = argparse.ArgumentParser(
         prog='alert',
+        usage='alert [OPTIONS] COMMAND [FILTERS]',
         description="Alerta client unified command-line tool",
+        epilog='Filters:\n'
+               '    Query parameters can be used to filter alerts by any valid alert attribute\n\n'
+               '    resource=web01     Show alerts for resource "web01"\n'
+               '    resource!=web01    Show alerts for all resources except "web01"\n'
+               '    event=~.*down      Show alerts with event ending in "down"\n'
+               '    event!=~.*down     Show alerts with event not ending in "down"\n\n'
+               '    Special query parameters include "limit", "sort-by", "from-date" and "q" (a\n'
+               '    json-compliant mongo query).'
+               '',
+        formatter_class=argparse.RawTextHelpFormatter,
         parents=[profile_parser]
     )
     parser.set_defaults(**defaults)
@@ -364,7 +390,9 @@ def main():
         dest='color',
         help=argparse.SUPPRESS
     )
-    subparsers = parser.add_subparsers(metavar='COMMAND', help='query, send or config')
+    subparsers = parser.add_subparsers(
+        title='Commands',
+    )
 
     parser_send = subparsers.add_parser('send', help='Send alert to server')
     parser_send.add_argument(
