@@ -3,7 +3,7 @@ import os
 import sys
 import argparse
 import time
-import pytz
+# import pytz
 import datetime
 import ConfigParser
 import json
@@ -68,9 +68,6 @@ class AlertCommand(object):
             except Exception as e:
                 LOG.error(e)
                 sys.exit(1)
-            else:
-                print response
-
         else:
             try:
                 alert = Alert(
@@ -100,8 +97,12 @@ class AlertCommand(object):
             except Exception as e:
                 LOG.error(e)
                 sys.exit(1)
-            else:
-                print response
+
+        if response['status'] == 'ok':
+            print response['id']
+        else:
+            LOG.error(response['message'])
+            sys.exit(1)
 
     def query(self, args, from_date=None):
 
@@ -112,21 +113,22 @@ class AlertCommand(object):
             print json.dumps(alerts, indent=4)
             sys.exit(0)
 
-        tz = pytz.timezone(args.timezone)
+        # tz = pytz.timezone(args.timezone)
 
         for alert in reversed(alerts):
             line_color = ''
             end_color = _ENDC
 
             last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-            last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
+            # last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
 
             if args.color:
                 line_color = _COLOR_MAP[alert['severity']]
 
             print(line_color + '%s|%s|%s|%5d|%-5s|%-10s|%-18s|%12s|%16s|%12s' % (
                 alert['id'][0:8],
-                last_receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
+                # last_receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
+                last_receive_time.strftime('%Y/%m/%d %H:%M:%S'),
                 alert['severity'],
                 alert['duplicateCount'],
                 alert.get('environment', NOT_SET),
@@ -186,19 +188,7 @@ class AlertCommand(object):
 
     def raw(self, args):
 
-        query = dict([x.split('=', 1) for x in args.filter if '=' in x])
-        query['sort-by'] = 'lastReceiveTime'
-
-        try:
-            response = self.api.get_alerts(**query)
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == "error":
-            LOG.error(response['message'])
-            sys.exit(1)
-
+        response = self._alerts(args.filter)
         alerts = response['alerts']
 
         if args.output == "json":
@@ -213,42 +203,37 @@ class AlertCommand(object):
 
     def history(self, args):
 
-        query = dict([x.split('=', 1) for x in args.filter if '=' in x])
-        query['sort-by'] = 'lastReceiveTime'
-
-        try:
-            response = self.api.get_alerts(**query)
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == "error":
-            LOG.error(response['message'])
-            sys.exit(1)
-
+        response = self._alerts(args.filter)
         alerts = response['alerts']
 
         if args.output == "json":
             print json.dumps(alerts, indent=4)
             sys.exit(0)
 
-        # FIXME: history should interleave alerts based on history updateTime
+        # tz = pytz.timezone(args.timezone)
 
-        for alert in reversed(alerts):
+        history = list()
+        for alert in alerts:
+            history.append(alert['history'])
+
+        # FIXME; sort order for alert history entries
+
+        for hist in history:
+
             line_color = ''
             end_color = _ENDC
 
-            tz = pytz.timezone(args.timezone)
+            # tz = pytz.timezone(args.timezone)
 
             last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-            last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
+            # last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
 
             if args.color:
                 line_color = _COLOR_MAP[alert['severity']]
             for hist in alert['history']:
                 if 'event' in hist:
                     receive_time = datetime.datetime.strptime(hist.get('receiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-                    receive_time = receive_time.replace(tzinfo=pytz.utc)
+                    # receive_time = receive_time.replace(tzinfo=pytz.utc)
                     print(line_color + '  %s|%s|%s|%-18s|%12s|%16s|%12s' % (
                         hist['id'][0:8],
                         receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
@@ -261,7 +246,7 @@ class AlertCommand(object):
                     print(line_color + '    |%s' % (alert['text'].encode('utf-8')) + end_color)
                 if 'status' in hist:
                     update_time = datetime.datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-                    update_time = update_time.replace(tzinfo=pytz.utc)
+                    # update_time = update_time.replace(tzinfo=pytz.utc)
                     print(line_color + '    %s|%-8s| %s' % (
                         update_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'), hist['status'], hist['text']) + end_color)
 
