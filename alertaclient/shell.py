@@ -564,20 +564,13 @@ def main():
         '-O',
         '--origin',
         default=None,
-        help='Origin of alert or heartbeat. Usually in form of "app/host"'
+        help='Origin of alert. Usually in form of "app/host"'
     )
     parser_send.add_argument(
         '--type',
         dest='event_type',
         default='exceptionAlert',
         help='event type eg. "exceptionAlert", "serviceAlert"'
-    )
-    parser_send.add_argument(
-        '-H',
-        '--heartbeat',
-        action='store_true',
-        default=False,
-        help='Send heartbeat to server. Use in conjunction with "--origin" and "--tags"'
     )
     parser_send.add_argument(
         '--timeout',
