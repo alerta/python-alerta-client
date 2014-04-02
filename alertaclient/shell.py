@@ -204,52 +204,49 @@ class AlertCommand(object):
 
     def history(self, args):
 
-        response = self._alerts(args.filter)
-        alerts = response['alerts']
+        response = self._history(args.filter)
+        history = response['history']
 
         if args.output == "json":
-            print json.dumps(alerts, indent=4)
+            print json.dumps(history, indent=4)
             sys.exit(0)
 
         # tz = pytz.timezone(args.timezone)
-
-        history = list()
-        for alert in alerts:
-            history.append(alert['history'])
-
-        # FIXME; sort order for alert history entries
 
         for hist in history:
 
             line_color = ''
             end_color = _ENDC
 
-            # tz = pytz.timezone(args.timezone)
+            update_time = datetime.datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
 
-            last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-            # last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
+            if 'severity' in hist:
+                if args.color:
+                    line_color = _COLOR_MAP[hist['severity']]
+                print(line_color + '%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s' % (
+                    hist['id'][0:8],
+                    update_time.strftime('%Y/%m/%d %H:%M:%S'),
+                    hist['severity'],
+                    hist['environment'],
+                    ','.join(hist['service']),
+                    hist['resource'],
+                    hist['group'],
+                    hist['event'],
+                    hist['value'],
+                    hist['text']
+                ) + end_color)
 
-            if args.color:
-                line_color = _COLOR_MAP[alert['severity']]
-            for hist in alert['history']:
-                if 'event' in hist:
-                    receive_time = datetime.datetime.strptime(hist.get('receiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-                    # receive_time = receive_time.replace(tzinfo=pytz.utc)
-                    print(line_color + '  %s|%s|%s|%-18s|%12s|%16s|%12s' % (
-                        hist['id'][0:8],
-                        receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
-                        hist['severity'],
-                        alert['resource'],
-                        alert['group'],
-                        hist['event'],
-                        hist['value']
-                    ) + end_color)
-                    print(line_color + '    |%s' % (alert['text'].encode('utf-8')) + end_color)
-                if 'status' in hist:
-                    update_time = datetime.datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-                    # update_time = update_time.replace(tzinfo=pytz.utc)
-                    print(line_color + '    %s|%-8s| %s' % (
-                        update_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'), hist['status'], hist['text']) + end_color)
+            if 'status' in hist:
+                print(line_color + '%s|%s|%s|%-5s|%-10s|%-18s|%s|%s' % (
+                    hist['id'][0:8],
+                    update_time.strftime('%Y/%m/%d %H:%M:%S'),
+                    hist['status'],
+                    hist['environment'],
+                    ','.join(hist['service']),
+                    hist['resource'],
+                    hist['group'],
+                    hist['text']
+                ) + end_color)
 
     def tag(self, args):
 
@@ -287,6 +284,25 @@ class AlertCommand(object):
 
         try:
             response = self.api.get_alerts(**query)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == "error":
+            LOG.error(response['message'])
+            sys.exit(1)
+
+        return response
+
+    def _history(self, filter, from_date=None):
+
+        query = dict([x.split('=', 1) for x in filter if '=' in x])
+
+        if from_date:
+            query['from-date'] = from_date
+
+        try:
+            response = self.api.get_history(**query)
         except Exception as e:
             LOG.error(e)
             sys.exit(1)
