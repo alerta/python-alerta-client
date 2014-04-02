@@ -250,9 +250,21 @@ class AlertCommand(object):
 
     def tag(self, args):
 
-        alerts = self._alerts(args.filter)['alerts']
-        for alert in alerts:
+        sys.stdout.write("Counting alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
+        total = response['total']
+        sys.stdout.write("%s, done.\n" % total)
+
+        sys.stdout.write("Tagging alerts: ")
+        for i, alert in enumerate(alerts):
+            pct = int(100.0 * i / total)
+            sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
+            sys.stdout.flush()
+            sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             self.api.tag_alert(alert['id'], args.tags)
+
+        sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
     def ack(self, args):
 
@@ -272,17 +284,59 @@ class AlertCommand(object):
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
+    def unack(self, args):
+
+        sys.stdout.write("Counting alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
+        total = response['total']
+        sys.stdout.write("%s, done.\n" % total)
+
+        sys.stdout.write("un-Acking alerts: ")
+        for i, alert in enumerate(alerts):
+            pct = int(100.0 * i / total)
+            sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
+            sys.stdout.flush()
+            sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
+            self.api.unack_alert(alert['id'])
+
+        sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
+
     def close(self, args):
 
-        alerts = self._alerts(args.filter)['alerts']
-        for alert in alerts:
+        sys.stdout.write("Counting alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
+        total = response['total']
+        sys.stdout.write("%s, done.\n" % total)
+
+        sys.stdout.write("Closing alerts: ")
+        for i, alert in enumerate(alerts):
+            pct = int(100.0 * i / total)
+            sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
+            sys.stdout.flush()
+            sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             self.api.close_alert(alert['id'])
+
+        sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
     def delete(self, args):
 
-        alerts = self._alerts(args.filter)['alerts']
-        for alert in alerts:
+        sys.stdout.write("Counting alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
+        total = response['total']
+        sys.stdout.write("%s, done.\n" % total)
+
+        sys.stdout.write("Deleting alerts: ")
+        for i, alert in enumerate(alerts):
+            pct = int(100.0 * i / total)
+            sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
+            sys.stdout.flush()
+            sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             self.api.delete_alert(alert['id'])
+
+        sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
     def _alerts(self, filter, from_date=None):
 
@@ -596,6 +650,15 @@ def main():
         help='eg. id=5108bc20'
     )
     parser_ack.set_defaults(func=cli.ack)
+
+    parser_unack = subparsers.add_parser('unack', help='Acknowledge alerts')
+    parser_unack.add_argument(
+        'filter',
+        nargs='*',
+        metavar='KEY=VALUE',
+        help='eg. id=5108bc20'
+    )
+    parser_unack.set_defaults(func=cli.unack)
 
     parser_close = subparsers.add_parser('close', help='Close alerts')
     parser_close.add_argument(
