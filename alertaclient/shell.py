@@ -256,9 +256,21 @@ class AlertCommand(object):
 
     def ack(self, args):
 
-        alerts = self._alerts(args.filter)['alerts']
-        for alert in alerts:
+        sys.stdout.write("Counting alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
+        total = response['total']
+        sys.stdout.write("%s, done.\n" % total)
+
+        sys.stdout.write("Acking alerts: ")
+        for i, alert in enumerate(alerts):
+            pct = int(100.0 * i / total)
+            sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
+            sys.stdout.flush()
+            sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             self.api.ack_alert(alert['id'])
+
+        sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
     def close(self, args):
 
@@ -577,7 +589,7 @@ def main():
     parser_tag.set_defaults(func=cli.tag)
 
     parser_ack = subparsers.add_parser('ack', help='Acknowledge alerts')
-    parser_tag.add_argument(
+    parser_ack.add_argument(
         'filter',
         nargs='*',
         metavar='KEY=VALUE',
