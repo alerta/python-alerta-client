@@ -651,7 +651,7 @@ def main():
     )
     parser_ack.set_defaults(func=cli.ack)
 
-    parser_unack = subparsers.add_parser('unack', help='Acknowledge alerts')
+    parser_unack = subparsers.add_parser('unack', help='Unacknowledge alerts')
     parser_unack.add_argument(
         'filter',
         nargs='*',
