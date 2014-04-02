@@ -142,37 +142,38 @@ class AlertCommand(object):
 
             if args.details:
                 print(
-                    line_color + '    severity | %s -> %s' % (
+                    line_color + '    severity   | %s -> %s' % (
                         alert['previousSeverity'],
                         alert['severity']) + end_color)
-                print(line_color + '    trend    | %s' % alert['trendIndication'] + end_color)
-                print(line_color + '    status   | %s' % alert['status'] + end_color)
-                print(line_color + '    resource | %s' % alert['resource'] + end_color)
-                print(line_color + '    group    | %s' % alert['group'] + end_color)
-                print(line_color + '    event    | %s' % alert['event'] + end_color)
-                print(line_color + '    value    | %s' % alert['value'] + end_color)
+                print(line_color + '    trend      | %s' % alert['trendIndication'] + end_color)
+                print(line_color + '    status     | %s' % alert['status'] + end_color)
+                print(line_color + '    resource   | %s' % alert['resource'] + end_color)
+                print(line_color + '    group      | %s' % alert['group'] + end_color)
+                print(line_color + '    event      | %s' % alert['event'] + end_color)
+                print(line_color + '    value      | %s' % alert['value'] + end_color)
+                print(line_color + '    tags       | %s' % ' '.join(alert['tags']) + end_color)
 
                 for key, value in alert['attributes'].items():
-                    print(line_color + '            %s | %s' % (key, value) + end_color)
+                    print(line_color + '    %s | %s' % (key.ljust(10), value) + end_color)
 
-                print(line_color + '      time created  | %s' % (
+                print(line_color + '        time created  | %s' % (
                     alert['createTime'] + end_color))
-                print(line_color + '      time received | %s' % (
+                print(line_color + '        time received | %s' % (
                     alert['receiveTime']) + end_color)
-                print(line_color + '      last received | %s' % (
+                print(line_color + '        last received | %s' % (
                     alert['lastReceiveTime']) + end_color)
-                #print(line_color + '      latency       | %sms' % latency + end_color)
-                print(line_color + '      timeout       | %ss' % alert['timeout'] + end_color)
+                #print(line_color + '        latency       | %sms' % latency + end_color)
+                print(line_color + '        timeout       | %ss' % alert['timeout'] + end_color)
 
-                print(line_color + '          alert id     | %s' % alert['id'] + end_color)
-                print(line_color + '          last recv id | %s' % alert['lastReceiveId'] + end_color)
-                print(line_color + '          environment  | %s' % alert['environment'] + end_color)
-                print(line_color + '          service      | %s' % (','.join(alert['service'])) + end_color)
-                print(line_color + '          resource     | %s' % alert['resource'] + end_color)
-                print(line_color + '          type         | %s' % alert['type'] + end_color)
-                print(line_color + '          repeat       | %s' % alert['repeat'] + end_color)
-                print(line_color + '          origin       | %s' % alert['origin'] + end_color)
-                print(line_color + '          correlate    | %s' % (','.join(alert['correlate'])) + end_color)
+                print(line_color + '            alert id     | %s' % alert['id'] + end_color)
+                print(line_color + '            last recv id | %s' % alert['lastReceiveId'] + end_color)
+                print(line_color + '            environment  | %s' % alert['environment'] + end_color)
+                print(line_color + '            service      | %s' % (','.join(alert['service'])) + end_color)
+                print(line_color + '            resource     | %s' % alert['resource'] + end_color)
+                print(line_color + '            type         | %s' % alert['type'] + end_color)
+                print(line_color + '            repeat       | %s' % alert['repeat'] + end_color)
+                print(line_color + '            origin       | %s' % alert['origin'] + end_color)
+                print(line_color + '            correlate    | %s' % (','.join(alert['correlate'])) + end_color)
 
         return response.get('lastTime', '')
 
@@ -350,10 +351,10 @@ def main():
         description="Alerta client unified command-line tool",
         epilog='Filters:\n'
                '    Query parameters can be used to filter alerts by any valid alert attribute\n\n'
-               '    resource=web01     Show alerts for resource "web01"\n'
-               '    resource!=web01    Show alerts for all resources except "web01"\n'
-               '    event=~.*down      Show alerts with event ending in "down"\n'
-               '    event!=~.*down     Show alerts with event not ending in "down"\n\n'
+               '    resource=web01     Filter alerts by resource equal to "web01"\n'
+               '    resource!=web01    Filter alerts by all resources except "web01"\n'
+               '    event=~.*down      Filter alerts by event ending in "down"\n'
+               '    event!=~.*down     Filter alerts by event not ending in "down"\n\n'
                '    Special query parameters include "limit", "sort-by", "from-date" and "q" (a\n'
                '    json-compliant mongo query).\n',
         formatter_class=argparse.RawTextHelpFormatter,
