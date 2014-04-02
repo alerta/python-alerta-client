@@ -8,6 +8,8 @@ from uuid import uuid4
 
 DEFAULT_TIMEOUT = 300  # seconds
 
+prog = os.path.basename(sys.argv[0])
+
 
 # Extend JSON Encoder to support ISO 8601 format dates
 class DateEncoder(json.JSONEncoder):
@@ -23,15 +25,8 @@ class Heartbeat(object):
 
     def __init__(self, origin=None, tags=[], create_time=None, timeout=None):
 
-        prog = os.path.basename(sys.argv[0])
-
-        if not origin:
-            self.origin = '%s/%s' % (prog, os.uname()[0])
-        else:
-            self.origin = origin
-
         self.id = str(uuid4())
-        self.origin = origin
+        self.origin = origin or '%s/%s' % (prog, os.uname()[1])
         self.tags = tags or list()
         self.event_type = 'Heartbeat'
         self.create_time = create_time or datetime.datetime.utcnow()

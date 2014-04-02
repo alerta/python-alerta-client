@@ -52,51 +52,58 @@ class AlertCommand(object):
 
     def send(self, args):
 
-        if args.heartbeat:
-            try:
-                heartbeat = Heartbeat(
-                    origin=args.origin,
-                    tags=args.tags,
-                    timeout=args.timeout
-                )
-            except Exception as e:
-                LOG.error(e)
-                sys.exit(1)
+        try:
+            alert = Alert(
+                resource=args.resource,
+                event=args.event,
+                environment=args.environment,
+                severity=args.severity,
+                correlate=args.correlate,
+                status=args.status,
+                service=args.service,
+                group=args.group,
+                value=args.value,
+                text=args.text,
+                tags=args.tags,
+                attributes=dict([attrib.split('=') for attrib in args.attributes]),
+                origin=args.origin,
+                event_type=args.event_type,
+                timeout=args.timeout,
+                raw_data=args.raw_data
+            )
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
 
-            try:
-                response = self.api.send(heartbeat)
-            except Exception as e:
-                LOG.error(e)
-                sys.exit(1)
+        try:
+            response = self.api.send(alert)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == 'ok':
+            print response['id']
         else:
-            try:
-                alert = Alert(
-                    resource=args.resource,
-                    event=args.event,
-                    environment=args.environment,
-                    severity=args.severity,
-                    correlate=args.correlate,
-                    status=args.status,
-                    service=args.service,
-                    group=args.group,
-                    value=args.value,
-                    text=args.text,
-                    tags=args.tags,
-                    attributes=dict([attrib.split('=') for attrib in args.attributes]),
-                    origin=args.origin,
-                    event_type=args.event_type,
-                    timeout=args.timeout,
-                    raw_data=args.raw_data
-                )
-            except Exception as e:
-                LOG.error(e)
-                sys.exit(1)
+            LOG.error(response['message'])
+            sys.exit(1)
 
-            try:
-                response = self.api.send(alert)
-            except Exception as e:
-                LOG.error(e)
-                sys.exit(1)
+    def heartbeat(self, args):
+
+        try:
+            heartbeat = Heartbeat(
+                origin=args.origin,
+                tags=args.tags,
+                timeout=args.timeout
+            )
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        try:
+            response = self.api.send(heartbeat)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
 
         if response['status'] == 'ok':
             print response['id']
@@ -677,6 +684,28 @@ def main():
         help='eg. id=5108bc20'
     )
     parser_delete.set_defaults(func=cli.delete)
+
+    parser_heartbeat = subparsers.add_parser('heartbeat', help='Send heartbeat to server')
+    parser_heartbeat.add_argument(
+        '-T',
+        '--tag',
+        action='append',
+        dest='tags',
+        default=list(),
+        help='List of tags eg. "London", "os:linux", "AWS/EC2".'
+    )
+    parser_heartbeat.add_argument(
+        '-O',
+        '--origin',
+        default=None,
+        help='Origin of alert or heartbeat. Usually in form of "app/host"'
+    )
+    parser_heartbeat.add_argument(
+        '--timeout',
+        default=None,
+        help='Timeout in seconds before a heartbeat will be considered stale'
+    )
+    parser_heartbeat.set_defaults(func=cli.heartbeat)
 
     parser_version = subparsers.add_parser('version', help='Show alerta version info')
     parser_version.set_defaults(func=cli.version)
