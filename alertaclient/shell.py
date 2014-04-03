@@ -15,7 +15,7 @@ from heartbeat import Heartbeat
 
 LOG = logging.getLogger('alerta')
 
-__version__ = '3.0.1'
+__version__ = '3.0.2'
 
 DEFAULT_CONF_FILE = '~/.alerta.conf'
 DEFAULT_ENDPOINT_URL = 'http://localhost:8080/api'
@@ -601,6 +601,11 @@ def main():
     parser_query.set_defaults(func=cli.query)
 
     parser_watch = subparsers.add_parser('watch', help='Watch alerts based on query filter')
+    parser_watch.add_argument(
+        '--details',
+        action='store_true',
+        help='Show alert details'
+    )
     parser_watch.add_argument(
         'filter',
         nargs='*',
