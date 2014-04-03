@@ -244,7 +244,7 @@ class AlertCommand(object):
                 ) + end_color)
 
             if 'status' in hist:
-                print(line_color + '%s|%s|%s|%-5s|%-10s|%-18s|%s|%s' % (
+                print(line_color + '%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s' % (
                     hist['id'][0:8],
                     update_time.strftime('%Y/%m/%d %H:%M:%S'),
                     hist['status'],
@@ -252,6 +252,8 @@ class AlertCommand(object):
                     ','.join(hist['service']),
                     hist['resource'],
                     hist['group'],
+                    hist['event'],
+                    'n/a',
                     hist['text']
                 ) + end_color)
 

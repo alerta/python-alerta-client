@@ -116,16 +116,14 @@ class Alert(object):
         try:
             alert = json.loads(alert)
         except ValueError, e:
-            LOG.error('Could not parse alert - %s: %s', e, alert)
-            raise
+            raise ValueError('Could not parse alert - %s: %s' % (e, alert))
 
         for k, v in alert.iteritems():
             if k in ['createTime', 'receiveTime', 'lastReceiveTime', 'expireTime']:
                 try:
                     alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%fZ')
                 except ValueError, e:
-                    LOG.error('Could not parse date time string: %s', e)
-                    raise
+                    raise ValueError('Could not parse date time string: %s' % e)
 
         return Alert(
             resource=alert.get('resource', None),
@@ -261,16 +259,14 @@ class AlertDocument(object):
         try:
             alert = json.loads(alert)
         except ValueError, e:
-            LOG.error('Could not parse alert - %s: %s', e, alert)
-            raise
+            raise ValueError('Could not parse alert - %s: %s' % (e, alert))
 
         for k, v in alert.iteritems():
             if k in ['createTime', 'receiveTime', 'lastReceiveTime', 'expireTime']:
                 try:
                     alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%fZ')
                 except ValueError, e:
-                    LOG.error('Could not parse date time string: %s', e)
-                    raise
+                    raise ValueError('Could not parse date time string: %s' % e)
 
         return AlertDocument(
             id=alert.get('id', None),

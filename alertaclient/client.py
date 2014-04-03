@@ -21,6 +21,10 @@ class ApiClient(object):
 
         return self._get('/alerts', kwargs)
 
+    def get_history(self, **kwargs):
+
+        return self._get('/alerts/history', kwargs)
+
     def send_alert(self, alert):
 
         return self._post('/alert', data=str(alert))
