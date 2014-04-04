@@ -143,8 +143,7 @@ class AlertCommand(object):
                 alert['resource'],
                 alert.get('group', NOT_SET),
                 alert['event'],
-                alert.get('value', NOT_SET) + end_color)
-            )
+                alert.get('value', NOT_SET)) + end_color)
             print(line_color + '   |%s' % (alert['text'].encode('utf-8')) + end_color)
 
             if args.details:
