@@ -6,20 +6,49 @@
 __version__ = '3.0.3'
 __license__ = 'MIT'
 
-
 import os
 import sys
+import argparse
 import time
 import datetime
+# import pytz
 import json
+import requests
+import urllib
+import ConfigParser
+import logging
 
 from uuid import uuid4
 from email import utils
 
+prog = os.path.basename(sys.argv[0])
+
+LOG = logging.getLogger(__name__)
+
+DEFAULT_CONF_FILE = '~/.alerta.conf'
+DEFAULT_ENDPOINT_URL = 'http://localhost:8080/api'
+DEFAULT_OUTPUT = 'text'
+DEFAULT_TIMEZONE = 'Europe/London'
+
 DEFAULT_SEVERITY = "normal"  # "normal", "ok" or "clear"
 DEFAULT_TIMEOUT = 86400
 
-prog = os.path.basename(sys.argv[0])
+_COLOR_MAP = {
+    "critical": '\033[91m',
+    "major": '\033[95m',
+    "minor": '\033[93m',
+    "warning": '\033[96m',
+    "indeterminate": '\033[92m',
+    "clear": '\033[92m',
+    "normal": '\033[92m',
+    "informational": '\033[92m',
+    "debug": '\033[90m',
+    "auth": '\033[90m',
+    "unknown": '\033[90m',
+}
+_ENDC = '\033[0m'
+
+NOT_SET = '<not set>'
 
 
 # Extend JSON Encoder to support ISO 8601 format dates
@@ -306,28 +335,6 @@ class AlertDocument(object):
         )
 
 
-import os
-import sys
-import datetime
-import json
-
-from uuid import uuid4
-
-DEFAULT_TIMEOUT = 300  # seconds
-
-prog = os.path.basename(sys.argv[0])
-
-
-# Extend JSON Encoder to support ISO 8601 format dates
-class DateEncoder(json.JSONEncoder):
-    def default(self, obj):
-
-        if isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.strftime('%Y-%m-%dT%H:%M:%S') + ".%03dZ" % (obj.microsecond // 1000)
-        else:
-            return json.JSONEncoder.default(self, obj)
-
-
 class Heartbeat(object):
 
     def __init__(self, origin=None, tags=[], create_time=None, timeout=None):
@@ -444,14 +451,6 @@ class HeartbeatDocument(object):
 
     def __str__(self):
         return json.dumps(self.get_body(), cls=DateEncoder, indent=4)
-
-
-import json
-import urllib
-import requests
-import logging
-
-LOG = logging.getLogger(__name__)
 
 
 class ApiClient(object):
@@ -578,47 +577,6 @@ class ApiClient(object):
             raise
 
         return response.json()
-
-
-import os
-import sys
-import argparse
-import time
-# import pytz
-import datetime
-import ConfigParser
-import json
-import logging
-
-from client import ApiClient
-from alert import Alert
-from heartbeat import Heartbeat
-
-LOG = logging.getLogger('alerta')
-
-__version__ = '3.0.2'
-
-DEFAULT_CONF_FILE = '~/.alerta.conf'
-DEFAULT_ENDPOINT_URL = 'http://localhost:8080/api'
-DEFAULT_OUTPUT = 'text'
-DEFAULT_TIMEZONE = 'Europe/London'
-
-_COLOR_MAP = {
-    "critical": '\033[91m',
-    "major": '\033[95m',
-    "minor": '\033[93m',
-    "warning": '\033[96m',
-    "indeterminate": '\033[92m',
-    "clear": '\033[92m',
-    "normal": '\033[92m',
-    "informational": '\033[92m',
-    "debug": '\033[90m',
-    "auth": '\033[90m',
-    "unknown": '\033[90m',
-}
-_ENDC = '\033[0m'
-
-NOT_SET = '<not set>'
 
 
 class AlertCommand(object):
