@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 """
     Alerta unified command-line tool
 """
@@ -11,7 +11,6 @@ import sys
 import argparse
 import time
 import datetime
-# import pytz
 import json
 import requests
 import urllib
@@ -20,6 +19,8 @@ import logging
 
 from uuid import uuid4
 from email import utils
+
+# import pytz
 
 prog = os.path.basename(sys.argv[0])
 
@@ -926,9 +927,14 @@ class AlertCommand(object):
 
         return response
 
+    def help(self, args):
+
+        pass
+
     def version(self, args):
 
         print 'alerta client %s' % __version__
+        print 'requests %s' % requests.__version__
 
 
 def main():
@@ -980,10 +986,10 @@ def main():
         description="Alerta client unified command-line tool",
         epilog='Filters:\n'
                '    Query parameters can be used to filter alerts by any valid alert attribute\n\n'
-               '    resource=web01     Filter alerts by resource equal to "web01"\n'
-               '    resource!=web01    Filter alerts by all resources except "web01"\n'
-               '    event=~.*down      Filter alerts by event ending in "down"\n'
-               '    event!=~.*down     Filter alerts by event not ending in "down"\n\n'
+               '    resource=web01     Show alerts with resource equal to "web01"\n'
+               '    resource!=web01    Show all alerts except those with resource of "web01"\n'
+               '    event=~down        Show alerts that include "down" in event name\n'
+               '    event!=~down       Show all alerts that don\'t have "down" in event name\n\n'
                '    Special query parameters include "limit", "sort-by", "from-date" and "q" (a\n'
                '    json-compliant mongo query).\n',
         formatter_class=argparse.RawTextHelpFormatter,
@@ -991,27 +997,22 @@ def main():
     )
     parser.set_defaults(**defaults)
     parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='debug mode'
-    )
-    parser.add_argument(
         '--endpoint-url',
         default=defaults['endpoint'],
         dest='endpoint',
         metavar='URL',
-        help='endpoint URL'
+        help='API endpoint URL'
     )
     parser.add_argument(
         '--output',
         default=defaults['output'],
-        help='Output format of "text", "table" or "json"'
+        help='Output format of "text" or "json"'
     )
     parser.add_argument(
         '--json',
         '-j',
         action='store_true',
-        help='Output format of JSON. Shortcut for "--output json"'
+        help='Output in JSON format. Shortcut for "--output json"'
     )
     parser.add_argument(
         '--color',
@@ -1027,6 +1028,11 @@ def main():
         default=defaults['color'],
         dest='color',
         help=argparse.SUPPRESS
+    )
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='Print debug output'
     )
     subparsers = parser.add_subparsers(
         title='Commands',
@@ -1245,6 +1251,9 @@ def main():
     )
     parser_heartbeat.set_defaults(func=cli.heartbeat)
 
+    parser_help = subparsers.add_parser('help', help='Show help')
+    parser_help.set_defaults(func=cli.help)
+
     parser_version = subparsers.add_parser('version', help='Show alerta version info')
     parser_version.set_defaults(func=cli.version)
 
@@ -1254,6 +1263,10 @@ def main():
 
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     root = logging.getLogger()
+
+    if args.func == cli.help:
+        parser.print_help()
+        sys.exit(0)
 
     if args.debug:
         root.setLevel(logging.DEBUG)
