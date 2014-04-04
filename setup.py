@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import setuptools
-from alertaclient import __version__
+
+from alert import __version__
 
 with open('README.rst') as f:
     long_description = f.read()
@@ -30,5 +31,5 @@ setuptools.setup(
         'Programming Language :: Python :: 2.7',
         'Topic :: System :: Monitoring',
     ],
-    scripts=['bin/alert']
+    scripts=['alert']
 )
