@@ -429,10 +429,10 @@ def main():
             for section in config.sections():
                 if section.startswith('profile '):
                     if args.profile == section.replace('profile ', ''):
-                        defaults['debug'] = config.getboolean(section, 'debug')
+                        # defaults['debug'] = config.getboolean(section, 'debug')
                         defaults['endpoint'] = config.get(section, 'endpoint')
                         defaults['output'] = config.get(section, 'output')
-                        defaults['color'] = config.getboolean(section, 'color')
+                        # defaults['color'] = config.getboolean(section, 'color')
                         defaults['timezone'] = config.get(section, 'timezone')
 
     parser = argparse.ArgumentParser(

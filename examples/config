@@ -4,11 +4,11 @@ colour = yes
 output = text
 
 [proifle production]
-endpoint = https://api.alerta.io
+endpoint = https://api.alerta.io/api
 timezone = Australia/Sydney
 
 [profile backup]
-endpoint = http://dc2.alerta.io
+endpoint = http://dc2.alerta.io/api
 
 [profile testing]
 endpoint = http://qa.alerta.io:8080/api
