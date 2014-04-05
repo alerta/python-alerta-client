@@ -48,3 +48,46 @@ or use the ``ALERTA_CONF`` environment variable::
 
     $ export ALERTA_CONF=/path/to/alerta.conf
 
+
+Usage
+=====
+
+    $ alert help
+    usage: alert [OPTIONS] COMMAND [FILTERS]
+
+    Alerta client unified command-line tool
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --profile PROFILE     Select profile to apply from ~/.alerta.conf
+      --endpoint-url URL    API endpoint URL
+      --output OUTPUT       Output format of "text" or "json"
+      --json, -j            Output in JSON format. Shortcut for "--output json"
+      --color, --colour     Color-coded output based on severity
+      --debug               Print debug output
+
+    Commands:
+        send                Send alert to server
+        query               List alerts based on query filter
+        watch               Watch alerts based on query filter
+        raw                 Show alert raw data
+        history             Show alert history
+        tag                 Tag alerts
+        ack                 Acknowledge alerts
+        unack               Unacknowledge alerts
+        close               Close alerts
+        delete              Delete alerts
+        heartbeat           Send heartbeat to server
+        help                Show help
+        version             Show alerta version info
+
+    Filters:
+        Query parameters can be used to filter alerts by any valid alert attribute
+
+        resource=web01     Show alerts with resource equal to "web01"
+        resource!=web01    Show all alerts except those with resource of "web01"
+        event=~down        Show alerts that include "down" in event name
+        event!=~down       Show all alerts that don't have "down" in event name
+
+        Special query parameters include "limit", "sort-by", "from-date" and "q" (a
+        json-compliant mongo query).
