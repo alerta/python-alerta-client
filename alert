@@ -558,6 +558,10 @@ class ApiClient(object):
 
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
+
+        LOG.debug('Request Headers: %s', headers)
+        LOG.debug('Request Body: %s', data)
+
         response = requests.post(url, data=data, headers=headers)
 
         try:
