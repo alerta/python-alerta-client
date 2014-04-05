@@ -7,7 +7,7 @@ with open('README.rst') as f:
 
 setuptools.setup(
     name="alerta-client",
-    version=open('VERSION').read().rstrip(),
+    version='3.0.4',
     description="Alerta unified command-line tool",
     long_description=long_description,
     license="MIT",
