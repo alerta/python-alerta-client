@@ -51,6 +51,7 @@ or use the ``ALERTA_CONF`` environment variable::
 
 Usage
 =====
+::
 
     $ alert help
     usage: alert [OPTIONS] COMMAND [FILTERS]
