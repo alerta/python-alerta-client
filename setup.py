@@ -2,14 +2,12 @@
 
 import setuptools
 
-from alert import __version__
-
 with open('README.rst') as f:
     long_description = f.read()
 
 setuptools.setup(
     name="alerta-client",
-    version=__version__,
+    version=open('VERSION').read().rstrip(),
     description="Alerta unified command-line tool",
     long_description=long_description,
     license="MIT",
