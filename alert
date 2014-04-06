@@ -30,8 +30,8 @@ DEFAULT_CONF_FILE = '~/.alerta.conf'
 DEFAULT_ENDPOINT_URL = 'http://localhost:8080'
 DEFAULT_TIMEZONE = 'Europe/London'
 DEFAULT_OUTPUT = 'text'
-DEFAULT_COLOR = 'no'
-DEFAULT_DEBUG = 'off'
+DEFAULT_COLOR = True
+DEFAULT_DEBUG = False
 
 DEFAULT_SEVERITY = "normal"  # "normal", "ok" or "clear"
 DEFAULT_TIMEOUT = 86400
@@ -982,8 +982,8 @@ def main():
     args, left = profile_parser.parse_known_args()
 
     if args.profile != defaults['profile']:
-        sources['profile'] = '--profile %s' % args.profile
         defaults['profile'] = args.profile
+        sources['profile'] = '--profile'
 
     config_file = defaults['config_file']
     if config_file:
@@ -1056,11 +1056,11 @@ def main():
         defaults['color'] = True
         sources['color'] = 'CLICOLOR'
     elif 'color' not in defaults:
-        defaults['color'] = bool(DEFAULT_COLOR)
+        defaults['color'] = DEFAULT_COLOR
         sources['color'] = '[system]'
 
     if 'debug' not in defaults:
-        defaults['debug'] = bool(DEFAULT_DEBUG)
+        defaults['debug'] = DEFAULT_DEBUG
         sources['debug'] = '[system]'
 
     parser = argparse.ArgumentParser(
