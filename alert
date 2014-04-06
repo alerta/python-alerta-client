@@ -598,15 +598,17 @@ class AlertCommand(object):
 
     def config(self, args):
 
-        print 'Name             Value                   Type                  Location'
-        print '----             -----                   ----                  --------'
-        print 'config_file      %-22s      %12s      %s' % (args.config_file, '', sources['config_file'])
-        print 'profile          %-22s      %12s      %s' % (args.profile, '', sources['profile'])
-        print 'endpoint         %-22s      %12s      %s' % (args.endpoint, '', sources['endpoint'])
-        print 'timezone         %-22s      %12s      %s' % (args.timezone, '', sources['timezone'])
-        print 'output           %-22s      %12s      %s' % (args.output, '', sources['output'])
-        print 'color            %-22s      %12s      %s' % (args.color, '', sources['color'])
-        print 'debug            %-22s      %12s      %s' % (args.debug, '', sources['debug'])
+        print
+        print 'Name             Value                     Location'
+        print '----             -----                     --------'
+        print 'config_file      %-22s    %s' % (args.config_file, sources['config_file'])
+        print 'profile          %-22s    %s' % (args.profile, sources['profile'])
+        print 'endpoint         %-22s    %s' % (args.endpoint, sources['endpoint'])
+        print 'timezone         %-22s    %s' % (args.timezone, sources['timezone'])
+        print 'output           %-22s    %s' % (args.output, sources['output'])
+        print 'color            %-22s    %s' % (args.color, sources['color'])
+        print 'debug            %-22s    %s' % (args.debug, sources['debug'])
+        print
 
     def send(self, args):
 
@@ -971,6 +973,22 @@ def main():
         'profile': 'ALERTA_DEFAULT_PROFILE' if os.environ.get('ALERTA_DEFAULT_PROFILE') else '[none]',
     }
 
+    config_file = defaults['config_file']
+    config = ConfigParser.RawConfigParser(defaults=defaults)
+    config.read(os.path.expanduser(config_file))
+
+    default_section = dict(config.defaults())
+    if 'endpoint' in default_section:
+        sources['endpoint'] = '[DEFAULT]'
+    if 'timezone' in default_section:
+        sources['timezone'] = '[DEFAULT]'
+    if 'output' in default_section:
+        sources['output'] = '[DEFAULT]'
+    if 'color' in default_section:
+        sources['color'] = '[DEFAULT]'
+    if 'debug' in default_section:
+        sources['debug'] = '[DEFAULT]'
+
     profile_parser = argparse.ArgumentParser(
         add_help=False
     )
@@ -985,57 +1003,40 @@ def main():
         defaults['profile'] = args.profile
         sources['profile'] = '--profile'
 
-    config_file = defaults['config_file']
-    if config_file:
-        config = ConfigParser.RawConfigParser(defaults=defaults)
-        config.read(os.path.expanduser(config_file))
-
-        default_section = dict(config.defaults())
-        if 'endpoint' in default_section:
-            sources['endpoint'] = '[DEFAULT]'
-        if 'timezone' in default_section:
-            sources['timezone'] = '[DEFAULT]'
-        if 'output' in default_section:
-            sources['output'] = '[DEFAULT]'
-        if 'color' in default_section:
-            sources['color'] = '[DEFAULT]'
-        if 'debug' in default_section:
-            sources['debug'] = '[DEFAULT]'
-
-        if args.profile:
-            for section in config.sections():
-                if section.startswith('profile '):
-                    if args.profile == section.replace('profile ', ''):
-                        if config.has_option(section, 'endpoint'):
-                            defaults['endpoint'] = config.get(section, 'endpoint')
-                            sources['endpoint'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['endpoint'] = DEFAULT_ENDPOINT_URL
-                            sources['endpoint'] = '[system]'
-                        if config.has_option(section, 'timezone'):
-                            defaults['timezone'] = config.get(section, 'timezone')
-                            sources['timezone'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['timezone'] = DEFAULT_TIMEZONE
-                            sources['timezone'] = '[system]'
-                        if config.has_option(section, 'output'):
-                            defaults['output'] = config.get(section, 'output')
-                            sources['output'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['output'] = DEFAULT_OUTPUT
-                            sources['output'] = '[system]'
-                        if config.has_option(section, 'color'):
-                            defaults['color'] = bool(config.get(section, 'color'))
-                            sources['color'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['color'] = DEFAULT_COLOR
-                            sources['color'] = '[system]'
-                        if config.has_option(section, 'debug'):
-                            defaults['debug'] = bool(config.get(section, 'debug'))
-                            sources['debug'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['debug'] = DEFAULT_DEBUG
-                            sources['debug'] = '[system]'
+    if args.profile:
+        for section in config.sections():
+            if section.startswith('profile '):
+                if args.profile == section.replace('profile ', ''):
+                    if config.has_option(section, 'endpoint'):
+                        defaults['endpoint'] = config.get(section, 'endpoint')
+                        sources['endpoint'] = '[profile %s]' % args.profile
+                    else:
+                        defaults['endpoint'] = DEFAULT_ENDPOINT_URL
+                        sources['endpoint'] = '[system]'
+                    if config.has_option(section, 'timezone'):
+                        defaults['timezone'] = config.get(section, 'timezone')
+                        sources['timezone'] = '[profile %s]' % args.profile
+                    else:
+                        defaults['timezone'] = DEFAULT_TIMEZONE
+                        sources['timezone'] = '[system]'
+                    if config.has_option(section, 'output'):
+                        defaults['output'] = config.get(section, 'output')
+                        sources['output'] = '[profile %s]' % args.profile
+                    else:
+                        defaults['output'] = DEFAULT_OUTPUT
+                        sources['output'] = '[system]'
+                    if config.has_option(section, 'color'):
+                        defaults['color'] = bool(config.get(section, 'color'))
+                        sources['color'] = '[profile %s]' % args.profile
+                    else:
+                        defaults['color'] = DEFAULT_COLOR
+                        sources['color'] = '[system]'
+                    if config.has_option(section, 'debug'):
+                        defaults['debug'] = bool(config.get(section, 'debug'))
+                        sources['debug'] = '[profile %s]' % args.profile
+                    else:
+                        defaults['debug'] = DEFAULT_DEBUG
+                        sources['debug'] = '[system]'
 
     if os.environ.get('ALERTA_DEFAULT_ENDPOINT'):
         defaults['endpoint'] = os.environ.get('ALERTA_DEFAULT_ENDPOINT')
