@@ -1042,7 +1042,16 @@ def main():
         title='Commands',
     )
 
-    parser_send = subparsers.add_parser('send', help='Send alert to server')
+    parser_send = subparsers.add_parser(
+        'send',
+        help='Send alert to server',
+        usage='alert [OPTIONS] send [-h] [-r RESOURCE] [-e EVENT] [-E ENVIRONMENT]\n'
+            '                            [-s SEVERITY] [-C CORRELATE] [--status STATUS]\n'
+            '                            [-S SERVICE] [-g GROUP] [-v VALUE] [-t TEXT]\n'
+            '                            [-T TAG] [-A ATTRIBUTES] [-O ORIGIN]\n'
+            '                            [--type EVENT_TYPE] [--timeout TIMEOUT]\n'
+            '                            [--raw-data RAW_DATA]\n'
+    )
     parser_send.add_argument(
         '-r',
         '--resource',
@@ -1135,7 +1144,11 @@ def main():
     )
     parser_send.set_defaults(func=cli.send)
 
-    parser_query = subparsers.add_parser('query', help='List alerts based on query filter')
+    parser_query = subparsers.add_parser(
+        'query',
+        help='List alerts based on query filter',
+        usage='alert [OPTIONS] query [-h] [FILTERS]'
+    )
     parser_query.add_argument(
         '--details',
         action='store_true',
@@ -1144,12 +1157,15 @@ def main():
     parser_query.add_argument(
         'filter',
         nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. stack=soulmates'
+        help='KEY=VALUE eg. id=5108bc20'
     )
     parser_query.set_defaults(func=cli.query)
 
-    parser_watch = subparsers.add_parser('watch', help='Watch alerts based on query filter')
+    parser_watch = subparsers.add_parser(
+        'watch',
+        help='Watch alerts based on query filter',
+        usage='alert [OPTIONS] watch [-h] [FILTERS]'
+    )
     parser_watch.add_argument(
         '--details',
         action='store_true',
@@ -1158,30 +1174,39 @@ def main():
     parser_watch.add_argument(
         'filter',
         nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. stack=soulmates'
+        help='KEY=VALUE eg. id=5108bc20'
     )
     parser_watch.set_defaults(func=cli.watch)
 
-    parser_raw = subparsers.add_parser('raw', help='Show alert raw data')
+    parser_raw = subparsers.add_parser(
+        'raw',
+        help='Show alert raw data',
+        usage='alert [OPTIONS] raw [-h] [FILTERS]'
+    )
     parser_raw.add_argument(
         'filter',
         nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. id=5108bc20'
+        help='KEY=VALUE eg. id=5108bc20'
     )
     parser_raw.set_defaults(func=cli.raw)
 
-    parser_history = subparsers.add_parser('history', help='Show alert history')
+    parser_history = subparsers.add_parser(
+        'history',
+        help='Show alert history',
+        usage='alert [OPTIONS] history [-h] [FILTERS]'
+    )
     parser_history.add_argument(
         'filter',
         nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. id=5108bc20'
+        help='KEY=VALUE eg. id=5108bc20'
     )
     parser_history.set_defaults(func=cli.history)
 
-    parser_tag = subparsers.add_parser('tag', help='Tag alerts')
+    parser_tag = subparsers.add_parser(
+        'tag',
+        help='Tag alerts',
+        usage='alert [OPTIONS] tag [-h] [FILTERS]'
+    )
     parser_tag.add_argument(
         '-T',
         '--tag',
@@ -1194,48 +1219,63 @@ def main():
     parser_tag.add_argument(
         'filter',
         nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. id=5108bc20'
+        help='KEY=VALUE eg. id=5108bc20'
     )
     parser_tag.set_defaults(func=cli.tag)
 
-    parser_ack = subparsers.add_parser('ack', help='Acknowledge alerts')
+    parser_ack = subparsers.add_parser(
+        'ack',
+        help='Acknowledge alerts',
+        usage='alert [OPTIONS] ack [-h] [FILTERS]'
+    )
     parser_ack.add_argument(
         'filter',
         nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. id=5108bc20'
+        help='KEY=VALUE eg. id=5108bc20'
     )
     parser_ack.set_defaults(func=cli.ack)
 
-    parser_unack = subparsers.add_parser('unack', help='Unacknowledge alerts')
+    parser_unack = subparsers.add_parser(
+        'unack',
+        help='Unacknowledge alerts',
+        usage='alert [OPTIONS] unack [-h] [FILTERS]'
+    )
     parser_unack.add_argument(
         'filter',
         nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. id=5108bc20'
+        help='KEY=VALUE eg. id=5108bc20'
     )
     parser_unack.set_defaults(func=cli.unack)
 
-    parser_close = subparsers.add_parser('close', help='Close alerts')
+    parser_close = subparsers.add_parser(
+        'close',
+        help='Close alerts',
+        usage='alert [OPTIONS] close [-h] [FILTERS]'
+    )
     parser_close.add_argument(
         'filter',
         nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. id=5108bc20'
+        help='KEY=VALUE eg. id=5108bc20'
     )
     parser_close.set_defaults(func=cli.close)
 
-    parser_delete = subparsers.add_parser('delete', help='Delete alerts')
+    parser_delete = subparsers.add_parser(
+        'delete',
+        help='Delete alerts',
+        usage='alert [OPTIONS] delete [-h] [FILTERS]'
+    )
     parser_delete.add_argument(
         'filter',
         nargs='*',
-        metavar='KEY=VALUE',
-        help='eg. id=5108bc20'
+        help='KEY=VALUE eg. id=5108bc20'
     )
     parser_delete.set_defaults(func=cli.delete)
 
-    parser_heartbeat = subparsers.add_parser('heartbeat', help='Send heartbeat to server')
+    parser_heartbeat = subparsers.add_parser(
+        'heartbeat',
+        help='Send heartbeat to server',
+        usage='alert [OPTIONS] heartbeat [-h] [-T TAG] [-O ORIGIN] [--timeout TIMEOUT]'
+    )
     parser_heartbeat.add_argument(
         '-T',
         '--tag',
@@ -1258,10 +1298,18 @@ def main():
     )
     parser_heartbeat.set_defaults(func=cli.heartbeat)
 
-    parser_help = subparsers.add_parser('help', help='Show help')
+    parser_help = subparsers.add_parser(
+        'help',
+        help='Show help',
+        add_help=False
+    )
     parser_help.set_defaults(func=cli.help)
 
-    parser_version = subparsers.add_parser('version', help='Show alerta version info')
+    parser_version = subparsers.add_parser(
+        'version',
+        help='Show alerta version info',
+        add_help=False
+    )
     parser_version.set_defaults(func=cli.version)
 
     args = parser.parse_args(left)
