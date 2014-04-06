@@ -28,8 +28,10 @@ LOG = logging.getLogger(__name__)
 
 DEFAULT_CONF_FILE = '~/.alerta.conf'
 DEFAULT_ENDPOINT_URL = 'http://localhost:8080'
-DEFAULT_OUTPUT = 'text'
 DEFAULT_TIMEZONE = 'Europe/London'
+DEFAULT_OUTPUT = 'text'
+DEFAULT_COLOR = 'no'
+DEFAULT_DEBUG = 'off'
 
 DEFAULT_SEVERITY = "normal"  # "normal", "ok" or "clear"
 DEFAULT_TIMEOUT = 86400
@@ -594,6 +596,18 @@ class AlertCommand(object):
 
         self.api = ApiClient(endpoint=url)
 
+    def config(self, args):
+
+        print 'Name             Value                   Type                  Location'
+        print '----             -----                   ----                  --------'
+        print 'config_file      %-22s      %12s      %s' % (args.config_file, '', sources['config_file'])
+        print 'profile          %-22s      %12s      %s' % (args.profile, '', sources['profile'])
+        print 'endpoint         %-22s      %12s      %s' % (args.endpoint, '', sources['endpoint'])
+        print 'timezone         %-22s      %12s      %s' % (args.timezone, '', sources['timezone'])
+        print 'output           %-22s      %12s      %s' % (args.output, '', sources['output'])
+        print 'color            %-22s      %12s      %s' % (args.color, '', sources['color'])
+        print 'debug            %-22s      %12s      %s' % (args.debug, '', sources['debug'])
+
     def send(self, args):
 
         try:
@@ -943,16 +957,18 @@ class AlertCommand(object):
 
 def main():
 
+    global sources
+
     cli = AlertCommand()
 
     defaults = {
         'config_file': os.environ.get('ALERTA_CONF_FILE') or DEFAULT_CONF_FILE,
         'profile': os.environ.get('ALERTA_DEFAULT_PROFILE'),
-        'endpoint': os.environ.get('ALERTA_DEFAULT_ENDPOINT') or DEFAULT_ENDPOINT_URL,
-        'color': True if os.environ.get('CLICOLOR') else False,
-        'timezone': DEFAULT_TIMEZONE,
-        'output': DEFAULT_OUTPUT,
-        'debug': False
+    }
+
+    sources = {
+        'config_file': 'ALERTA_CONF_FILE' if os.environ.get('ALERTA_CONF_FILE') else '[system]',
+        'profile': 'ALERTA_DEFAULT_PROFILE' if os.environ.get('ALERTA_DEFAULT_PROFILE') else '[none]',
     }
 
     profile_parser = argparse.ArgumentParser(
@@ -965,24 +981,73 @@ def main():
     )
     args, left = profile_parser.parse_known_args()
 
+    if args.profile != defaults['profile']:
+        sources['profile'] = '--profile %s' % args.profile
+        defaults['profile'] = args.profile
+
     config_file = defaults['config_file']
     if config_file:
-
-        config = ConfigParser.SafeConfigParser(defaults=defaults)
+        config = ConfigParser.RawConfigParser(defaults=defaults)
         config.read(os.path.expanduser(config_file))
 
-        defaults = dict(config.defaults())
+        default_section = dict(config.defaults())
+        if 'endpoint' in default_section:
+            sources['endpoint'] = '[DEFAULT]'
+        if 'timezone' in default_section:
+            sources['timezone'] = '[DEFAULT]'
+        if 'output' in default_section:
+            sources['output'] = '[DEFAULT]'
+        if 'color' in default_section:
+            sources['color'] = '[DEFAULT]'
+        if 'debug' in default_section:
+            sources['debug'] = '[DEFAULT]'
 
         if args.profile:
-            defaults['profile'] = args.profile
             for section in config.sections():
                 if section.startswith('profile '):
                     if args.profile == section.replace('profile ', ''):
-                        # defaults['debug'] = config.getboolean(section, 'debug')
-                        defaults['endpoint'] = config.get(section, 'endpoint')
-                        defaults['output'] = config.get(section, 'output')
-                        # defaults['color'] = config.getboolean(section, 'color')
-                        defaults['timezone'] = config.get(section, 'timezone')
+                        if config.has_option(section, 'endpoint'):
+                            defaults['endpoint'] = config.get(section, 'endpoint')
+                            sources['endpoint'] = '[profile %s]' % args.profile
+                        else:
+                            defaults['endpoint'] = DEFAULT_ENDPOINT_URL
+                            sources['endpoint'] = '[system]'
+                        if config.has_option(section, 'timezone'):
+                            defaults['timezone'] = config.get(section, 'timezone')
+                            sources['timezone'] = '[profile %s]' % args.profile
+                        else:
+                            defaults['timezone'] = DEFAULT_TIMEZONE
+                            sources['timezone'] = '[system]'
+                        if config.has_option(section, 'output'):
+                            defaults['output'] = config.get(section, 'output')
+                            sources['output'] = '[profile %s]' % args.profile
+                        else:
+                            defaults['output'] = DEFAULT_OUTPUT
+                            sources['output'] = '[system]'
+                        if config.has_option(section, 'color'):
+                            defaults['color'] = config.get(section, 'color')
+                            sources['color'] = '[profile %s]' % args.profile
+                        else:
+                            defaults['color'] = DEFAULT_COLOR
+                            sources['color'] = '[system]'
+                        if config.has_option(section, 'debug'):
+                            defaults['debug'] = config.get(section, 'debug')
+                            sources['debug'] = '[profile %s]' % args.profile
+                        else:
+                            defaults['debug'] = DEFAULT_DEBUG
+                            sources['debug'] = '[system]'
+
+    # ensure boolean options are True or False
+    defaults['debug'] = bool(defaults['debug'])
+    defaults['color'] = bool(defaults['color'])
+
+    if os.environ.get('ALERTA_DEFAULT_ENDPOINT'):
+        defaults['endpoint'] = os.environ.get('ALERTA_DEFAULT_ENDPOINT')
+        sources['endpoint'] = 'ALERTA_DEFAULT_ENDPOINT'
+
+    if os.environ.get('CLICOLOR'):
+        defaults['color'] = True
+        sources['color'] = 'CLICOLOR'
 
     parser = argparse.ArgumentParser(
         prog='alert',
@@ -1298,6 +1363,13 @@ def main():
     )
     parser_heartbeat.set_defaults(func=cli.heartbeat)
 
+    parser_config = subparsers.add_parser(
+        'config',
+        help='Show config',
+        add_help=False
+    )
+    parser_config.set_defaults(func=cli.config)
+
     parser_help = subparsers.add_parser(
         'help',
         help='Show help',
@@ -1330,6 +1402,15 @@ def main():
     else:
         root.setLevel(logging.ERROR)
         LOG.setLevel(logging.ERROR)
+
+    if args.endpoint != defaults['endpoint']:
+        sources['endpoint'] = '--endpoint'
+    if args.output != defaults['output']:
+        sources['output'] = '--output'
+    if args.color != defaults['color']:
+        sources['color'] = '--color'
+    if args.debug != defaults['debug']:
+        sources['debug'] = '--debug'
 
     cli.set_api(url=args.endpoint)
 
