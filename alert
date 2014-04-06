@@ -1025,29 +1025,43 @@ def main():
                             defaults['output'] = DEFAULT_OUTPUT
                             sources['output'] = '[system]'
                         if config.has_option(section, 'color'):
-                            defaults['color'] = config.get(section, 'color')
+                            defaults['color'] = bool(config.get(section, 'color'))
                             sources['color'] = '[profile %s]' % args.profile
                         else:
                             defaults['color'] = DEFAULT_COLOR
                             sources['color'] = '[system]'
                         if config.has_option(section, 'debug'):
-                            defaults['debug'] = config.get(section, 'debug')
+                            defaults['debug'] = bool(config.get(section, 'debug'))
                             sources['debug'] = '[profile %s]' % args.profile
                         else:
                             defaults['debug'] = DEFAULT_DEBUG
                             sources['debug'] = '[system]'
 
-    # ensure boolean options are True or False
-    defaults['debug'] = bool(defaults['debug'])
-    defaults['color'] = bool(defaults['color'])
-
     if os.environ.get('ALERTA_DEFAULT_ENDPOINT'):
         defaults['endpoint'] = os.environ.get('ALERTA_DEFAULT_ENDPOINT')
         sources['endpoint'] = 'ALERTA_DEFAULT_ENDPOINT'
+    elif 'endpoint' not in defaults:
+        defaults['endpoint'] = DEFAULT_ENDPOINT_URL
+        sources['endpoint'] = '[system]'
+
+    if 'timezone' not in defaults:
+        defaults['timezone'] = DEFAULT_TIMEZONE
+        sources['timezone'] = '[system]'
+
+    if 'output' not in defaults:
+        defaults['output'] = DEFAULT_OUTPUT
+        sources['output'] = '[system]'
 
     if os.environ.get('CLICOLOR'):
         defaults['color'] = True
         sources['color'] = 'CLICOLOR'
+    elif 'color' not in defaults:
+        defaults['color'] = bool(DEFAULT_COLOR)
+        sources['color'] = '[system]'
+
+    if 'debug' not in defaults:
+        defaults['debug'] = bool(DEFAULT_DEBUG)
+        sources['debug'] = '[system]'
 
     parser = argparse.ArgumentParser(
         prog='alert',
