@@ -1097,6 +1097,7 @@ def main():
     parser_send.add_argument(
         '-T',
         '--tag',
+        metavar='TAG',
         action='append',
         dest='tags',
         default=list(),
@@ -1184,6 +1185,7 @@ def main():
     parser_tag.add_argument(
         '-T',
         '--tag',
+        metavar='TAG',
         action='append',
         dest='tags',
         default=list(),
@@ -1237,6 +1239,7 @@ def main():
     parser_heartbeat.add_argument(
         '-T',
         '--tag',
+        metavar='TAG',
         action='append',
         dest='tags',
         default=list(),
@@ -1246,7 +1249,7 @@ def main():
         '-O',
         '--origin',
         default=None,
-        help='Origin of alert or heartbeat. Usually in form of "app/host"'
+        help='Origin of heartbeat. Usually in form of "app/host"'
     )
     parser_heartbeat.add_argument(
         '--timeout',
