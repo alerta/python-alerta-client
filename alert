@@ -599,15 +599,15 @@ class AlertCommand(object):
     def config(self, args):
 
         print
-        print 'Name             Value                     Location'
-        print '----             -----                     --------'
-        print 'config_file      %-22s    %s' % (args.config_file, sources['config_file'])
-        print 'profile          %-22s    %s' % (args.profile, sources['profile'])
-        print 'endpoint         %-22s    %s' % (args.endpoint, sources['endpoint'])
-        print 'timezone         %-22s    %s' % (args.timezone, sources['timezone'])
-        print 'output           %-22s    %s' % (args.output, sources['output'])
-        print 'color            %-22s    %s' % (args.color, sources['color'])
-        print 'debug            %-22s    %s' % (args.debug, sources['debug'])
+        print 'Name             Value                             Location'
+        print '----             -----                             --------'
+        print 'config_file      %-30s    %s' % (args.config_file, sources['config_file'])
+        print 'profile          %-30s    %s' % (args.profile, sources['profile'])
+        print 'endpoint         %-30s    %s' % (args.endpoint, sources['endpoint'])
+        print 'timezone         %-30s    %s' % (args.timezone, sources['timezone'])
+        print 'output           %-30s    %s' % (args.output, sources['output'])
+        print 'color            %-30s    %s' % (args.color, sources['color'])
+        print 'debug            %-30s    %s' % (args.debug, sources['debug'])
         print
 
     def send(self, args):
@@ -1160,7 +1160,7 @@ def main():
     )
     parser_send.add_argument(
         '--status',
-        help='status should not normally be defined eg. "open", "closed"'
+        help='status should not normally be defined as it is server-assigned eg. "open", "closed"'
     )
     parser_send.add_argument(
         '-S',
