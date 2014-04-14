@@ -770,7 +770,7 @@ class AlertCommand(object):
             line_color = ''
             end_color = _ENDC
 
-            print(line_color + alert['rawData'] + end_color)
+            print(line_color + '%s' % alert['rawData'] + end_color)
 
     def history(self, args):
 
