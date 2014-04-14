@@ -3,7 +3,7 @@
     Alerta unified command-line tool
 """
 
-__version__ = '3.0.5'
+__version__ = '3.0.6'
 __license__ = 'MIT'
 
 import os
@@ -470,6 +470,10 @@ class ApiClient(object):
 
         return self._get('/api/alerts', kwargs)
 
+    def get_counts(self, **kwargs):
+
+        return self._get('/api/alerts/count', kwargs)
+
     def get_history(self, **kwargs):
 
         return self._get('/api/alerts/history', kwargs)
@@ -542,7 +546,7 @@ class ApiClient(object):
 
     def _get(self, path, query=None):
 
-        url = self.endpoint + path + '?' + urllib.urlencode(query)
+        url = self.endpoint + path + '?' + urllib.urlencode(query, doseq=True)
         response = requests.get(url)
 
         LOG.debug('Content type from response: %s', response.headers['content-type'])
@@ -837,12 +841,13 @@ class AlertCommand(object):
     def ack(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._alerts(args.filter)
-        alerts = response['alerts']
+        response = self._counts(args.filter)
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
 
         sys.stdout.write("Acking alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
         for i, alert in enumerate(alerts):
             pct = int(100.0 * i / total)
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
@@ -855,12 +860,13 @@ class AlertCommand(object):
     def unack(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._alerts(args.filter)
-        alerts = response['alerts']
+        response = self._counts(args.filter)
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
 
         sys.stdout.write("un-Acking alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
         for i, alert in enumerate(alerts):
             pct = int(100.0 * i / total)
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
@@ -873,12 +879,13 @@ class AlertCommand(object):
     def close(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._alerts(args.filter)
-        alerts = response['alerts']
+        response = self._counts(args.filter)
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
 
         sys.stdout.write("Closing alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
         for i, alert in enumerate(alerts):
             pct = int(100.0 * i / total)
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
@@ -891,12 +898,13 @@ class AlertCommand(object):
     def delete(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._alerts(args.filter)
-        alerts = response['alerts']
+        response = self._counts(args.filter)
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
 
         sys.stdout.write("Deleting alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
         for i, alert in enumerate(alerts):
             pct = int(100.0 * i / total)
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
@@ -918,6 +926,28 @@ class AlertCommand(object):
 
         try:
             response = self.api.get_alerts(**query)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == "error":
+            LOG.error(response['message'])
+            sys.exit(1)
+
+        return response
+
+    def _counts(self, filter, from_date=None):
+
+        query = dict([x.split('=', 1) for x in filter if '=' in x])
+
+        if from_date:
+            query['from-date'] = from_date
+
+        if 'sort-by' not in query:
+            query['sort-by'] = 'lastReceiveTime'
+
+        try:
+            response = self.api.get_counts(**query)
         except Exception as e:
             LOG.error(e)
             sys.exit(1)
