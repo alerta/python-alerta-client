@@ -33,11 +33,11 @@ For a basic configuration that can be used to test the client tools against a de
     timezone = Europe/London
 
     [profile production]
-    endpoint = http://alerta.prod.com:8080/api
+    endpoint = http://alerta.prod.com:8080
     debug = no
 
     [profile development]
-    endpoint = http://alerta.dev.com:8080/api
+    endpoint = http://alerta.dev.com:8080
     debug = yes
 
 Copy this configuration ``$HOME/.alerta.conf`` files::
@@ -92,3 +92,9 @@ Usage
 
         Special query parameters include "limit", "sort-by", "from-date" and "q" (a
         json-compliant mongo query).
+
+
+Examples
+========
+
+::
