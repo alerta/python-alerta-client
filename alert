@@ -3,7 +3,7 @@
     Alerta unified command-line tool
 """
 
-__version__ = '3.0.6'
+__version__ = '3.0.7'
 __license__ = 'MIT'
 
 import os
@@ -500,6 +500,13 @@ class ApiClient(object):
 
         return self._post('/api/alert/%s/tag' % alertid, data=json.dumps({"tags": tags}))
 
+    def untag_alert(self, alertid, tags):
+
+        if not isinstance(tags, list):
+            raise
+
+        return self._post('/api/alert/%s/untag' % alertid, data=json.dumps({"tags": tags}))
+
     def open_alert(self, alertid):
 
         self.update_status(alertid, 'open')
@@ -835,6 +842,24 @@ class AlertCommand(object):
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             self.api.tag_alert(alert['id'], args.tags)
+
+        sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
+
+    def untag(self, args):
+
+        sys.stdout.write("Counting alerts: ")
+        response = self._alerts(args.filter)
+        alerts = response['alerts']
+        total = response['total']
+        sys.stdout.write("%s, done.\n" % total)
+
+        sys.stdout.write("Un-tagging alerts: ")
+        for i, alert in enumerate(alerts):
+            pct = int(100.0 * i / total)
+            sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
+            sys.stdout.flush()
+            sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
+            self.api.untag_alert(alert['id'], args.tags)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -1332,6 +1357,27 @@ def main():
         help='KEY=VALUE eg. id=5108bc20'
     )
     parser_tag.set_defaults(func=cli.tag)
+
+    parser_untag = subparsers.add_parser(
+        'untag',
+        help='Remove tags from alerts',
+        usage='alert [OPTIONS] untag [-h] [FILTERS]'
+    )
+    parser_untag.add_argument(
+        '-T',
+        '--tag',
+        metavar='TAG',
+        action='append',
+        dest='tags',
+        default=list(),
+        help='List of tags eg. "London", "os:linux", "AWS/EC2".'
+    )
+    parser_untag.add_argument(
+        'filter',
+        nargs='*',
+        help='KEY=VALUE eg. id=5108bc20'
+    )
+    parser_untag.set_defaults(func=cli.untag)
 
     parser_ack = subparsers.add_parser(
         'ack',
