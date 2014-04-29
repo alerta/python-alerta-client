@@ -3,7 +3,7 @@
     Alerta unified command-line tool
 """
 
-__version__ = '3.0.7'
+__version__ = '3.0.8'
 __license__ = 'MIT'
 
 import os
@@ -54,50 +54,39 @@ _ENDC = '\033[0m'
 NOT_SET = '<not set>'
 
 
-# Extend JSON Encoder to support ISO 8601 format dates
-class DateEncoder(json.JSONEncoder):
-    def default(self, obj):
-
-        if isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.strftime('%Y-%m-%dT%H:%M:%S') + ".%03dZ" % (obj.microsecond // 1000)
-        else:
-            return json.JSONEncoder.default(self, obj)
-
-
 class Alert(object):
 
-    def __init__(self, resource, event, environment=None, severity=None, correlate=None,
-                 status=None, service=None, group=None, value=None, text=None, tags=None,
-                 attributes={}, origin=None, event_type=None, create_time=None, timeout=86400, raw_data=None):
+    def __init__(self, resource, event, **kwargs):
 
         if not resource:
             raise ValueError('Missing mandatory value for "resource"')
         if not event:
             raise ValueError('Missing mandatory value for "event"')
-        if any(['.' in key for key in attributes.keys()]) or any(['$' in key for key in attributes.keys()]):
+        if any(['.' in key for key in kwargs.get('attributes', dict()).keys()])\
+                or any(['$' in key for key in kwargs.get('attributes', dict()).keys()]):
             raise ValueError('Attribute keys must not contain "." or "$"')
 
         self.id = str(uuid4())
         self.resource = resource
         self.event = event
-        self.environment = environment or ""
-        self.severity = severity or DEFAULT_SEVERITY
-        self.correlate = correlate or list()
-        if correlate and event not in correlate:
+        self.environment = kwargs.get('environment', "")
+        self.severity = kwargs.get('severity', DEFAULT_SEVERITY)
+        self.correlate = kwargs.get('correlate', list())
+        if self.correlate and event not in self.correlate:
             self.correlate.append(event)
-        self.status = status or 'unknown'
-        self.service = service or list()
-        self.group = group or 'Misc'
-        self.value = value or 'n/a'
-        self.text = text or ""
-        self.tags = tags or list()
-        self.attributes = attributes or dict()
-        self.origin = origin or '%s/%s' % (prog, os.uname()[1])
-        self.event_type = event_type or 'exceptionAlert'
-        self.create_time = create_time or datetime.datetime.utcnow()
+        self.status = kwargs.get('status', 'unknown')
+        self.service = kwargs.get('service', list())
+        self.group = kwargs.get('group', 'Misc')
+        self.value = kwargs.get('value', 'n/a')
+        self.text = kwargs.get('text', "")
+        self.tags = kwargs.get('tags', list())
+        self.attributes = kwargs.get('attributes', dict())
+        self.origin = kwargs.get('origin', '%s/%s' % (prog, os.uname()[1]))
+        self.event_type = kwargs.get('event_type', kwargs.get('type', 'exceptionAlert'))
+        self.create_time = kwargs.get('create_time', datetime.datetime.utcnow())
         self.receive_time = None
-        self.timeout = timeout or DEFAULT_TIMEOUT
-        self.raw_data = raw_data
+        self.timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
+        self.raw_data = kwargs.get('raw_data', kwargs.get('rawData', ""))
 
     def get_id(self, short=False):
 
@@ -132,7 +121,7 @@ class Alert(object):
             'attributes': self.attributes,
             'origin': self.origin,
             'type': self.event_type,
-            'createTime': self.create_time,
+            'createTime': self.create_time.isoformat()+'Z',
             'timeout': self.timeout,
             'rawData': self.raw_data
         }
@@ -148,7 +137,7 @@ class Alert(object):
             self.id, self.environment, self.resource, self.event, self.severity, self.status)
 
     def __str__(self):
-        return json.dumps(self.get_body(), cls=DateEncoder, indent=4)
+        return json.dumps(self.get_body(), indent=4)
 
     @staticmethod
     def parse_alert(alert):
@@ -273,16 +262,16 @@ class AlertDocument(object):
             'attributes': self.attributes,
             'origin': self.origin,
             'type': self.event_type,
-            'createTime': self.create_time,
+            'createTime': self.create_time.isoformat()+'Z',
             'timeout': self.timeout,
             'rawData': self.raw_data,
             'duplicateCount': self.duplicate_count,
             'repeat': self.repeat,
             'previousSeverity': self.previous_severity,
             'trendIndication': self.trend_indication,
-            'receiveTime': self.receive_time,
+            'receiveTime': self.receive_time.isoformat()+'Z',
             'lastReceiveId': self.last_receive_id,
-            'lastReceiveTime': self.last_receive_time,
+            'lastReceiveTime': self.last_receive_time.isoformat()+'Z',
             'history': self.history
         }
 
@@ -291,7 +280,7 @@ class AlertDocument(object):
             self.id, self.environment, self.resource, self.event, self.severity, self.status)
 
     def __str__(self):
-        return json.dumps(self.get_body(), cls=DateEncoder, indent=4)
+        return json.dumps(self.get_body(), indent=4)
 
     @staticmethod
     def parse_alert(alert):
@@ -372,7 +361,7 @@ class Heartbeat(object):
             'origin': self.origin,
             'tags': self.tags,
             'type': self.event_type,
-            'createTime': self.create_time,
+            'createTime': self.create_time.isoformat()+'Z',
             'timeout': self.timeout,
         }
 
@@ -386,7 +375,7 @@ class Heartbeat(object):
         return 'Heartbeat(id=%r, origin=%r, create_time=%r, timeout=%r)' % (self.id, self.origin, self.create_time, self.timeout)
 
     def __str__(self):
-        return json.dumps(self.get_body(), cls=DateEncoder, indent=4)
+        return json.dumps(self.get_body(), indent=4)
 
     @staticmethod
     def parse_heartbeat(heartbeat):
@@ -444,16 +433,16 @@ class HeartbeatDocument(object):
             'origin': self.origin,
             'tags': self.tags,
             'type': self.event_type,
-            'createTime': self.create_time,
+            'createTime': self.create_time.isoformat()+'Z',
             'timeout': self.timeout,
-            'receiveTime': self.receive_time
+            'receiveTime': self.receive_time.isoformat()+'Z'
         }
 
     def __repr__(self):
         return 'HeartbeatDocument(id=%r, origin=%r, create_time=%r, timeout=%r)' % (self.id, self.origin, self.create_time, self.timeout)
 
     def __str__(self):
-        return json.dumps(self.get_body(), cls=DateEncoder, indent=4)
+        return json.dumps(self.get_body(), indent=4)
 
 
 class ApiClient(object):
