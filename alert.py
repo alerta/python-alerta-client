@@ -3,7 +3,7 @@
     Alerta unified command-line tool
 """
 
-__version__ = '3.0.8'
+__version__ = '3.0.9'
 __license__ = 'MIT'
 
 import os
@@ -66,27 +66,27 @@ class Alert(object):
                 or any(['$' in key for key in kwargs.get('attributes', dict()).keys()]):
             raise ValueError('Attribute keys must not contain "." or "$"')
 
-        self.id = str(uuid4())
+        self.id = kwargs.get('id', str(uuid4()))
         self.resource = resource
         self.event = event
-        self.environment = kwargs.get('environment', "")
-        self.severity = kwargs.get('severity', DEFAULT_SEVERITY)
+        self.environment = kwargs.get('environment', None) or ""
+        self.severity = kwargs.get('severity', None) or DEFAULT_SEVERITY
         self.correlate = kwargs.get('correlate', list())
         if self.correlate and event not in self.correlate:
             self.correlate.append(event)
-        self.status = kwargs.get('status', 'unknown')
+        self.status = kwargs.get('status', None) or "unknown"
         self.service = kwargs.get('service', list())
-        self.group = kwargs.get('group', 'Misc')
-        self.value = kwargs.get('value', 'n/a')
-        self.text = kwargs.get('text', "")
+        self.group = kwargs.get('group', None) or "Misc"
+        self.value = kwargs.get('value', None) or "n/a"
+        self.text = kwargs.get('text', None) or ""
         self.tags = kwargs.get('tags', list())
         self.attributes = kwargs.get('attributes', dict())
-        self.origin = kwargs.get('origin', '%s/%s' % (prog, os.uname()[1]))
-        self.event_type = kwargs.get('event_type', kwargs.get('type', 'exceptionAlert'))
-        self.create_time = kwargs.get('create_time', datetime.datetime.utcnow())
+        self.origin = kwargs.get('origin', None) or '%s/%s' % (prog, os.uname()[1])
+        self.event_type = kwargs.get('event_type', kwargs.get('type', None)) or "exceptionAlert"
+        self.create_time = kwargs.get('create_time', None) or datetime.datetime.utcnow()
         self.receive_time = None
-        self.timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
-        self.raw_data = kwargs.get('raw_data', kwargs.get('rawData', ""))
+        self.timeout = kwargs.get('timeout', None) or DEFAULT_TIMEOUT
+        self.raw_data = kwargs.get('raw_data', kwargs.get('rawData', None)) or ""
 
     def get_id(self, short=False):
 
@@ -158,9 +158,9 @@ class Alert(object):
             resource=alert.get('resource', None),
             event=alert.get('event', None),
             environment=alert.get('environment', None),
-            severity=alert.get('severity', DEFAULT_SEVERITY),
-            correlate=alert.get('correlate', None),
-            status=alert.get('status', "unknown"),
+            severity=alert.get('severity', None),
+            correlate=alert.get('correlate', list()),
+            status=alert.get('status', None),
             service=alert.get('service', list()),
             group=alert.get('group', None),
             value=alert.get('value', None),
@@ -302,9 +302,9 @@ class AlertDocument(object):
             resource=alert.get('resource', None),
             event=alert.get('event', None),
             environment=alert.get('environment', None),
-            severity=alert.get('severity', DEFAULT_SEVERITY),
-            correlate=alert.get('correlate', None),
-            status=alert.get('status', "unknown"),
+            severity=alert.get('severity', None),
+            correlate=alert.get('correlate', list()),
+            status=alert.get('status', None),
             service=alert.get('service', list()),
             group=alert.get('group', None),
             value=alert.get('value', None),
@@ -686,11 +686,14 @@ class AlertCommand(object):
             line_color = ''
             end_color = _ENDC
 
-            last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+            try:
+                last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+            except ValueError:
+                last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%SZ')
             # last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
 
             if args.color:
-                line_color = _COLOR_MAP[alert['severity']]
+                line_color = _COLOR_MAP.get(alert['severity'], _COLOR_MAP['unknown'])
 
             print(line_color + '%s|%s|%s|%5d|%-5s|%-10s|%-18s|%12s|%16s|%12s' % (
                 alert['id'][0:8],
@@ -788,7 +791,7 @@ class AlertCommand(object):
 
             if 'severity' in hist:
                 if args.color:
-                    line_color = _COLOR_MAP[hist['severity']]
+                    line_color = _COLOR_MAP.get(hist['severity'], _COLOR_MAP['unknown'])
                 print(line_color + '%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s' % (
                     hist['id'][0:8],
                     update_time.strftime('%Y/%m/%d %H:%M:%S'),
