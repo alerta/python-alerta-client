@@ -51,8 +51,6 @@ _COLOR_MAP = {
 }
 _ENDC = '\033[0m'
 
-NOT_SET = '<not set>'
-
 
 class Alert(object):
 
@@ -121,7 +119,7 @@ class Alert(object):
             'attributes': self.attributes,
             'origin': self.origin,
             'type': self.event_type,
-            'createTime': self.create_time.isoformat()+'Z',
+            'createTime': self.create_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.create_time.microsecond // 1000),
             'timeout': self.timeout,
             'rawData': self.raw_data
         }
@@ -224,17 +222,19 @@ class AlertDocument(object):
             "correlation-id": self.id
         }
 
-    def get_date(self, attr, fmt):
+    def get_date(self, attr, fmt='iso'):
 
         if hasattr(self, attr):
             if fmt == 'local':
-                return getattr(self, attr).astimezone(self.tz).strftime('%Y/%m/%d %H:%M:%S')
+                return getattr(self, attr).strftime('%Y/%m/%d %H:%M:%S')
+                #return getattr(self, attr).astimezone(self.tz).strftime('%Y/%m/%d %H:%M:%S')
             elif fmt == 'iso' or fmt == 'iso8601':
                 return getattr(self, attr).replace(microsecond=0).isoformat() + ".%03dZ" % (getattr(self, attr).microsecond // 1000)
             elif fmt == 'rfc' or fmt == 'rfc2822':
                 return utils.formatdate(time.mktime(getattr(self, attr).timetuple()))
             elif fmt == 'short':
-                return getattr(self, attr).astimezone(self.tz).strftime('%a %d %H:%M:%S')
+                return getattr(self, attr).strftime('%a %d %H:%M:%S')
+                #return getattr(self, attr).astimezone(self.tz).strftime('%a %d %H:%M:%S')
             elif fmt == 'epoch':
                 return time.mktime(getattr(self, attr).timetuple())
             elif fmt == 'raw':
@@ -262,16 +262,16 @@ class AlertDocument(object):
             'attributes': self.attributes,
             'origin': self.origin,
             'type': self.event_type,
-            'createTime': self.create_time.isoformat()+'Z',
+            'createTime': self.create_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.create_time.microsecond // 1000),
             'timeout': self.timeout,
             'rawData': self.raw_data,
             'duplicateCount': self.duplicate_count,
             'repeat': self.repeat,
             'previousSeverity': self.previous_severity,
             'trendIndication': self.trend_indication,
-            'receiveTime': self.receive_time.isoformat()+'Z',
+            'receiveTime': self.receive_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.receive_time.microsecond // 1000),
             'lastReceiveId': self.last_receive_id,
-            'lastReceiveTime': self.last_receive_time.isoformat()+'Z',
+            'lastReceiveTime': self.last_receive_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.last_receive_time.microsecond // 1000),
             'history': self.history
         }
 
@@ -285,17 +285,18 @@ class AlertDocument(object):
     @staticmethod
     def parse_alert(alert):
 
-        try:
-            alert = json.loads(alert)
-        except ValueError, e:
-            raise ValueError('Could not parse alert - %s: %s' % (e, alert))
-
         for k, v in alert.iteritems():
             if k in ['createTime', 'receiveTime', 'lastReceiveTime', 'expireTime']:
-                try:
-                    alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%fZ')
-                except ValueError, e:
-                    raise ValueError('Could not parse date time string: %s' % e)
+                if '.' in v:
+                    try:
+                        alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%fZ')
+                    except ValueError, e:
+                        raise ValueError('Could not parse date time string: %s' % e)
+                else:
+                    try:
+                        alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%SZ')  # if us = 000000
+                    except ValueError, e:
+                        raise ValueError('Could not parse date time string: %s' % e)
 
         return AlertDocument(
             id=alert.get('id', None),
@@ -361,7 +362,7 @@ class Heartbeat(object):
             'origin': self.origin,
             'tags': self.tags,
             'type': self.event_type,
-            'createTime': self.create_time.isoformat()+'Z',
+            'createTime': self.create_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.create_time.microsecond // 1000),
             'timeout': self.timeout,
         }
 
@@ -433,9 +434,9 @@ class HeartbeatDocument(object):
             'origin': self.origin,
             'tags': self.tags,
             'type': self.event_type,
-            'createTime': self.create_time.isoformat()+'Z',
+            'createTime': self.create_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.create_time.microsecond // 1000),
             'timeout': self.timeout,
-            'receiveTime': self.receive_time.isoformat()+'Z'
+            'receiveTime': self.receive_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.receive_time.microsecond // 1000)
         }
 
     def __repr__(self):
@@ -683,66 +684,58 @@ class AlertCommand(object):
         # tz = pytz.timezone(args.timezone)
 
         for alert in reversed(alerts):
+
+            a = AlertDocument.parse_alert(alert)
+
             line_color = ''
             end_color = _ENDC
 
-            try:
-                last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
-            except ValueError:
-                last_receive_time = datetime.datetime.strptime(alert.get('lastReceiveTime', None), '%Y-%m-%dT%H:%M:%SZ')
-            # last_receive_time = last_receive_time.replace(tzinfo=pytz.utc)
-
             if args.color:
-                line_color = _COLOR_MAP.get(alert['severity'], _COLOR_MAP['unknown'])
+                line_color = _COLOR_MAP.get(a.severity, _COLOR_MAP['unknown'])
 
             print(line_color + '%s|%s|%s|%5d|%-5s|%-10s|%-18s|%12s|%16s|%12s' % (
-                alert['id'][0:8],
-                # last_receive_time.astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
-                last_receive_time.strftime('%Y/%m/%d %H:%M:%S'),
-                alert['severity'],
-                alert['duplicateCount'],
-                alert.get('environment', NOT_SET),
-                ','.join(alert.get('service', [NOT_SET])),
-                alert['resource'],
-                alert.get('group', NOT_SET),
-                alert['event'],
-                alert.get('value', NOT_SET)) + end_color)
-            print(line_color + '   |%s' % (alert['text'].encode('utf-8')) + end_color)
+                a.id[0:8],
+                a.get_date('last_receive_time', 'local'),
+                a.severity,
+                a.duplicate_count,
+                a.environment,
+                ','.join(a.service),
+                a.resource,
+                a.group,
+                a.event,
+                a.value) + end_color)
+            print(line_color + '   |%s' % (a.text.encode('utf-8')) + end_color)
 
             if args.details:
-                print(
-                    line_color + '    severity   | %s -> %s' % (
-                        alert['previousSeverity'],
-                        alert['severity']) + end_color)
-                print(line_color + '    trend      | %s' % alert['trendIndication'] + end_color)
-                print(line_color + '    status     | %s' % alert['status'] + end_color)
-                print(line_color + '    resource   | %s' % alert['resource'] + end_color)
-                print(line_color + '    group      | %s' % alert['group'] + end_color)
-                print(line_color + '    event      | %s' % alert['event'] + end_color)
-                print(line_color + '    value      | %s' % alert['value'] + end_color)
-                print(line_color + '    tags       | %s' % ' '.join(alert['tags']) + end_color)
+                print(line_color + '    severity   | %s -> %s' % (a.previous_severity, a.severity) + end_color)
+                print(line_color + '    trend      | %s' % a.trend_indication + end_color)
+                print(line_color + '    status     | %s' % a.status + end_color)
+                print(line_color + '    resource   | %s' % a.resource + end_color)
+                print(line_color + '    group      | %s' % a.group + end_color)
+                print(line_color + '    event      | %s' % a.event + end_color)
+                print(line_color + '    value      | %s' % a.value + end_color)
+                print(line_color + '    tags       | %s' % ' '.join(a.tags) + end_color)
 
-                for key, value in alert['attributes'].items():
+                for key, value in a.attributes.items():
                     print(line_color + '    %s | %s' % (key.ljust(10), value) + end_color)
 
-                print(line_color + '        time created  | %s' % (
-                    alert['createTime'] + end_color))
-                print(line_color + '        time received | %s' % (
-                    alert['receiveTime']) + end_color)
-                print(line_color + '        last received | %s' % (
-                    alert['lastReceiveTime']) + end_color)
-                #print(line_color + '        latency       | %sms' % latency + end_color)
-                print(line_color + '        timeout       | %ss' % alert['timeout'] + end_color)
+                latency = a.receive_time - a.create_time
 
-                print(line_color + '            alert id     | %s' % alert['id'] + end_color)
-                print(line_color + '            last recv id | %s' % alert['lastReceiveId'] + end_color)
-                print(line_color + '            environment  | %s' % alert['environment'] + end_color)
-                print(line_color + '            service      | %s' % (','.join(alert['service'])) + end_color)
-                print(line_color + '            resource     | %s' % alert['resource'] + end_color)
-                print(line_color + '            type         | %s' % alert['type'] + end_color)
-                print(line_color + '            repeat       | %s' % alert['repeat'] + end_color)
-                print(line_color + '            origin       | %s' % alert['origin'] + end_color)
-                print(line_color + '            correlate    | %s' % (','.join(alert['correlate'])) + end_color)
+                print(line_color + '        time created  | %s' % a.get_date('create_time', 'iso') + end_color)
+                print(line_color + '        time received | %s' % a.get_date('receive_time', 'iso') + end_color)
+                print(line_color + '        last received | %s' % a.get_date('last_receive_time', 'iso') + end_color)
+                print(line_color + '        latency       | %sms' % (latency.microseconds / 1000) + end_color)
+                print(line_color + '        timeout       | %ss' % a.timeout + end_color)
+
+                print(line_color + '            alert id     | %s' % a.id + end_color)
+                print(line_color + '            last recv id | %s' % a.last_receive_id + end_color)
+                print(line_color + '            environment  | %s' % a.environment + end_color)
+                print(line_color + '            service      | %s' % ','.join(a.service) + end_color)
+                print(line_color + '            resource     | %s' % a.resource + end_color)
+                print(line_color + '            type         | %s' % a.event_type + end_color)
+                print(line_color + '            repeat       | %s' % a.repeat + end_color)
+                print(line_color + '            origin       | %s' % a.origin + end_color)
+                print(line_color + '            correlate    | %s' % ','.join(a.correlate) + end_color)
 
         return response.get('lastTime', '')
 
