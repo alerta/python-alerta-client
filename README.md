@@ -50,5 +50,5 @@ Options
 License
 -------
 
-Copyright (c) 2013 Nick Satterly. Available under the MIT License.
+Copyright (c) 2014 Nick Satterly. Available under the MIT License.
 
