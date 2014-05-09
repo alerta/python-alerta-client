@@ -6,8 +6,8 @@ with open('README.rst') as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="alerta-client",
-    version='3.0.7',
+    name="alerta",
+    version='3.1.0',
     description="Alerta unified command-line tool",
     long_description=long_description,
     license="MIT",
@@ -29,5 +29,7 @@ setuptools.setup(
         'Programming Language :: Python :: 2.7',
         'Topic :: System :: Monitoring',
     ],
-    scripts=['alert']
+    entry_points={
+        'console_scripts': [ 'alerta = alerta.shell:main']
+    }
 )

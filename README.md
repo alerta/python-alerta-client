@@ -1,6 +1,17 @@
-python-alertaclient
-===================
+python-alerta-client
+====================
 
+Unified command-line tool and python API for [alerta](https://github.com/guardian/alerta).
+
+
+Installation
+------------
+
+    $ pip install alerta
+
+
+Configuration
+-------------
 
 ALERTA_CONF_FILE=
 ALERTA_DEFAULT_URL=
@@ -36,4 +47,8 @@ Options
 --profile
 --color
 
+License
+-------
+
+Copyright (c) 2013 Nick Satterly. Available under the MIT License.
 
