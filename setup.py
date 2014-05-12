@@ -2,12 +2,14 @@
 
 import setuptools
 
+from alerta import shell
+
 with open('README.rst') as f:
     long_description = f.read()
 
 setuptools.setup(
     name="alerta",
-    version='3.1.0',
+    version=shell.__version__,
     description="Alerta unified command-line tool",
     long_description=long_description,
     license="MIT",
@@ -20,7 +22,12 @@ setuptools.setup(
         'requests',
         'pytz'
     ],
-    keywords="alerta command line",
+    entry_points={
+        'console_scripts': [
+            'alerta = alerta.shell:main'
+        ]
+    },
+    keywords="alerta client unified command line tool",
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: MIT License',
@@ -28,8 +35,5 @@ setuptools.setup(
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Topic :: System :: Monitoring',
-    ],
-    entry_points={
-        'console_scripts': [ 'alerta = alerta.shell:main']
-    }
+    ]
 )
