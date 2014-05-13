@@ -3,7 +3,7 @@
     Alerta unified command-line tool
 """
 
-__version__ = '3.1.0'
+__version__ = '3.1.1'
 __license__ = 'MIT'
 
 import os
@@ -571,8 +571,8 @@ class AlertaShell(object):
             sources['debug'] = '[system]'
 
         parser = argparse.ArgumentParser(
-            prog='alert',
-            usage='alert [OPTIONS] COMMAND [FILTERS]',
+            prog='alerta',
+            usage='alerta [OPTIONS] COMMAND [FILTERS]',
             description="Alerta client unified command-line tool",
             epilog='Filters:\n'
                    '    Query parameters can be used to filter alerts by any valid alert attribute\n\n'
@@ -631,12 +631,12 @@ class AlertaShell(object):
         parser_send = subparsers.add_parser(
             'send',
             help='Send alert to server',
-            usage='alert [OPTIONS] send [-h] [-r RESOURCE] [-e EVENT] [-E ENVIRONMENT]\n'
-                '                            [-s SEVERITY] [-C CORRELATE] [--status STATUS]\n'
-                '                            [-S SERVICE] [-g GROUP] [-v VALUE] [-t TEXT]\n'
-                '                            [-T TAG] [-A ATTRIBUTES] [-O ORIGIN]\n'
-                '                            [--type EVENT_TYPE] [--timeout TIMEOUT]\n'
-                '                            [--raw-data RAW_DATA]\n'
+            usage='alerta [OPTIONS] send [-h] [-r RESOURCE] [-e EVENT] [-E ENVIRONMENT]\n'
+                '                             [-s SEVERITY] [-C CORRELATE] [--status STATUS]\n'
+                '                             [-S SERVICE] [-g GROUP] [-v VALUE] [-t TEXT]\n'
+                '                             [-T TAG] [-A ATTRIBUTES] [-O ORIGIN]\n'
+                '                             [--type EVENT_TYPE] [--timeout TIMEOUT]\n'
+                '                             [--raw-data RAW_DATA]\n'
         )
         parser_send.add_argument(
             '-r',
@@ -733,7 +733,7 @@ class AlertaShell(object):
         parser_query = subparsers.add_parser(
             'query',
             help='List alerts based on query filter',
-            usage='alert [OPTIONS] query [-h] [FILTERS]'
+            usage='alerta [OPTIONS] query [-h] [FILTERS]'
         )
         parser_query.add_argument(
             '--details',
@@ -750,7 +750,7 @@ class AlertaShell(object):
         parser_watch = subparsers.add_parser(
             'watch',
             help='Watch alerts based on query filter',
-            usage='alert [OPTIONS] watch [-h] [FILTERS]'
+            usage='alerta [OPTIONS] watch [-h] [FILTERS]'
         )
         parser_watch.add_argument(
             '--details',
@@ -767,7 +767,7 @@ class AlertaShell(object):
         parser_raw = subparsers.add_parser(
             'raw',
             help='Show alert raw data',
-            usage='alert [OPTIONS] raw [-h] [FILTERS]'
+            usage='alerta [OPTIONS] raw [-h] [FILTERS]'
         )
         parser_raw.add_argument(
             'filter',
@@ -779,7 +779,7 @@ class AlertaShell(object):
         parser_history = subparsers.add_parser(
             'history',
             help='Show alert history',
-            usage='alert [OPTIONS] history [-h] [FILTERS]'
+            usage='alerta [OPTIONS] history [-h] [FILTERS]'
         )
         parser_history.add_argument(
             'filter',
@@ -791,7 +791,7 @@ class AlertaShell(object):
         parser_tag = subparsers.add_parser(
             'tag',
             help='Tag alerts',
-            usage='alert [OPTIONS] tag [-h] [FILTERS]'
+            usage='alerta [OPTIONS] tag [-h] [FILTERS]'
         )
         parser_tag.add_argument(
             '-T',
@@ -812,7 +812,7 @@ class AlertaShell(object):
         parser_untag = subparsers.add_parser(
             'untag',
             help='Remove tags from alerts',
-            usage='alert [OPTIONS] untag [-h] [FILTERS]'
+            usage='alerta [OPTIONS] untag [-h] [FILTERS]'
         )
         parser_untag.add_argument(
             '-T',
@@ -833,7 +833,7 @@ class AlertaShell(object):
         parser_ack = subparsers.add_parser(
             'ack',
             help='Acknowledge alerts',
-            usage='alert [OPTIONS] ack [-h] [FILTERS]'
+            usage='alerta [OPTIONS] ack [-h] [FILTERS]'
         )
         parser_ack.add_argument(
             'filter',
@@ -845,7 +845,7 @@ class AlertaShell(object):
         parser_unack = subparsers.add_parser(
             'unack',
             help='Unacknowledge alerts',
-            usage='alert [OPTIONS] unack [-h] [FILTERS]'
+            usage='alerta [OPTIONS] unack [-h] [FILTERS]'
         )
         parser_unack.add_argument(
             'filter',
@@ -857,7 +857,7 @@ class AlertaShell(object):
         parser_close = subparsers.add_parser(
             'close',
             help='Close alerts',
-            usage='alert [OPTIONS] close [-h] [FILTERS]'
+            usage='alerta [OPTIONS] close [-h] [FILTERS]'
         )
         parser_close.add_argument(
             'filter',
@@ -869,7 +869,7 @@ class AlertaShell(object):
         parser_delete = subparsers.add_parser(
             'delete',
             help='Delete alerts',
-            usage='alert [OPTIONS] delete [-h] [FILTERS]'
+            usage='alerta [OPTIONS] delete [-h] [FILTERS]'
         )
         parser_delete.add_argument(
             'filter',
@@ -881,7 +881,7 @@ class AlertaShell(object):
         parser_heartbeat = subparsers.add_parser(
             'heartbeat',
             help='Send heartbeat to server',
-            usage='alert [OPTIONS] heartbeat [-h] [-T TAG] [-O ORIGIN] [--timeout TIMEOUT]'
+            usage='alerta [OPTIONS] heartbeat [-h] [-T TAG] [-O ORIGIN] [--timeout TIMEOUT]'
         )
         parser_heartbeat.add_argument(
             '-T',
