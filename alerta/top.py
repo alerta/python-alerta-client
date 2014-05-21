@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import sys
 import time
@@ -389,7 +388,8 @@ class Screen(object):
         elif key in 'oO':
             self.dedup_by = "origin"
         elif key in 'qQ':
-            exit_handler()
+            self._reset()
+            sys.exit(0)
 
     # def _handle_movement_key(self, key):
     #     # Highlight the corresponding node in the list
@@ -419,7 +419,9 @@ class Screen(object):
 def exit_handler(signum, frame):
 
     logging.debug('Received Signal %s (%s)' % (signum, frame))
-    screen._reset()
+    curses.echo()
+    curses.nocbreak()
+    curses.endwin()
     sys.exit(0)
 
 # Register exit signals
