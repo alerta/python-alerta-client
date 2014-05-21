@@ -17,6 +17,7 @@ import ConfigParser
 import logging
 
 from alerta.api import ApiClient
+from alerta.top import Screen
 from alerta.alert import Alert, AlertDocument
 from alerta.heartbeat import Heartbeat
 
@@ -212,6 +213,22 @@ class AlertCommand(object):
                 time.sleep(2)
             except (KeyboardInterrupt, SystemExit):
                 sys.exit(0)
+
+    def top(self, args):
+
+        screen = Screen(args)
+
+        try:
+            screen.run()
+        except RuntimeError, e:
+            screen._reset()
+            print e
+            sys.exit(1)
+        except (KeyboardInterrupt, SystemExit):
+            screen.w.running = False
+            screen._reset()
+            print 'Exiting...'
+            sys.exit(0)
 
     def raw(self, args):
 
@@ -763,6 +780,13 @@ class AlertaShell(object):
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_watch.set_defaults(func=cli.watch)
+
+        parser_top = subparsers.add_parser(
+            'top',
+            help='Show top offenders and stats',
+            usage='alerta [OPTIONS] top [-h]'
+        )
+        parser_top.set_defaults(func=cli.top)
 
         parser_raw = subparsers.add_parser(
             'raw',
