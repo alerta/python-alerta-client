@@ -3,7 +3,7 @@
     Alerta unified command-line tool
 """
 
-__version__ = '3.1.2'
+__version__ = '3.1.3'
 __license__ = 'MIT'
 
 import os
@@ -159,7 +159,7 @@ class AlertCommand(object):
 
             print(line_color + '%s|%s|%s|%5d|%-5s|%-10s|%-18s|%12s|%16s|%12s' % (
                 a.id[0:8],
-                a.get_date('last_receive_time', 'local'),
+                a.get_date('last_receive_time', 'local', args.timezone),
                 a.severity,
                 a.duplicate_count,
                 a.environment,
@@ -185,9 +185,9 @@ class AlertCommand(object):
 
                 latency = a.receive_time - a.create_time
 
-                print(line_color + '        time created  | %s' % a.get_date('create_time', 'iso') + end_color)
-                print(line_color + '        time received | %s' % a.get_date('receive_time', 'iso') + end_color)
-                print(line_color + '        last received | %s' % a.get_date('last_receive_time', 'iso') + end_color)
+                print(line_color + '        time created  | %s' % a.get_date('create_time', 'iso', args.timezone) + end_color)
+                print(line_color + '        time received | %s' % a.get_date('receive_time', 'iso', args.timezone) + end_color)
+                print(line_color + '        last received | %s' % a.get_date('last_receive_time', 'iso', args.timezone) + end_color)
                 print(line_color + '        latency       | %sms' % (latency.microseconds / 1000) + end_color)
                 print(line_color + '        timeout       | %ss' % a.timeout + end_color)
 
