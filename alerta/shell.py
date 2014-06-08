@@ -3,7 +3,7 @@
     Alerta unified command-line tool
 """
 
-__version__ = '3.1.3'
+__version__ = '3.2.0'
 __license__ = 'MIT'
 
 import os
@@ -28,6 +28,7 @@ root = logging.getLogger()
 
 DEFAULT_CONF_FILE = '~/.alerta.conf'
 DEFAULT_ENDPOINT_URL = 'http://localhost:8080'
+DEFAULT_API_KEY = ''
 DEFAULT_TIMEZONE = 'Europe/London'
 DEFAULT_OUTPUT = 'text'
 DEFAULT_COLOR = True
@@ -58,11 +59,12 @@ class AlertCommand(object):
 
         self.api = None
 
-    def set_api(self, url):
+    def set_api(self, url, key):
 
-        self.api = ApiClient(endpoint=url)
+        self.api = ApiClient(endpoint=url, key=key)
 
-    def config(self, args):
+    @staticmethod
+    def config(args):
 
         print
         print 'Name             Value                             Location'
@@ -70,6 +72,7 @@ class AlertCommand(object):
         print 'config_file      %-30s    %s' % (args.config_file, sources['config_file'])
         print 'profile          %-30s    %s' % (args.profile, sources['profile'])
         print 'endpoint         %-30s    %s' % (args.endpoint, sources['endpoint'])
+        print 'key              %-30s    %s' % (args.key, sources['key'])
         print 'timezone         %-30s    %s' % (args.timezone, sources['timezone'])
         print 'output           %-30s    %s' % (args.output, sources['output'])
         print 'color            %-30s    %s' % (args.color, sources['color'])
@@ -145,8 +148,6 @@ class AlertCommand(object):
         if args.output == "json":
             print json.dumps(alerts, indent=4)
             sys.exit(0)
-
-        # tz = pytz.timezone(args.timezone)
 
         for alert in reversed(alerts):
 
@@ -503,6 +504,8 @@ class AlertaShell(object):
         default_section = dict(config.defaults())
         if 'endpoint' in default_section:
             sources['endpoint'] = '[DEFAULT]'
+        if 'key' in default_section:
+            sources['key'] = '[DEFAULT]'
         if 'timezone' in default_section:
             sources['timezone'] = '[DEFAULT]'
         if 'output' in default_section:
@@ -536,6 +539,12 @@ class AlertaShell(object):
                         else:
                             defaults['endpoint'] = DEFAULT_ENDPOINT_URL
                             sources['endpoint'] = '[system]'
+                        if config.has_option(section, 'key'):
+                            defaults['key'] = config.get(section, 'key')
+                            sources['key'] = '[profile %s]' % args.profile
+                        else:
+                            defaults['key'] = DEFAULT_API_KEY
+                            sources['key'] = '[system]'
                         if config.has_option(section, 'timezone'):
                             defaults['timezone'] = config.get(section, 'timezone')
                             sources['timezone'] = '[profile %s]' % args.profile
@@ -567,6 +576,13 @@ class AlertaShell(object):
         elif 'endpoint' not in defaults:
             defaults['endpoint'] = DEFAULT_ENDPOINT_URL
             sources['endpoint'] = '[system]'
+
+        if os.environ.get('ALERTA_API_KEY'):
+            defaults['key'] = os.environ.get('ALERTA_API_KEY')
+            sources['key'] = 'ALERTA_API_KEY'
+        elif 'key' not in defaults:
+            defaults['key'] = DEFAULT_API_KEY
+            sources['key'] = '[system]'
 
         if 'timezone' not in defaults:
             defaults['timezone'] = DEFAULT_TIMEZONE
@@ -975,7 +991,7 @@ class AlertaShell(object):
         if args.debug != defaults['debug']:
             sources['debug'] = '--debug'
 
-        cli.set_api(url=args.endpoint)
+        cli.set_api(url=args.endpoint, key=args.key)
 
         args.func(args)
 

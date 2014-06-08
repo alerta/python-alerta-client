@@ -4,20 +4,35 @@ import urllib
 import requests
 import logging
 
+from requests.auth import AuthBase
+
 LOG = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = 86400
 
 
+class ApiAuth(AuthBase):
+
+    def __init__(self, key):
+
+        self.key = key
+
+    def __call__(self, r):
+
+        r.headers['Authorization'] = 'Key %s' % self.key
+        return r
+
+
 class ApiClient(object):
 
-    def __init__(self, endpoint="http://localhost:8080"):
+    def __init__(self, endpoint="http://localhost:8080", key=''):
 
         self.endpoint = endpoint
+        self.key = key
 
     def __repr__(self):
 
-        return 'ApiClient(endpoint=%r)' % self.endpoint
+        return 'ApiClient(endpoint=%r, key=%r)' % (self.endpoint, self.key)
 
     def get_alerts(self, **kwargs):
 
@@ -107,7 +122,7 @@ class ApiClient(object):
     def _get(self, path, query=None):
 
         url = self.endpoint + path + '?' + urllib.urlencode(query, doseq=True)
-        response = requests.get(url)
+        response = requests.get(url, auth=ApiAuth(self.key))
 
         LOG.debug('Content type from response: %s', response.headers['content-type'])
         LOG.debug('Response Headers: %s', response.headers)
@@ -128,7 +143,7 @@ class ApiClient(object):
         LOG.debug('Request Headers: %s', headers)
         LOG.debug('Request Body: %s', data)
 
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, data=data, auth=ApiAuth(self.key), headers=headers)
 
         try:
             response.raise_for_status()
@@ -140,7 +155,7 @@ class ApiClient(object):
     def _delete(self, path):
 
         url = self.endpoint + path
-        response = requests.delete(url)
+        response = requests.delete(url, auth=ApiAuth(self.key))
 
         try:
             response.raise_for_status()

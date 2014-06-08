@@ -9,9 +9,6 @@ import signal
 
 from datetime import datetime
 
-import logging
-logging.basicConfig(filename='console.log', level=logging.DEBUG)
-
 SCREEN_REDRAW_INTERVAL = 2
 lock = threading.Lock()
 
@@ -75,7 +72,7 @@ class Alert(threading.Thread):
         try:
             response.raise_for_status()
         except requests.HTTPError, e:
-            logging.error(e)
+            pass
 
         status = response.json()
 
@@ -131,7 +128,7 @@ class Alert(threading.Thread):
         try:
             response.raise_for_status()
         except requests.HTTPError, e:
-            logging.error(e)
+            pass
 
         response = response.json()
 
@@ -231,7 +228,7 @@ class Screen(object):
         try:
             curses.curs_set(0)
         except Exception, e:
-            logging.error(e)
+            pass
 
         screen.keypad(1)
         screen.nodelay(1)
@@ -314,7 +311,7 @@ class Screen(object):
                             self.w.resources[key]['resource'])
                         )
                     except curses.error, e:
-                        logging.warn(e)
+                        pass
                     if i == self.max_y - 3:
                         break
 
@@ -332,7 +329,7 @@ class Screen(object):
                             self.w.events[key]['event'])
                         )
                     except curses.error, e:
-                        logging.warning(e)
+                        pass
                     if i == self.max_y - 3:
                         break
 
@@ -349,7 +346,7 @@ class Screen(object):
                             self.w.origins[key]['origin']
                         ))
                     except curses.error, e:
-                        logging.warning(e)
+                        pass
                     if i == self.max_y - 3:
                         break
 
@@ -418,7 +415,6 @@ class Screen(object):
 
 def exit_handler(signum, frame):
 
-    logging.debug('Received Signal %s (%s)' % (signum, frame))
     curses.echo()
     curses.nocbreak()
     curses.endwin()
