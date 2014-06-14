@@ -13,11 +13,10 @@ import requests
 import ConfigParser
 import logging
 
-from alerta import __version__
-from alerta.api import ApiClient
+from alerta import ApiClient, Alert, AlertDocument, Heartbeat
 from alerta.top import Screen
-from alerta.alert import Alert, AlertDocument
-from alerta.heartbeat import Heartbeat
+
+from . import __version__
 
 prog = os.path.basename(sys.argv[0])
 
