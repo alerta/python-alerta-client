@@ -13,6 +13,7 @@ import requests
 import ConfigParser
 import logging
 
+from alerta.version import __version__
 from alerta.api import ApiClient
 from alerta.top import Screen
 from alerta.alert import Alert, AlertDocument
