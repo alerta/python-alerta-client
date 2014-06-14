@@ -1,5 +1,5 @@
-python-alerta-client
-====================
+Alerta Command-Line Tool
+========================
 
 Unified command-line tool and python API for [alerta](https://github.com/guardian/alerta).
 
@@ -51,7 +51,7 @@ Options
 Python SDK
 ==========
 
-The client API can also be used as a Python SDK.
+The python packages used by the client command-line tool can also be used as a Python SDK.
 
 
 Example
