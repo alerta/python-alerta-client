@@ -1,22 +1,28 @@
 #!/usr/bin/env python
 
-import setuptools
+import os
+import sys
+
+import alerta
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 with open('README.rst') as f:
-    long_description = f.read()
+    readme = f.read()
 
-execfile('alerta/version.py')
-
-setuptools.setup(
+setup(
     name="alerta",
-    version=__version__,
+    version=alerta.__version__,
     description="Alerta unified command-line tool",
-    long_description=long_description,
+    long_description=readme,
     license="MIT",
     author="Nick Satterly",
     author_email="nick.satterly@theguardian.com",
     url="http://github.com/alerta/python-alerta-client",
-    packages=setuptools.find_packages(exclude=['tests']),
+    packages_dir={'alerta': 'alerta'},
     install_requires=[
         'argparse',
         'requests',
