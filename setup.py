@@ -22,7 +22,7 @@ setup(
     author="Nick Satterly",
     author_email="nick.satterly@theguardian.com",
     url="http://github.com/alerta/python-alerta-client",
-    packages_dir={'alerta': 'alerta'},
+    package_dir={'alerta': 'alerta'},
     install_requires=[
         'argparse',
         'requests',
