@@ -119,7 +119,7 @@ class ApiClient(object):
 
         return self._delete('/api/heartbeat/%s' % heartbeatid)
 
-    def _get(self, path, query=None):
+    def _get(self, path, query=''):
 
         url = self.endpoint + path + '?' + urllib.urlencode(query, doseq=True)
         response = requests.get(url, auth=ApiAuth(self.key))
