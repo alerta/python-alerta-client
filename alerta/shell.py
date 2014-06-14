@@ -13,7 +13,9 @@ import requests
 import ConfigParser
 import logging
 
-from alerta import ApiClient, Alert, AlertDocument, Heartbeat
+from alerta.api import ApiClient
+from alerta.alert import Alert, AlertDocument
+from alerta.heartbeat import Heartbeat
 from alerta.top import Screen
 
 from . import __version__

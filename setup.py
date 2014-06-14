@@ -3,7 +3,7 @@
 import os
 import sys
 
-import alerta
+from alerta import __version__
 
 try:
     from setuptools import setup
@@ -15,14 +15,14 @@ with open('README.rst') as f:
 
 setup(
     name="alerta",
-    version=alerta.__version__,
+    version=__version__,
     description="Alerta unified command-line tool",
     long_description=readme,
     license="MIT",
     author="Nick Satterly",
     author_email="nick.satterly@theguardian.com",
     url="http://github.com/alerta/python-alerta-client",
-    package_dir={'alerta': 'alerta'},
+    packages=['alerta'],
     install_requires=[
         'argparse',
         'requests',
