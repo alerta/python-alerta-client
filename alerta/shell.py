@@ -469,7 +469,7 @@ class AlertCommand(object):
 
 class AlertaShell(object):
 
-    def main(self):
+    def run(self):
 
         config_file = os.environ.get('ALERTA_CONF_FILE') or OPTIONS['config_file']
 
@@ -880,7 +880,7 @@ def main():
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     try:
-        AlertaShell().main()
+        AlertaShell().run()
     except Exception as e:
         LOG.error(e, exc_info=1)
         sys.exit(1)
