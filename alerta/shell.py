@@ -25,13 +25,18 @@ prog = os.path.basename(sys.argv[0])
 LOG = logging.getLogger(__name__)
 root = logging.getLogger()
 
-DEFAULT_CONF_FILE = '~/.alerta.conf'
-DEFAULT_ENDPOINT_URL = 'http://localhost:8080'
-DEFAULT_API_KEY = ''
-DEFAULT_TIMEZONE = 'Europe/London'
-DEFAULT_OUTPUT = 'text'
-DEFAULT_COLOR = True
-DEFAULT_DEBUG = False
+OPTIONS = {
+    'config_file': '~/.alerta.conf',
+    'profile':     None,
+    'endpoint':    'http://localhost:8080',
+    'key':         '',
+    'timezone':    'Europe/London',
+    'output':      'text',
+    'color':       True,
+    'debug':       False,
+    'severity':    "normal",
+    'timeout':     86400
+}
 
 DEFAULT_SEVERITY = "normal"  # "normal", "ok" or "clear"
 DEFAULT_TIMEOUT = 86400
@@ -61,22 +66,6 @@ class AlertCommand(object):
     def set_api(self, url, key):
 
         self.api = ApiClient(endpoint=url, key=key)
-
-    @staticmethod
-    def config(args):
-
-        print
-        print 'Name             Value                             Location'
-        print '----             -----                             --------'
-        print 'config_file      %-30s    %s' % (args.config_file, sources['config_file'])
-        print 'profile          %-30s    %s' % (args.profile, sources['profile'])
-        print 'endpoint         %-30s    %s' % (args.endpoint, sources['endpoint'])
-        print 'key              %-30s    %s' % (args.key, sources['key'])
-        print 'timezone         %-30s    %s' % (args.timezone, sources['timezone'])
-        print 'output           %-30s    %s' % (args.output, sources['output'])
-        print 'color            %-30s    %s' % (args.color, sources['color'])
-        print 'debug            %-30s    %s' % (args.debug, sources['debug'])
-        print
 
     def send(self, args):
 
@@ -482,125 +471,35 @@ class AlertaShell(object):
 
     def main(self):
 
-        global sources
+        config_file = os.environ.get('ALERTA_CONF_FILE') or OPTIONS['config_file']
 
-        cli = AlertCommand()
-
-        defaults = {
-            'config_file': os.environ.get('ALERTA_CONF_FILE') or DEFAULT_CONF_FILE,
-            'profile': os.environ.get('ALERTA_DEFAULT_PROFILE'),
-        }
-
-        sources = {
-            'config_file': 'ALERTA_CONF_FILE' if os.environ.get('ALERTA_CONF_FILE') else '[system]',
-            'profile': 'ALERTA_DEFAULT_PROFILE' if os.environ.get('ALERTA_DEFAULT_PROFILE') else '[none]',
-        }
-
-        config_file = defaults['config_file']
-        config = ConfigParser.RawConfigParser(defaults=defaults)
+        config = ConfigParser.RawConfigParser(defaults=OPTIONS)
         config.read(os.path.expanduser(config_file))
-
-        default_section = dict(config.defaults())
-        if 'endpoint' in default_section:
-            sources['endpoint'] = '[DEFAULT]'
-        if 'key' in default_section:
-            sources['key'] = '[DEFAULT]'
-        if 'timezone' in default_section:
-            sources['timezone'] = '[DEFAULT]'
-        if 'output' in default_section:
-            sources['output'] = '[DEFAULT]'
-        if 'color' in default_section:
-            sources['color'] = '[DEFAULT]'
-        if 'debug' in default_section:
-            sources['debug'] = '[DEFAULT]'
 
         profile_parser = argparse.ArgumentParser(
             add_help=False
         )
         profile_parser.add_argument(
             '--profile',
-            default=defaults['profile'],
-            help='Select profile to apply from %s' % defaults['config_file']
+            help='Profile to apply from %s' % config_file
         )
         args, left = profile_parser.parse_known_args()
 
-        if args.profile != defaults['profile']:
-            defaults['profile'] = args.profile
-            sources['profile'] = '--profile'
+        want_profile = args.profile or os.environ.get('ALERTA_DEFAULT_PROFILE') or config.defaults().get('profile')
 
-        if args.profile:
-            for section in config.sections():
-                if section.startswith('profile '):
-                    if args.profile == section.replace('profile ', ''):
-                        if config.has_option(section, 'endpoint'):
-                            defaults['endpoint'] = config.get(section, 'endpoint')
-                            sources['endpoint'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['endpoint'] = DEFAULT_ENDPOINT_URL
-                            sources['endpoint'] = '[system]'
-                        if config.has_option(section, 'key'):
-                            defaults['key'] = config.get(section, 'key')
-                            sources['key'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['key'] = DEFAULT_API_KEY
-                            sources['key'] = '[system]'
-                        if config.has_option(section, 'timezone'):
-                            defaults['timezone'] = config.get(section, 'timezone')
-                            sources['timezone'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['timezone'] = DEFAULT_TIMEZONE
-                            sources['timezone'] = '[system]'
-                        if config.has_option(section, 'output'):
-                            defaults['output'] = config.get(section, 'output')
-                            sources['output'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['output'] = DEFAULT_OUTPUT
-                            sources['output'] = '[system]'
-                        if config.has_option(section, 'color'):
-                            defaults['color'] = bool(config.get(section, 'color'))
-                            sources['color'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['color'] = DEFAULT_COLOR
-                            sources['color'] = '[system]'
-                        if config.has_option(section, 'debug'):
-                            defaults['debug'] = bool(config.get(section, 'debug'))
-                            sources['debug'] = '[profile %s]' % args.profile
-                        else:
-                            defaults['debug'] = DEFAULT_DEBUG
-                            sources['debug'] = '[system]'
+        if want_profile and config.has_section('profile %s' % want_profile):
+            for opt in OPTIONS:
+                OPTIONS[opt] = config.get('profile %s' % want_profile, opt)
+        else:
+            for opt in OPTIONS:
+                OPTIONS[opt] = config.get('DEFAULT', opt)
 
-        if os.environ.get('ALERTA_DEFAULT_ENDPOINT'):
-            defaults['endpoint'] = os.environ.get('ALERTA_DEFAULT_ENDPOINT')
-            sources['endpoint'] = 'ALERTA_DEFAULT_ENDPOINT'
-        elif 'endpoint' not in defaults:
-            defaults['endpoint'] = DEFAULT_ENDPOINT_URL
-            sources['endpoint'] = '[system]'
+        OPTIONS['endpoint'] = os.environ.get('ALERTA_ENDPOINT') or OPTIONS['endpoint']
+        OPTIONS['key'] = os.environ.get('ALERTA_API_KEY') or OPTIONS['key']
+        OPTIONS['color'] = os.environ.get('CLICOLOR') or OPTIONS['color']
+        OPTIONS['debug'] = os.environ.get('DEBUG') or OPTIONS['debug']
 
-        if os.environ.get('ALERTA_API_KEY'):
-            defaults['key'] = os.environ.get('ALERTA_API_KEY')
-            sources['key'] = 'ALERTA_API_KEY'
-        elif 'key' not in defaults:
-            defaults['key'] = DEFAULT_API_KEY
-            sources['key'] = '[system]'
-
-        if 'timezone' not in defaults:
-            defaults['timezone'] = DEFAULT_TIMEZONE
-            sources['timezone'] = '[system]'
-
-        if 'output' not in defaults:
-            defaults['output'] = DEFAULT_OUTPUT
-            sources['output'] = '[system]'
-
-        if os.environ.get('CLICOLOR'):
-            defaults['color'] = True
-            sources['color'] = 'CLICOLOR'
-        elif 'color' not in defaults:
-            defaults['color'] = DEFAULT_COLOR
-            sources['color'] = '[system]'
-
-        if 'debug' not in defaults:
-            defaults['debug'] = DEFAULT_DEBUG
-            sources['debug'] = '[system]'
+        cli = AlertCommand()
 
         parser = argparse.ArgumentParser(
             prog='alerta',
@@ -617,17 +516,14 @@ class AlertaShell(object):
             formatter_class=argparse.RawTextHelpFormatter,
             parents=[profile_parser]
         )
-        parser.set_defaults(**defaults)
         parser.add_argument(
             '--endpoint-url',
-            default=defaults['endpoint'],
             dest='endpoint',
             metavar='URL',
             help='API endpoint URL'
         )
         parser.add_argument(
             '--output',
-            default=defaults['output'],
             help='Output format of "text" or "json"'
         )
         parser.add_argument(
@@ -640,14 +536,12 @@ class AlertaShell(object):
             '--color',
             '--colour',
             action='store_true',
-            default=defaults['color'],
             help='Color-coded output based on severity'
         )
         parser.add_argument(
             '--no-color',
             '--no-colour',
             action='store_false',
-            default=defaults['color'],
             dest='color',
             help=argparse.SUPPRESS
         )
@@ -656,6 +550,8 @@ class AlertaShell(object):
             action='store_true',
             help='Print debug output'
         )
+        parser.set_defaults(**OPTIONS)
+
         subparsers = parser.add_subparsers(
             title='Commands',
         )
@@ -944,13 +840,6 @@ class AlertaShell(object):
         )
         parser_heartbeat.set_defaults(func=cli.heartbeat)
 
-        parser_config = subparsers.add_parser(
-            'config',
-            help='Show config',
-            add_help=False
-        )
-        parser_config.set_defaults(func=cli.config)
-
         parser_help = subparsers.add_parser(
             'help',
             help='Show help',
@@ -980,15 +869,6 @@ class AlertaShell(object):
         else:
             root.setLevel(logging.ERROR)
             LOG.setLevel(logging.ERROR)
-
-        if args.endpoint != defaults['endpoint']:
-            sources['endpoint'] = '--endpoint'
-        if args.output != defaults['output']:
-            sources['output'] = '--output'
-        if args.color != defaults['color']:
-            sources['color'] = '--color'
-        if args.debug != defaults['debug']:
-            sources['debug'] = '--debug'
 
         cli.set_api(url=args.endpoint, key=args.key)
 
