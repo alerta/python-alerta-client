@@ -8,9 +8,10 @@ api = ApiClient(endpoint='http://localhost:8080', key='tUA6oBX6E5hUUQZ+dyze6vZbO
 alert = Alert(
     resource='web-server-01',
     event='HttpError',
+    correlate=['HttpOK'],
     group='Web',
     environment='Production',
-    service='theguardian.com',
+    service=['theguardian.com'],
     severity='major',
     value='Bad Gateway (502)',
     text='Web server error.',
