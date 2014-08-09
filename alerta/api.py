@@ -29,6 +29,7 @@ class ApiClient(object):
 
         self.endpoint = endpoint
         self.key = key
+        self.session = requests.Session()
 
     def __repr__(self):
 
@@ -122,7 +123,7 @@ class ApiClient(object):
     def _get(self, path, query=''):
 
         url = self.endpoint + path + '?' + urllib.urlencode(query, doseq=True)
-        response = requests.get(url, auth=ApiAuth(self.key))
+        response = self.session.get(url, auth=ApiAuth(self.key))
 
         LOG.debug('Content type from response: %s', response.headers['content-type'])
         LOG.debug('Response Headers: %s', response.headers)
@@ -143,7 +144,7 @@ class ApiClient(object):
         LOG.debug('Request Headers: %s', headers)
         LOG.debug('Request Body: %s', data)
 
-        response = requests.post(url, data=data, auth=ApiAuth(self.key), headers=headers)
+        response = self.session.post(url, data=data, auth=ApiAuth(self.key), headers=headers)
 
         try:
             response.raise_for_status()
@@ -155,7 +156,7 @@ class ApiClient(object):
     def _delete(self, path):
 
         url = self.endpoint + path
-        response = requests.delete(url, auth=ApiAuth(self.key))
+        response = self.session.delete(url, auth=ApiAuth(self.key))
 
         try:
             response.raise_for_status()
