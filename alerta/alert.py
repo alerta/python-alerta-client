@@ -9,7 +9,7 @@ import json
 from uuid import uuid4
 from email import utils
 
-DEFAULT_SEVERITY = "normal"  # "normal", "ok" or "clear"
+DEFAULT_SEVERITY = "normal"  # "normal", "cleared " or "ok"
 DEFAULT_TIMEOUT = 86400
 
 prog = os.path.basename(sys.argv[0])
