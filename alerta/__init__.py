@@ -1,3 +1,2 @@
-__title__ = 'alerta'
-__version__ = '3.2.2'
-__license__ = 'MIT'
+import pkg_resources
+pkg_resources.declare_namespace(__name__)

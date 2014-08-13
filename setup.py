@@ -1,21 +1,17 @@
 #!/usr/bin/env python
 
-import os
-import sys
+import setuptools
 
-from alerta import __version__
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+with open('VERSION') as f:
+    version = f.read().strip()
 
 with open('README.rst') as f:
     readme = f.read()
 
-setup(
+setuptools.setup(
     name="alerta",
-    version=__version__,
+    namespace_packages=['alerta'],
+    version=version,
     description="Alerta unified command-line tool",
     long_description=readme,
     license="MIT",

@@ -3,7 +3,7 @@
 from alerta.api import ApiClient
 from alerta.alert import Alert
 
-api = ApiClient(endpoint='http://localhost:8080', key='tUA6oBX6E5hUUQZ+dyze6vZbOMmiZWA7ke88Nvio')
+api = ApiClient()
 
 alert = Alert(
     resource='web-server-01',
