@@ -473,7 +473,7 @@ class AlertaShell(object):
 
     def run(self):
 
-        config_file = os.environ.get('ALERTA_CONF_FILE') or OPTIONS['config_file']
+        config_file = os.environ.get('ALERTA_CONFIG_FILE') or OPTIONS['config_file']
 
         config = ConfigParser.RawConfigParser(defaults=OPTIONS)
         config.read(os.path.expanduser(config_file))
