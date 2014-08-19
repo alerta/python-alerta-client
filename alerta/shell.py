@@ -473,10 +473,14 @@ class AlertaShell(object):
 
     def run(self):
 
-        config_file = os.environ.get('ALERTA_CONFIG_FILE') or OPTIONS['config_file']
+        config_file = os.environ.get('ALERTA_CONF_FILE') or OPTIONS['config_file']
 
         config = ConfigParser.RawConfigParser(defaults=OPTIONS)
-        config.read(os.path.expanduser(config_file))
+        try:
+            config.read(os.path.expanduser(config_file))
+        except Exception as e:
+            LOG.warning("Problem reading configuration file %s - is this an ini file?", config_file)
+            sys.exit(1)
 
         profile_parser = argparse.ArgumentParser(
             add_help=False
