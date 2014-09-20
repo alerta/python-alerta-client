@@ -101,7 +101,11 @@ class AlertCommand(object):
             sys.exit(1)
 
         if response['status'] == 'ok':
-            print response['id']
+            if response['alert']['repeat']:
+                info = "%s duplicates" % response['alert']['duplicateCount']
+            else:
+                info = "%s -> %s" % (response['alert']['previousSeverity'], response['alert']['severity'])
+            print "%s (%s)" % (response['id'], info)
         else:
             LOG.error(response['message'])
             sys.exit(1)

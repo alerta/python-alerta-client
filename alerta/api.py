@@ -37,19 +37,19 @@ class ApiClient(object):
 
     def get_alerts(self, **kwargs):
 
-        return self._get('/api/alerts', kwargs)
+        return self._get('/alerts', kwargs)
 
     def get_counts(self, **kwargs):
 
-        return self._get('/api/alerts/count', kwargs)
+        return self._get('/alerts/count', kwargs)
 
     def get_history(self, **kwargs):
 
-        return self._get('/api/alerts/history', kwargs)
+        return self._get('/alerts/history', kwargs)
 
     def send_alert(self, alert):
 
-        return self._post('/api/alert', data=str(alert))
+        return self._post('/alert', data=str(alert))
 
     def send(self, msg):
 
@@ -60,21 +60,21 @@ class ApiClient(object):
 
     def get_alert(self, alertid):
 
-        return self._get('/api/alert/%s' % alertid)
+        return self._get('/alert/%s' % alertid)
 
     def tag_alert(self, alertid, tags):
 
         if not isinstance(tags, list):
             raise
 
-        return self._post('/api/alert/%s/tag' % alertid, data=json.dumps({"tags": tags}))
+        return self._post('/alert/%s/tag' % alertid, data=json.dumps({"tags": tags}))
 
     def untag_alert(self, alertid, tags):
 
         if not isinstance(tags, list):
             raise
 
-        return self._post('/api/alert/%s/untag' % alertid, data=json.dumps({"tags": tags}))
+        return self._post('/alert/%s/untag' % alertid, data=json.dumps({"tags": tags}))
 
     def open_alert(self, alertid):
 
@@ -98,27 +98,27 @@ class ApiClient(object):
 
     def update_status(self, alertid, status):
 
-        return self._post('/api/alert/%s/status' % alertid, data=json.dumps({"status": status}))
+        return self._post('/alert/%s/status' % alertid, data=json.dumps({"status": status}))
 
     def delete_alert(self, alertid):
 
-        return self._delete('/api/alert/%s' % alertid)
+        return self._delete('/alert/%s' % alertid)
 
     def send_heartbeat(self, heartbeat):
         """
         Send a heartbeat
         """
-        return self._post('/api/heartbeat', data=str(heartbeat))
+        return self._post('/heartbeat', data=str(heartbeat))
 
     def get_heartbeats(self):
         """
         Get list of heartbeats
         """
-        return self._get('/api/heartbeats')
+        return self._get('/heartbeats')
 
     def delete_heartbeat(self, heartbeatid):
 
-        return self._delete('/api/heartbeat/%s' % heartbeatid)
+        return self._delete('/heartbeat/%s' % heartbeatid)
 
     def _get(self, path, query=''):
 
