@@ -146,11 +146,6 @@ class ApiClient(object):
 
         response = self.session.post(url, data=data, auth=ApiAuth(self.key), headers=headers)
 
-        try:
-            response.raise_for_status()
-        except requests.HTTPError:
-            raise
-
         return response.json()
 
     def _delete(self, path):
