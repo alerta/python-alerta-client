@@ -1,4 +1,5 @@
 
+import os
 import json
 import urllib
 import requests
@@ -25,10 +26,10 @@ class ApiAuth(AuthBase):
 
 class ApiClient(object):
 
-    def __init__(self, endpoint="http://localhost:8080", key=''):
+    def __init__(self, endpoint=None, key=None):
 
-        self.endpoint = endpoint
-        self.key = key
+        self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', "http://localhost:8080")
+        self.key = key or os.environ.get('ALERTA_API_KEY', '')
         self.session = requests.Session()
 
     def __repr__(self):

@@ -894,11 +894,11 @@ def main():
 
     try:
         AlertaShell().run()
+    except (SystemExit, KeyboardInterrupt):
+        LOG.warning("Exiting alerta client.")
+        sys.exit(0)
     except Exception as e:
         LOG.error(e, exc_info=1)
-        sys.exit(1)
-    except KeyboardInterrupt as e:
-        LOG.warning("Exiting alerta client.")
         sys.exit(1)
 
 if __name__ == "__main__":
