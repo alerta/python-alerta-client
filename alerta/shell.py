@@ -692,7 +692,7 @@ class AlertaShell(object):
         parser_query = subparsers.add_parser(
             'query',
             help='List alerts based on query filter',
-            usage='alerta [OPTIONS] query [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] query [--details] [--id ID] [--filters FILTERS]'
         )
         parser_query.add_argument(
             '--details',
@@ -736,7 +736,7 @@ class AlertaShell(object):
         )
         parser_watch.add_argument(
             '--filters',
-            nargs='filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_watch.set_defaults(func=cli.watch)
@@ -764,7 +764,7 @@ class AlertaShell(object):
         )
         parser_raw.add_argument(
             '--filters',
-            nargs='filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_raw.set_defaults(func=cli.raw)
@@ -784,8 +784,8 @@ class AlertaShell(object):
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_history.add_argument(
-            'filters',
-            nargs='filters',
+            '--filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_history.set_defaults(func=cli.history)
@@ -815,7 +815,7 @@ class AlertaShell(object):
         )
         parser_tag.add_argument(
             '--filters',
-            nargs='filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_tag.set_defaults(func=cli.tag)
@@ -845,7 +845,7 @@ class AlertaShell(object):
         )
         parser_untag.add_argument(
             '--filters',
-            nargs='filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_untag.set_defaults(func=cli.untag)
@@ -866,7 +866,7 @@ class AlertaShell(object):
         )
         parser_ack.add_argument(
             '--filters',
-            nargs='filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_ack.set_defaults(func=cli.ack)
@@ -887,7 +887,7 @@ class AlertaShell(object):
         )
         parser_unack.add_argument(
             '--filters',
-            nargs='filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_unack.set_defaults(func=cli.unack)
@@ -908,7 +908,7 @@ class AlertaShell(object):
         )
         parser_close.add_argument(
             '--filters',
-            nargs='filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_close.set_defaults(func=cli.close)
@@ -929,7 +929,7 @@ class AlertaShell(object):
         )
         parser_delete.add_argument(
             '--filters',
-            nargs='filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_delete.set_defaults(func=cli.delete)
