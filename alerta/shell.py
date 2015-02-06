@@ -139,7 +139,7 @@ class AlertCommand(object):
 
     def query(self, args, from_date=None):
 
-        response = self._alerts(args.filter, from_date)
+        response = self._alerts(args.filters, from_date)
         alerts = response['alerts']
 
         if args.output == "json":
@@ -214,7 +214,7 @@ class AlertCommand(object):
 
     def top(self, args):
 
-        screen = Screen(args)
+        screen = Screen(url=args.endpoint, key=args.key)
 
         try:
             screen.run()
@@ -230,7 +230,7 @@ class AlertCommand(object):
 
     def raw(self, args):
 
-        response = self._alerts(args.filter)
+        response = self._alerts(args.filters)
         alerts = response['alerts']
 
         if args.output == "json":
@@ -245,7 +245,7 @@ class AlertCommand(object):
 
     def history(self, args):
 
-        response = self._history(args.filter)
+        response = self._history(args.filters)
         history = response['history']
 
         if args.output == "json":
@@ -294,7 +294,7 @@ class AlertCommand(object):
     def tag(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._alerts(args.filter)
+        response = self._alerts(args.filters)
         alerts = response['alerts']
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
@@ -312,7 +312,7 @@ class AlertCommand(object):
     def untag(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._alerts(args.filter)
+        response = self._alerts(args.filters)
         alerts = response['alerts']
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
@@ -330,12 +330,12 @@ class AlertCommand(object):
     def ack(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._counts(args.filter)
+        response = self._counts(args.filters)
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
 
         sys.stdout.write("Acking alerts: ")
-        response = self._alerts(args.filter)
+        response = self._alerts(args.filters)
         alerts = response['alerts']
         for i, alert in enumerate(alerts):
             pct = int(100.0 * i / total)
@@ -349,12 +349,12 @@ class AlertCommand(object):
     def unack(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._counts(args.filter)
+        response = self._counts(args.filters)
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
 
         sys.stdout.write("un-Acking alerts: ")
-        response = self._alerts(args.filter)
+        response = self._alerts(args.filters)
         alerts = response['alerts']
         for i, alert in enumerate(alerts):
             pct = int(100.0 * i / total)
@@ -368,12 +368,12 @@ class AlertCommand(object):
     def close(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._counts(args.filter)
+        response = self._counts(args.filters)
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
 
         sys.stdout.write("Closing alerts: ")
-        response = self._alerts(args.filter)
+        response = self._alerts(args.filters)
         alerts = response['alerts']
         for i, alert in enumerate(alerts):
             pct = int(100.0 * i / total)
@@ -387,12 +387,12 @@ class AlertCommand(object):
     def delete(self, args):
 
         sys.stdout.write("Counting alerts: ")
-        response = self._counts(args.filter)
+        response = self._counts(args.filters)
         total = response['total']
         sys.stdout.write("%s, done.\n" % total)
 
         sys.stdout.write("Deleting alerts: ")
-        response = self._alerts(args.filter)
+        response = self._alerts(args.filters)
         alerts = response['alerts']
         for i, alert in enumerate(alerts):
             pct = int(100.0 * i / total)
@@ -403,12 +403,18 @@ class AlertCommand(object):
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
-    def _alerts(self, filter, from_date=None):
+    def _alerts(self, filters, from_date=None, to_date=None):
 
-        query = dict([x.split('=', 1) for x in filter if '=' in x])
+        if filters:
+            query = dict([x.split('=', 1) for x in filters.split(',') if '=' in x])
+        else:
+            query = {}
 
         if from_date:
             query['from-date'] = from_date
+
+        if to_date:
+            query['to-date'] = to_date
 
         if 'sort-by' not in query:
             query['sort-by'] = 'lastReceiveTime'
@@ -425,12 +431,18 @@ class AlertCommand(object):
 
         return response
 
-    def _counts(self, filter, from_date=None):
+    def _counts(self, filters, from_date=None, to_date=None):
 
-        query = dict([x.split('=', 1) for x in filter if '=' in x])
+        if filters:
+            query = dict([x.split('=', 1) for x in filters.split(',') if '=' in x])
+        else:
+            query = {}
 
         if from_date:
             query['from-date'] = from_date
+
+        if to_date:
+            query['to-date'] = to_date
 
         if 'sort-by' not in query:
             query['sort-by'] = 'lastReceiveTime'
@@ -447,12 +459,18 @@ class AlertCommand(object):
 
         return response
 
-    def _history(self, filter, from_date=None):
+    def _history(self, filters, from_date=None, to_date=None):
 
-        query = dict([x.split('=', 1) for x in filter if '=' in x])
+        if filters:
+            query = dict([x.split('=', 1) for x in filters.split(',') if '=' in x])
+        else:
+            query = {}
 
         if from_date:
             query['from-date'] = from_date
+
+        if to_date:
+            query['to-date'] = to_date
 
         try:
             response = self.api.get_history(**query)
@@ -572,12 +590,12 @@ class AlertaShell(object):
         parser_send = subparsers.add_parser(
             'send',
             help='Send alert to server',
-            usage='alerta [OPTIONS] send [-h] [-r RESOURCE] [-e EVENT] [-E ENVIRONMENT]\n'
-                '                             [-s SEVERITY] [-C CORRELATE] [--status STATUS]\n'
-                '                             [-S SERVICE] [-g GROUP] [-v VALUE] [-t TEXT]\n'
-                '                             [-T TAG] [-A ATTRIBUTES] [-O ORIGIN]\n'
-                '                             [--type EVENT_TYPE] [--timeout TIMEOUT]\n'
-                '                             [--raw-data RAW_DATA]\n'
+            usage='alerta [OPTIONS] send [-r RESOURCE] [-e EVENT] [-E ENVIRONMENT]\n'
+                '                        [-s SEVERITY] [-C CORRELATE] [--status STATUS]\n'
+                '                        [-S SERVICE] [-g GROUP] [-v VALUE] [-t TEXT]\n'
+                '                        [-T TAG] [-A ATTRIBUTES] [-O ORIGIN]\n'
+                '                        [--type EVENT_TYPE] [--timeout TIMEOUT]\n'
+                '                        [--raw-data RAW_DATA]\n'
         )
         parser_send.add_argument(
             '-r',
@@ -674,7 +692,7 @@ class AlertaShell(object):
         parser_query = subparsers.add_parser(
             'query',
             help='List alerts based on query filter',
-            usage='alerta [OPTIONS] query [-h] [FILTERS]'
+            usage='alerta [OPTIONS] query [--id ID] [--filters FILTERS]'
         )
         parser_query.add_argument(
             '--details',
@@ -682,8 +700,17 @@ class AlertaShell(object):
             help='Show alert details'
         )
         parser_query.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_query.add_argument(
+            '--filters',
+            dest='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_query.set_defaults(func=cli.query)
@@ -691,7 +718,7 @@ class AlertaShell(object):
         parser_watch = subparsers.add_parser(
             'watch',
             help='Watch alerts based on query filter',
-            usage='alerta [OPTIONS] watch [-h] [FILTERS]'
+            usage='alerta [OPTIONS] watch [--id ID] [--filters FILTERS]'
         )
         parser_watch.add_argument(
             '--details',
@@ -699,8 +726,17 @@ class AlertaShell(object):
             help='Show alert details'
         )
         parser_watch.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_watch.add_argument(
+            '--filters',
+            nargs='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_watch.set_defaults(func=cli.watch)
@@ -715,11 +751,20 @@ class AlertaShell(object):
         parser_raw = subparsers.add_parser(
             'raw',
             help='Show alert raw data',
-            usage='alerta [OPTIONS] raw [-h] [FILTERS]'
+            usage='alerta [OPTIONS] raw [--id ID] [--filters FILTERS]'
         )
         parser_raw.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_raw.add_argument(
+            '--filters',
+            nargs='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_raw.set_defaults(func=cli.raw)
@@ -727,11 +772,20 @@ class AlertaShell(object):
         parser_history = subparsers.add_parser(
             'history',
             help='Show alert history',
-            usage='alerta [OPTIONS] history [-h] [FILTERS]'
+            usage='alerta [OPTIONS] history [--id ID] [--filters FILTERS]'
         )
         parser_history.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_history.add_argument(
+            'filters',
+            nargs='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_history.set_defaults(func=cli.history)
@@ -739,7 +793,7 @@ class AlertaShell(object):
         parser_tag = subparsers.add_parser(
             'tag',
             help='Tag alerts',
-            usage='alerta [OPTIONS] tag [-h] [FILTERS]'
+            usage='alerta [OPTIONS] tag -T TAG [--id ID] [--filters FILTERS]'
         )
         parser_tag.add_argument(
             '-T',
@@ -751,8 +805,17 @@ class AlertaShell(object):
             help='List of tags eg. "London", "os:linux", "AWS/EC2".'
         )
         parser_tag.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_tag.add_argument(
+            '--filters',
+            nargs='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_tag.set_defaults(func=cli.tag)
@@ -760,7 +823,7 @@ class AlertaShell(object):
         parser_untag = subparsers.add_parser(
             'untag',
             help='Remove tags from alerts',
-            usage='alerta [OPTIONS] untag [-h] [FILTERS]'
+            usage='alerta [OPTIONS] untag -T TAG [--id ID] [--filters FILTERS]'
         )
         parser_untag.add_argument(
             '-T',
@@ -772,8 +835,17 @@ class AlertaShell(object):
             help='List of tags eg. "London", "os:linux", "AWS/EC2".'
         )
         parser_untag.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_untag.add_argument(
+            '--filters',
+            nargs='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_untag.set_defaults(func=cli.untag)
@@ -781,11 +853,20 @@ class AlertaShell(object):
         parser_ack = subparsers.add_parser(
             'ack',
             help='Acknowledge alerts',
-            usage='alerta [OPTIONS] ack [-h] [FILTERS]'
+            usage='alerta [OPTIONS] ack [--id ID] [--filters FILTERS]'
         )
         parser_ack.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_ack.add_argument(
+            '--filters',
+            nargs='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_ack.set_defaults(func=cli.ack)
@@ -793,11 +874,20 @@ class AlertaShell(object):
         parser_unack = subparsers.add_parser(
             'unack',
             help='Unacknowledge alerts',
-            usage='alerta [OPTIONS] unack [-h] [FILTERS]'
+            usage='alerta [OPTIONS] unack [--id ID] [--filters FILTERS]'
         )
         parser_unack.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_unack.add_argument(
+            '--filters',
+            nargs='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_unack.set_defaults(func=cli.unack)
@@ -805,11 +895,20 @@ class AlertaShell(object):
         parser_close = subparsers.add_parser(
             'close',
             help='Close alerts',
-            usage='alerta [OPTIONS] close [-h] [FILTERS]'
+            usage='alerta [OPTIONS] close [--id ID] [--filters FILTERS]'
         )
         parser_close.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_close.add_argument(
+            '--filters',
+            nargs='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_close.set_defaults(func=cli.close)
@@ -817,11 +916,20 @@ class AlertaShell(object):
         parser_delete = subparsers.add_parser(
             'delete',
             help='Delete alerts',
-            usage='alerta [OPTIONS] delete [-h] [FILTERS]'
+            usage='alerta [OPTIONS] delete [--id ID] [--filters FILTERS]'
         )
         parser_delete.add_argument(
-            'filter',
-            nargs='*',
+            '-i',
+            '--id',
+            metavar='ID',
+            action='append',
+            dest='id',
+            default=list(),
+            help='List of alert IDs (can use short 8-char id).'
+        )
+        parser_delete.add_argument(
+            '--filters',
+            nargs='filters',
             help='KEY=VALUE eg. id=5108bc20'
         )
         parser_delete.set_defaults(func=cli.delete)
@@ -829,7 +937,7 @@ class AlertaShell(object):
         parser_heartbeat = subparsers.add_parser(
             'heartbeat',
             help='Send heartbeat to server',
-            usage='alerta [OPTIONS] heartbeat [-h] [-T TAG] [-O ORIGIN] [--timeout TIMEOUT]'
+            usage='alerta [OPTIONS] heartbeat [-T TAG] [-O ORIGIN] [--timeout TIMEOUT]'
         )
         parser_heartbeat.add_argument(
             '-T',
