@@ -12,6 +12,8 @@ import json
 import requests
 import ConfigParser
 import logging
+import codecs
+import locale
 
 from alerta.api import ApiClient
 from alerta.alert import Alert, AlertDocument
@@ -999,6 +1001,8 @@ class AlertaShell(object):
 def main():
 
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
     try:
         AlertaShell().run()
