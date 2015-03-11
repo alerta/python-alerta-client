@@ -3,7 +3,7 @@ timezone = Europe/London
 colour = yes
 output = text
 
-[proifle production]
+[profile production]
 endpoint = https://api.alerta.io/api
 timezone = Australia/Sydney
 
