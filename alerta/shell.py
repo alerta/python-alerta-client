@@ -957,6 +957,8 @@ class AlertaShell(object):
 
         args = parser.parse_args(left)
 
+        if hasattr(args, 'id') and args.ids:
+            args.filters += ['id='+i for i in args.ids]
         args.output = 'json' if args.json else args.output
 
         if args.func == cli.help:
@@ -969,9 +971,6 @@ class AlertaShell(object):
             LOG.debug("Alerta cli version: %s", __version__)
 
         cli.set_api(url=args.endpoint, key=args.key)
-
-        if args.ids:
-            args.filters += ['id='+i for i in args.ids]
 
         args.func(args)
 
