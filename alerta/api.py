@@ -126,7 +126,6 @@ class ApiClient(object):
         query = query or tuple()
 
         url = self.endpoint + path + '?' + urllib.urlencode(query, doseq=True)
-        print url
         response = self.session.get(url, auth=ApiAuth(self.key))
 
         LOG.debug('Content type from response: %s', response.headers['content-type'])
