@@ -36,17 +36,17 @@ class ApiClient(object):
 
         return 'ApiClient(endpoint=%r, key=%r)' % (self.endpoint, self.key)
 
-    def get_alerts(self, **kwargs):
+    def get_alerts(self, query):
 
-        return self._get('/alerts', kwargs)
+        return self._get('/alerts', query)
 
-    def get_counts(self, **kwargs):
+    def get_counts(self, query):
 
-        return self._get('/alerts/count', kwargs)
+        return self._get('/alerts/count', query)
 
-    def get_history(self, **kwargs):
+    def get_history(self, query):
 
-        return self._get('/alerts/history', kwargs)
+        return self._get('/alerts/history', query)
 
     def send_alert(self, alert):
 
@@ -121,9 +121,12 @@ class ApiClient(object):
 
         return self._delete('/heartbeat/%s' % heartbeatid)
 
-    def _get(self, path, query=''):
+    def _get(self, path, query=None):
+
+        query = query or tuple()
 
         url = self.endpoint + path + '?' + urllib.urlencode(query, doseq=True)
+        print url
         response = self.session.get(url, auth=ApiAuth(self.key))
 
         LOG.debug('Content type from response: %s', response.headers['content-type'])

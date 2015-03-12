@@ -405,24 +405,30 @@ class AlertCommand(object):
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
-    def _alerts(self, filters, from_date=None, to_date=None):
+    def _build(self, filters, from_date=None, to_date=None):
 
         if filters:
-            query = dict([x.split('=', 1) for x in filters.split(',') if '=' in x])
+            query = [tuple(x.split('=', 1)) for x in filters if '=' in x]
         else:
-            query = {}
+            query = list()
 
         if from_date:
-            query['from-date'] = from_date
+            query.append(('from-date', from_date))
 
         if to_date:
-            query['to-date'] = to_date
+            query.append(('to-date', to_date))
 
         if 'sort-by' not in query:
-            query['sort-by'] = 'lastReceiveTime'
+            query.append(('sort-by', 'lastReceiveTime'))
+
+        return query
+
+    def _alerts(self, filters, from_date=None, to_date=None):
+
+        query = self._build(filters, from_date, to_date)
 
         try:
-            response = self.api.get_alerts(**query)
+            response = self.api.get_alerts(query)
         except Exception as e:
             LOG.error(e)
             sys.exit(1)
@@ -435,22 +441,10 @@ class AlertCommand(object):
 
     def _counts(self, filters, from_date=None, to_date=None):
 
-        if filters:
-            query = dict([x.split('=', 1) for x in filters.split(',') if '=' in x])
-        else:
-            query = {}
-
-        if from_date:
-            query['from-date'] = from_date
-
-        if to_date:
-            query['to-date'] = to_date
-
-        if 'sort-by' not in query:
-            query['sort-by'] = 'lastReceiveTime'
+        query = self._build(filters, from_date, to_date)
 
         try:
-            response = self.api.get_counts(**query)
+            response = self.api.get_counts(query)
         except Exception as e:
             LOG.error(e)
             sys.exit(1)
@@ -463,19 +457,10 @@ class AlertCommand(object):
 
     def _history(self, filters, from_date=None, to_date=None):
 
-        if filters:
-            query = dict([x.split('=', 1) for x in filters.split(',') if '=' in x])
-        else:
-            query = {}
-
-        if from_date:
-            query['from-date'] = from_date
-
-        if to_date:
-            query['to-date'] = to_date
+        query = self._build(filters, from_date, to_date)
 
         try:
-            response = self.api.get_history(**query)
+            response = self.api.get_history(query)
         except Exception as e:
             LOG.error(e)
             sys.exit(1)
@@ -703,17 +688,16 @@ class AlertaShell(object):
         )
         parser_query.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
-            default=list(),
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_query.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            default=list(),
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_query.set_defaults(func=cli.query)
 
@@ -729,17 +713,16 @@ class AlertaShell(object):
         )
         parser_watch.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
-            default=list(),
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_watch.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            default=list(),
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_watch.set_defaults(func=cli.watch)
 
@@ -757,17 +740,16 @@ class AlertaShell(object):
         )
         parser_raw.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
-            default=list(),
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_raw.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            default=list(),
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_raw.set_defaults(func=cli.raw)
 
@@ -778,17 +760,16 @@ class AlertaShell(object):
         )
         parser_history.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
-            default=list(),
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_history.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            default=list(),
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_history.set_defaults(func=cli.history)
 
@@ -808,17 +789,16 @@ class AlertaShell(object):
         )
         parser_tag.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
-            default=list(),
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_tag.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            default=list(),
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_tag.set_defaults(func=cli.tag)
 
@@ -838,17 +818,16 @@ class AlertaShell(object):
         )
         parser_untag.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             default=list(),
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_untag.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_untag.set_defaults(func=cli.untag)
 
@@ -859,17 +838,16 @@ class AlertaShell(object):
         )
         parser_ack.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
-            default=list(),
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_ack.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            default=list(),
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_ack.set_defaults(func=cli.ack)
 
@@ -880,17 +858,16 @@ class AlertaShell(object):
         )
         parser_unack.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
-            default=list(),
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_unack.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            default=list(),
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_unack.set_defaults(func=cli.unack)
 
@@ -901,17 +878,16 @@ class AlertaShell(object):
         )
         parser_close.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             default=list(),
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_close.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_close.set_defaults(func=cli.close)
 
@@ -922,17 +898,16 @@ class AlertaShell(object):
         )
         parser_delete.add_argument(
             '-i',
-            '--id',
-            metavar='ID',
-            action='append',
-            dest='id',
+            '--ids',
+            metavar='IDs',
+            nargs='+',
             default=list(),
             help='List of alert IDs (can use short 8-char id).'
         )
         parser_delete.add_argument(
             '--filters',
-            dest='filters',
-            help='KEY=VALUE eg. id=5108bc20'
+            nargs='+',
+            help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_delete.set_defaults(func=cli.delete)
 
@@ -994,6 +969,9 @@ class AlertaShell(object):
             LOG.setLevel(logging.ERROR)
 
         cli.set_api(url=args.endpoint, key=args.key)
+
+        if args.ids:
+            args.filters += ['id='+i for i in args.ids]
 
         args.func(args)
 
