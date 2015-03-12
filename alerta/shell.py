@@ -485,6 +485,9 @@ class AlertaShell(object):
 
     def run(self):
 
+        root.setLevel(logging.ERROR)
+        LOG.setLevel(logging.ERROR)
+
         config_file = os.environ.get('ALERTA_CONF_FILE') or OPTIONS['config_file']
 
         config = ConfigParser.RawConfigParser(defaults=OPTIONS)
@@ -964,9 +967,6 @@ class AlertaShell(object):
             root.setLevel(logging.DEBUG)
             LOG.setLevel(logging.DEBUG)
             LOG.debug("Alerta cli version: %s", __version__)
-        else:
-            root.setLevel(logging.ERROR)
-            LOG.setLevel(logging.ERROR)
 
         cli.set_api(url=args.endpoint, key=args.key)
 
