@@ -679,7 +679,7 @@ class AlertaShell(object):
         parser_query = subparsers.add_parser(
             'query',
             help='List alerts based on query filter',
-            usage='alerta [OPTIONS] query [--details] [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] query [--details] [--ids IDs] [--filters FILTERS]'
         )
         parser_query.add_argument(
             '--details',
@@ -704,7 +704,7 @@ class AlertaShell(object):
         parser_watch = subparsers.add_parser(
             'watch',
             help='Watch alerts based on query filter',
-            usage='alerta [OPTIONS] watch [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] watch [--ids IDs] [--filters FILTERS]'
         )
         parser_watch.add_argument(
             '--details',
@@ -736,7 +736,7 @@ class AlertaShell(object):
         parser_raw = subparsers.add_parser(
             'raw',
             help='Show alert raw data',
-            usage='alerta [OPTIONS] raw [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] raw [--ids IDs] [--filters FILTERS]'
         )
         parser_raw.add_argument(
             '-i',
@@ -756,7 +756,7 @@ class AlertaShell(object):
         parser_history = subparsers.add_parser(
             'history',
             help='Show alert history',
-            usage='alerta [OPTIONS] history [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] history [--ids IDs] [--filters FILTERS]'
         )
         parser_history.add_argument(
             '-i',
@@ -776,7 +776,7 @@ class AlertaShell(object):
         parser_tag = subparsers.add_parser(
             'tag',
             help='Tag alerts',
-            usage='alerta [OPTIONS] tag -T TAG [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] tag -T TAG [--ids IDs] [--filters FILTERS]'
         )
         parser_tag.add_argument(
             '-T',
@@ -805,7 +805,7 @@ class AlertaShell(object):
         parser_untag = subparsers.add_parser(
             'untag',
             help='Remove tags from alerts',
-            usage='alerta [OPTIONS] untag -T TAG [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] untag -T TAG [--ids IDs] [--filters FILTERS]'
         )
         parser_untag.add_argument(
             '-T',
@@ -834,7 +834,7 @@ class AlertaShell(object):
         parser_ack = subparsers.add_parser(
             'ack',
             help='Acknowledge alerts',
-            usage='alerta [OPTIONS] ack [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] ack [--ids IDs] [--filters FILTERS]'
         )
         parser_ack.add_argument(
             '-i',
@@ -854,7 +854,7 @@ class AlertaShell(object):
         parser_unack = subparsers.add_parser(
             'unack',
             help='Unacknowledge alerts',
-            usage='alerta [OPTIONS] unack [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] unack [--ids IDs] [--filters FILTERS]'
         )
         parser_unack.add_argument(
             '-i',
@@ -874,7 +874,7 @@ class AlertaShell(object):
         parser_close = subparsers.add_parser(
             'close',
             help='Close alerts',
-            usage='alerta [OPTIONS] close [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] close [--ids IDs] [--filters FILTERS]'
         )
         parser_close.add_argument(
             '-i',
@@ -894,7 +894,7 @@ class AlertaShell(object):
         parser_delete = subparsers.add_parser(
             'delete',
             help='Delete alerts',
-            usage='alerta [OPTIONS] delete [--id ID] [--filters FILTERS]'
+            usage='alerta [OPTIONS] delete [--ids IDs] [--filters FILTERS]'
         )
         parser_delete.add_argument(
             '-i',
