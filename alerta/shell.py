@@ -959,7 +959,7 @@ class AlertaShell(object):
 
         args = parser.parse_args(left)
 
-        if hasattr(args, 'id') and args.ids:
+        if hasattr(args, 'ids') and args.ids:
             args.filters += ['id='+i for i in args.ids]
         args.output = 'json' if args.json else args.output
 
