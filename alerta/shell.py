@@ -832,6 +832,7 @@ class AlertaShell(object):
         parser_untag.add_argument(
             '--filters',
             nargs='+',
+            default=list(),
             help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_untag.set_defaults(func=cli.untag)
@@ -892,6 +893,7 @@ class AlertaShell(object):
         parser_close.add_argument(
             '--filters',
             nargs='+',
+            default=list(),
             help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_close.set_defaults(func=cli.close)
@@ -912,6 +914,7 @@ class AlertaShell(object):
         parser_delete.add_argument(
             '--filters',
             nargs='+',
+            default=list(),
             help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_delete.set_defaults(func=cli.delete)
