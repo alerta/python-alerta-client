@@ -307,7 +307,12 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            self.api.tag_alert(alert['id'], args.tags)
+            try:
+                self.api.tag_alert(alert['id'], args.tags)
+            except Exception as e:
+                print
+                LOG.error(e)
+                sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -325,7 +330,12 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            self.api.untag_alert(alert['id'], args.tags)
+            try:
+                self.api.untag_alert(alert['id'], args.tags)
+            except Exception as e:
+                print
+                LOG.error(e)
+                sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -344,7 +354,12 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            self.api.ack_alert(alert['id'])
+            try:
+                self.api.ack_alert(alert['id'])
+            except Exception as e:
+                print
+                LOG.error(e)
+                sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -363,7 +378,12 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            self.api.unack_alert(alert['id'])
+            try:
+                self.api.unack_alert(alert['id'])
+            except Exception as e:
+                print
+                LOG.error(e)
+                sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -382,7 +402,12 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            self.api.close_alert(alert['id'])
+            try:
+                self.api.close_alert(alert['id'])
+            except Exception as e:
+                print
+                LOG.error(e)
+                sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -401,7 +426,12 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            self.api.delete_alert(alert['id'])
+            try:
+                self.api.delete_alert(alert['id'])
+            except Exception as e:
+                print
+                LOG.error(e)
+                sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
