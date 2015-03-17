@@ -787,6 +787,7 @@ class AlertaShell(object):
             metavar='TAG',
             action='append',
             dest='tags',
+            required=True,
             default=list(),
             help='List of tags eg. "London", "os:linux", "AWS/EC2".'
         )
@@ -816,6 +817,7 @@ class AlertaShell(object):
             metavar='TAG',
             action='append',
             dest='tags',
+            required=True,
             default=list(),
             help='List of tags eg. "London", "os:linux", "AWS/EC2".'
         )
