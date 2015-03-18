@@ -250,8 +250,6 @@ class AlertCommand(object):
             print json.dumps(history, indent=4)
             sys.exit(0)
 
-        # tz = pytz.timezone(args.timezone)
-
         for hist in history:
 
             line_color = ''
