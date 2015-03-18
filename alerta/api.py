@@ -121,6 +121,10 @@ class ApiClient(object):
 
         return self._delete('/heartbeat/%s' % heartbeatid)
 
+    def get_status(self):
+
+        return self._get('/management/status')
+
     def _get(self, path, query=None):
 
         query = query or tuple()

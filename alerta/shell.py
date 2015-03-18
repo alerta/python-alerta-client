@@ -7,13 +7,14 @@ import os
 import sys
 import argparse
 import time
-import datetime
 import json
 import requests
 import ConfigParser
 import logging
 import codecs
 import locale
+
+from datetime import datetime, timedelta
 
 from alerta.api import ApiClient
 from alerta.alert import Alert, AlertDocument
@@ -255,7 +256,7 @@ class AlertCommand(object):
             line_color = ''
             end_color = _ENDC
 
-            update_time = datetime.datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+            update_time = datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
 
             if 'severity' in hist:
                 if args.color:
@@ -429,7 +430,24 @@ class AlertCommand(object):
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
-    def _build(self, filters, from_date=None, to_date=None):
+    def status(self, args):
+
+        response = self._status()
+        metrics = response['metrics']
+
+        for metric in [m for m in metrics if m['type'] in ['gauge', 'counter', 'timer']]:
+            if metric['type'] == 'gauge':
+                print '%-28s %-8s %-26s %-10s' % (metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value'])
+            else:
+                value = metric.get('count', 0)
+                avg = int(metric['totalTime']) * 1.0 / int(metric['count'])
+                print '%-28s %-8s %-26s %-10s %-3.2f ms' % (metric['title'], metric['type'], metric['group'] + '.' + metric['name'], value, avg)
+
+        for metric in [m for m in metrics if m['type'] == 'text']:
+            print '%-28s %-8s %-26s %-10s' % (metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value'])
+
+    @staticmethod
+    def _build(filters, from_date=None, to_date=None):
 
         if filters:
             query = [tuple(x.split('=', 1)) for x in filters if '=' in x]
@@ -495,12 +513,40 @@ class AlertCommand(object):
 
         return response
 
+    def _status(self):
+
+        try:
+            response = self.api.get_status()
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        return response
+
     def help(self, args):
 
         pass
 
+    def uptime(self, args):
+
+        response = self._status()
+
+        now = datetime.fromtimestamp(int(response['time']) / 1000.0)
+        d = datetime(1, 1, 1) + timedelta(seconds=int(response['uptime']) / 1000.0)
+
+        print '%s up %s days %02d:%02d' % (
+            now.strftime('%H:%M'),
+            d.day - 1, d.hour, d.minute
+        )
+
     def version(self, args):
 
+        response = self._status()
+
+        print '%s %s' % (
+            response['application'],
+            response['version'],
+        )
         print 'alerta client %s' % __version__
         print 'requests %s' % requests.__version__
 
@@ -971,12 +1017,19 @@ class AlertaShell(object):
         )
         parser_heartbeat.set_defaults(func=cli.heartbeat)
 
-        parser_help = subparsers.add_parser(
-            'help',
-            help='Show help',
-            add_help=False
+        parser_status = subparsers.add_parser(
+            'status',
+            help='Show status and metrics',
+            usage='alerta [OPTIONS] status [-h]'
         )
-        parser_help.set_defaults(func=cli.help)
+        parser_status.set_defaults(func=cli.status)
+
+        parser_uptime = subparsers.add_parser(
+            'uptime',
+            help='Show server uptime',
+            usage='alerta [OPTIONS] uptime [-h]'
+        )
+        parser_uptime.set_defaults(func=cli.uptime)
 
         parser_version = subparsers.add_parser(
             'version',
@@ -984,6 +1037,13 @@ class AlertaShell(object):
             add_help=False
         )
         parser_version.set_defaults(func=cli.version)
+
+        parser_help = subparsers.add_parser(
+            'help',
+            help='Show this help',
+            add_help=False
+        )
+        parser_help.set_defaults(func=cli.help)
 
         args = parser.parse_args(left)
 
