@@ -435,23 +435,19 @@ class AlertCommand(object):
         response = self._status()
         metrics = response['metrics']
 
-        now = datetime.fromtimestamp(int(response['time']) / 1000.0)
-        d = datetime(1, 1, 1) + timedelta(seconds=int(response['uptime']) / 1000.0)
-
-        print '%s v%s %s up %s days %-2d:%2d' % (
-            response['application'],
-            response['version'],
-            now.strftime('%H:%M'),
-            d.day - 1, d.hour, d.minute
-        )
-
-        for metric in metrics:
-            if 'count' in metric:
-                print '%-28s %-8s %-10s %-10s %-3.2f ms' % (metric['title'], metric['type'], metric['name'], metric['count'], (int(metric['totalTime']) * 1.0 / int(metric['count'])))
+        for metric in [m for m in metrics if m['type'] in ['gauge', 'counter', 'timer']]:
+            if metric['type'] == 'gauge':
+                print '%-28s %-8s %-26s %-10s' % (metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value'])
             else:
-                print '%-28s %-8s %-10s %-10s' % (metric['title'], metric['type'], metric['name'], metric['value'])
+                value = metric.get('count', 0)
+                avg = int(metric['totalTime']) * 1.0 / int(metric['count'])
+                print '%-28s %-8s %-26s %-10s %-3.2f ms' % (metric['title'], metric['type'], metric['group'] + '.' + metric['name'], value, avg)
 
-    def _build(self, filters, from_date=None, to_date=None):
+        for metric in [m for m in metrics if m['type'] == 'text']:
+            print '%-28s %-8s %-26s %-10s' % (metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value'])
+
+    @staticmethod
+    def _build(filters, from_date=None, to_date=None):
 
         if filters:
             query = [tuple(x.split('=', 1)) for x in filters if '=' in x]
@@ -531,8 +527,26 @@ class AlertCommand(object):
 
         pass
 
+    def uptime(self, args):
+
+        response = self._status()
+
+        now = datetime.fromtimestamp(int(response['time']) / 1000.0)
+        d = datetime(1, 1, 1) + timedelta(seconds=int(response['uptime']) / 1000.0)
+
+        print '%s up %s days %02d:%02d' % (
+            now.strftime('%H:%M'),
+            d.day - 1, d.hour, d.minute
+        )
+
     def version(self, args):
 
+        response = self._status()
+
+        print '%s %s' % (
+            response['application'],
+            response['version'],
+        )
         print 'alerta client %s' % __version__
         print 'requests %s' % requests.__version__
 
@@ -1010,12 +1024,12 @@ class AlertaShell(object):
         )
         parser_status.set_defaults(func=cli.status)
 
-        parser_help = subparsers.add_parser(
-            'help',
-            help='Show help',
-            add_help=False
+        parser_uptime = subparsers.add_parser(
+            'uptime',
+            help='Show server uptime',
+            usage='alerta [OPTIONS] uptime [-h]'
         )
-        parser_help.set_defaults(func=cli.help)
+        parser_uptime.set_defaults(func=cli.uptime)
 
         parser_version = subparsers.add_parser(
             'version',
@@ -1023,6 +1037,13 @@ class AlertaShell(object):
             add_help=False
         )
         parser_version.set_defaults(func=cli.version)
+
+        parser_help = subparsers.add_parser(
+            'help',
+            help='Show this help',
+            add_help=False
+        )
+        parser_help.set_defaults(func=cli.help)
 
         args = parser.parse_args(left)
 
