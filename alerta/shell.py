@@ -63,13 +63,9 @@ _ENDC = '\033[0m'
 
 class AlertCommand(object):
 
-    def __init__(self):
+    def __init__(self, endpoint, key):
 
-        self.api = None
-
-    def set_api(self, url, key):
-
-        self.api = ApiClient(endpoint=url, key=key)
+        self.api = ApiClient(endpoint=endpoint, key=key)
 
     def send(self, args):
 
@@ -216,7 +212,7 @@ class AlertCommand(object):
 
     def top(self, args):
 
-        screen = Screen(url=args.endpoint, key=args.key)
+        screen = Screen(endpoint=args.endpoint, key=args.key)
 
         try:
             screen.run()
@@ -550,8 +546,6 @@ class AlertaShell(object):
         OPTIONS['color'] = os.environ.get('CLICOLOR') or OPTIONS['color']
         OPTIONS['debug'] = os.environ.get('DEBUG') or OPTIONS['debug']
 
-        cli = AlertCommand()
-
         parser = argparse.ArgumentParser(
             prog='alerta',
             usage='alerta [OPTIONS] COMMAND [FILTERS]',
@@ -602,6 +596,9 @@ class AlertaShell(object):
             help='Print debug output'
         )
         parser.set_defaults(**OPTIONS)
+
+        args, left = parser.parse_known_args()
+        cli = AlertCommand(endpoint=args.endpoint, key=args.key)
 
         subparsers = parser.add_subparsers(
             title='Commands',
@@ -992,10 +989,6 @@ class AlertaShell(object):
 
         args = parser.parse_args(left)
 
-        if hasattr(args, 'ids') and args.ids:
-            args.filters += ['id='+i for i in args.ids]
-        args.output = 'json' if args.json else args.output
-
         if args.func == cli.help:
             parser.print_help()
             sys.exit(0)
@@ -1005,7 +998,9 @@ class AlertaShell(object):
             LOG.setLevel(logging.DEBUG)
             LOG.debug("Alerta cli version: %s", __version__)
 
-        cli.set_api(url=args.endpoint, key=args.key)
+        if hasattr(args, 'ids') and args.ids:
+            args.filters += ['id='+i for i in args.ids]
+        args.output = 'json' if args.json else args.output
 
         args.func(args)
 

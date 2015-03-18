@@ -171,9 +171,10 @@ class Screen(object):
     ALIGN_RIGHT = 'R'
     ALIGN_CENTRE = 'C'
 
-    def __init__(self, args):
+    def __init__(self, endpoint, key):
 
-        self.endpoint = args.endpoint
+        self.endpoint = endpoint
+        self.key = key
 
         self.screen = self._get_screen()
         self.min_y = 0
