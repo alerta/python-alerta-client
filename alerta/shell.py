@@ -7,13 +7,14 @@ import os
 import sys
 import argparse
 import time
-import datetime
 import json
 import requests
 import ConfigParser
 import logging
 import codecs
 import locale
+
+from datetime import datetime, timedelta
 
 from alerta.api import ApiClient
 from alerta.alert import Alert, AlertDocument
@@ -255,7 +256,7 @@ class AlertCommand(object):
             line_color = ''
             end_color = _ENDC
 
-            update_time = datetime.datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
+            update_time = datetime.strptime(hist.get('updateTime', None), '%Y-%m-%dT%H:%M:%S.%fZ')
 
             if 'severity' in hist:
                 if args.color:
@@ -429,6 +430,27 @@ class AlertCommand(object):
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
+    def status(self, args):
+
+        response = self._status()
+        metrics = response['metrics']
+
+        now = datetime.fromtimestamp(int(response['time']) / 1000.0)
+        d = datetime(1, 1, 1) + timedelta(seconds=int(response['uptime']) / 1000.0)
+
+        print '%s v%s %s up %s days %-2d:%2d' % (
+            response['application'],
+            response['version'],
+            now.strftime('%H:%M'),
+            d.day - 1, d.hour, d.minute
+        )
+
+        for metric in metrics:
+            if 'count' in metric:
+                print '%-28s %-8s %-10s %-10s %-3.2f ms' % (metric['title'], metric['type'], metric['name'], metric['count'], (int(metric['totalTime']) * 1.0 / int(metric['count'])))
+            else:
+                print '%-28s %-8s %-10s %-10s' % (metric['title'], metric['type'], metric['name'], metric['value'])
+
     def _build(self, filters, from_date=None, to_date=None):
 
         if filters:
@@ -491,6 +513,16 @@ class AlertCommand(object):
 
         if response['status'] == "error":
             LOG.error(response['message'])
+            sys.exit(1)
+
+        return response
+
+    def _status(self):
+
+        try:
+            response = self.api.get_status()
+        except Exception as e:
+            LOG.error(e)
             sys.exit(1)
 
         return response
@@ -970,6 +1002,13 @@ class AlertaShell(object):
             help='Timeout in seconds before a heartbeat will be considered stale'
         )
         parser_heartbeat.set_defaults(func=cli.heartbeat)
+
+        parser_status = subparsers.add_parser(
+            'status',
+            help='Show status and metrics',
+            usage='alerta [OPTIONS] status [-h]'
+        )
+        parser_status.set_defaults(func=cli.status)
 
         parser_help = subparsers.add_parser(
             'help',
