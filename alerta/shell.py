@@ -646,6 +646,7 @@ class AlertaShell(object):
 
         subparsers = parser.add_subparsers(
             title='Commands',
+            metavar='COMMAND'
         )
 
         parser_send = subparsers.add_parser(
