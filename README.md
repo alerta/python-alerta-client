@@ -1,8 +1,9 @@
 Alerta Command-Line Tool
 ========================
 
-Unified command-line tool and python API for [alerta](https://github.com/guardian/alerta).
+[![Build Status](https://travis-ci.org/guardian/alerta.png)](https://travis-ci.org/guardian/alerta)
 
+Unified command-line tool and python API for [alerta](https://github.com/guardian/alerta).
 
 Installation
 ------------
