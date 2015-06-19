@@ -64,7 +64,11 @@ _ENDC = '\033[0m'
 
 class AlertCommand(object):
 
-    def __init__(self, endpoint, key):
+    def __init__(self):
+
+        self.api = None
+
+    def set(self, endpoint, key):
 
         self.api = ApiClient(endpoint=endpoint, key=key)
 
@@ -641,8 +645,7 @@ class AlertaShell(object):
         )
         parser.set_defaults(**OPTIONS)
 
-        args, left = parser.parse_known_args()
-        cli = AlertCommand(endpoint=args.endpoint, key=args.key)
+        cli = AlertCommand()
 
         subparsers = parser.add_subparsers(
             title='Commands',
@@ -1046,7 +1049,7 @@ class AlertaShell(object):
         )
         parser_help.set_defaults(func=cli.help)
 
-        args = parser.parse_args(left)
+        args = parser.parse_args()
 
         if args.func == cli.help:
             parser.print_help()
@@ -1060,6 +1063,8 @@ class AlertaShell(object):
         if hasattr(args, 'ids') and args.ids:
             args.filters += ['id='+i for i in args.ids]
         args.output = 'json' if args.json else args.output
+
+        cli.set(endpoint=args.endpoint, key=args.key)
 
         args.func(args)
 
