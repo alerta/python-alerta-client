@@ -66,7 +66,7 @@ class AlertCommand(object):
 
     def __init__(self):
 
-        self.api = None
+        self.api = ApiClient()
 
     def set(self, endpoint, key):
 
