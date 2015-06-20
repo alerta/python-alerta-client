@@ -21,7 +21,8 @@ from alerta.alert import Alert, AlertDocument
 from alerta.heartbeat import Heartbeat
 from alerta.top import Screen
 
-from .version import __version__
+import pkg_resources  # part of setuptools
+__version__ = pkg_resources.require("alerta")[0].version
 
 prog = os.path.basename(sys.argv[0])
 
