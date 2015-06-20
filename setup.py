@@ -2,8 +2,8 @@
 
 import setuptools
 
-with open('VERSION') as f:
-    version = f.read().strip()
+with open('alerta/version.py') as f:
+    exec(f.read())
 
 with open('README.rst') as f:
     readme = f.read()
@@ -11,7 +11,7 @@ with open('README.rst') as f:
 setuptools.setup(
     name="alerta",
     namespace_packages=['alerta'],
-    version=version,
+    version=__version__,
     description="Alerta unified command-line tool",
     long_description=readme,
     license="MIT",
