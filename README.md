@@ -3,7 +3,7 @@ Alerta Command-Line Tool
 
 [![Build Status](https://travis-ci.org/guardian/alerta.png)](https://travis-ci.org/guardian/alerta)
 
-Unified command-line tool and python API for [alerta](https://github.com/guardian/alerta).
+Unified command-line tool and python SDK for [alerta](https://github.com/guardian/alerta) monitoring system.
 
 Installation
 ------------
@@ -14,45 +14,104 @@ Installation
 Configuration
 -------------
 
-ALERTA_CONF_FILE=
-ALERTA_DEFAULT_URL=
-ALERTA_DEFAULT_PROFILE=production
-ALERTA_DEFAULT_OUTPUT=text
+Options can be set in a configuration file, as environment variables or on the command line. Profiles can be used to easily switch between different configuration settings.
 
-0. set defaults
-1. read in env vars
-2. use CONF_FILE env var to read in config file
-3. use DEF_PROFILE env var to get settings
-4. override defaults with DEFAULTs if no profile
-5. override settings with command-line options
+| Option	| Config File	| Environment Variable	| Optional Argument	| Default |
+| file	| n/a	ALERTA_CONF_FILE	| n/a	| ~/.alerta.conf |
+| profile	| profile	| ALERTA_DEFAULT_PROFILE	| --profile PROFILE	| None |
+| endpoint	| endpoint	| ALERTA_ENDPOINT	| --endpoint-url URL	| http://localhost:8080 |
+| key	| key	| ALERTA_API_KEY	n/a	| None |
+| timezone	| timezone	| n/a	| n/a	| Europe/London |
+| output	| output	| n/a	| --output OUTPUT, --json	| text |
+| color	| color	| CLICOLOR	| --color, --no-color	| color on |
+| debug	| debug	| DEBUG	| --debug	| no debug |
 
-ENV VAR
-ALERTA_CONF_FILE
-ALERTA_DEFAULT_PROFILE
-ALERTA_DEFAULT_ENDPOINT
-CLICOLOR
+Example
+-------
 
-ConfigFile
-[profile development]
-debug = yes
-endpoint = http://sldfja
-output = json
-color = yes
-timezone = Australia/Sydney
+Configuration file ~/.alerta.conf:
 
-Options
---debug
---endpoint-url
---output
---json
---profile
---color
+    [DEFAULT]
+    timezone = Australia/Sydney
+    # output = json
+    profile = production
 
+    [profile production]
+    endpoint = https://api.alerta.io
+    key = demo-key
+
+    [profile development]
+    endpoint = http://localhost:8080
+    debug = yes
+
+Environment Variables
+---------------------
+
+Set environment variables:
+
+    $ export ALERTA_CONF_FILE=~/.alerta.conf
+    $ export ALERTA_DEFAULT_PROFILE=production
+
+Use production configuration settings by default:
+
+    $ alerta query
+    Switch to development configuration settings when required:
+
+    $ alerta --profile development query
+
+
+Usage
+-----
+
+    $ alerta -h
+    usage: alerta [OPTIONS] COMMAND [FILTERS]
+
+    Alerta client unified command-line tool
+
+    optional arguments:
+      -h, --help          show this help message and exit
+      --profile PROFILE   Profile to apply from /Users/nsatterl/.alerta.conf
+      --endpoint-url URL  API endpoint URL
+      --output OUTPUT     Output format of "text" or "json"
+      --json, -j          Output in JSON format. Shortcut for "--output json"
+      --color, --colour   Color-coded output based on severity
+      --debug             Print debug output
+
+    Commands:
+      COMMAND
+        send              Send alert to server
+        query             List alerts based on query filter
+        watch             Watch alerts based on query filter
+        top               Show top offenders and stats
+        raw               Show alert raw data
+        history           Show alert history
+        tag               Tag alerts
+        untag             Remove tags from alerts
+        ack               Acknowledge alerts
+        unack             Unacknowledge alerts
+        close             Close alerts
+        delete            Delete alerts
+        heartbeat         Send heartbeat to server
+        status            Show status and metrics
+        uptime            Show server uptime
+        version           Show alerta version info
+        help              Show this help
+
+    Filters:
+        Query parameters can be used to filter alerts by any valid alert attribute
+
+        resource=web01     Show alerts with resource equal to "web01"
+        resource!=web01    Show all alerts except those with resource of "web01"
+        event=~down        Show alerts that include "down" in event name
+        event!=~down       Show all alerts that don't have "down" in event name
+
+        Special query parameters include "limit", "sort-by", "from-date" and "q" (a
+        json-compliant mongo query).
 
 Python SDK
 ==========
 
-The python packages used by the client command-line tool can also be used as a Python SDK.
+The alerta client python package can also be used as a Python SDK.
 
 
 Example
@@ -85,5 +144,5 @@ Example
 License
 -------
 
-Copyright (c) 2014 Nick Satterly. Available under the MIT License.
+Copyright (c) 2015 Nick Satterly. Available under the MIT License.
 
