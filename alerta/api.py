@@ -1,9 +1,13 @@
 
 import os
 import json
-import urllib
 import requests
 import logging
+
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
 
 from requests.auth import AuthBase
 
@@ -129,7 +133,7 @@ class ApiClient(object):
 
         query = query or tuple()
 
-        url = self.endpoint + path + '?' + urllib.urlencode(query, doseq=True)
+        url = self.endpoint + path + '?' + urlencode(query, doseq=True)
         response = self.session.get(url, auth=ApiAuth(self.key))
 
         LOG.debug('Content type from response: %s', response.headers['content-type'])

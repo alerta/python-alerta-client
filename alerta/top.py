@@ -1,11 +1,15 @@
 
 import sys
 import time
-import urllib
 import requests
 import curses
 import threading
 import signal
+
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
 
 from datetime import datetime
 
@@ -122,7 +126,7 @@ class Alert(threading.Thread):
         if 'sort-by' not in query:
             query['sort-by'] = 'lastReceiveTime'
 
-        url = self.endpoint + '/api/alerts?' + urllib.urlencode(query, doseq=True)
+        url = self.endpoint + '/api/alerts?' + urlencode(query, doseq=True)
         response = requests.get(url)
 
         try:
