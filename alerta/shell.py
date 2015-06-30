@@ -11,7 +11,6 @@ import json
 import requests
 import logging
 import codecs
-import locale
 
 try:
     import configparser
@@ -313,7 +312,7 @@ class AlertCommand(object):
             try:
                 self.api.tag_alert(alert['id'], args.tags)
             except Exception as e:
-                print
+                print()
                 LOG.error(e)
                 sys.exit(1)
 
@@ -336,7 +335,7 @@ class AlertCommand(object):
             try:
                 self.api.untag_alert(alert['id'], args.tags)
             except Exception as e:
-                print
+                print()
                 LOG.error(e)
                 sys.exit(1)
 
@@ -360,7 +359,7 @@ class AlertCommand(object):
             try:
                 self.api.ack_alert(alert['id'])
             except Exception as e:
-                print
+                print()
                 LOG.error(e)
                 sys.exit(1)
 
@@ -384,7 +383,7 @@ class AlertCommand(object):
             try:
                 self.api.unack_alert(alert['id'])
             except Exception as e:
-                print
+                print()
                 LOG.error(e)
                 sys.exit(1)
 
@@ -408,7 +407,7 @@ class AlertCommand(object):
             try:
                 self.api.close_alert(alert['id'])
             except Exception as e:
-                print
+                print()
                 LOG.error(e)
                 sys.exit(1)
 
@@ -432,7 +431,7 @@ class AlertCommand(object):
             try:
                 self.api.delete_alert(alert['id'])
             except Exception as e:
-                print
+                print()
                 LOG.error(e)
                 sys.exit(1)
 

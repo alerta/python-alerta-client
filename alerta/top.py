@@ -82,7 +82,7 @@ class Alert(threading.Thread):
 
         app_time = status['time'] / 1000  # epoch ms
 
-        metrics = [metric for metric in status['metrics'] if metric['type'] == u'timer']
+        metrics = [metric for metric in status['metrics'] if metric['type'] == 'timer']
         for m in metrics:
             count = m['count']
             totalTime = m['totalTime']
