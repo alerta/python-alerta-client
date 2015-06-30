@@ -108,7 +108,7 @@ class Alert(object):
         except ValueError as e:
             raise ValueError('Could not parse alert - %s: %s' % (e, alert))
 
-        for k, v in alert.iteritems():
+        for k, v in alert.items():
             if k in ['createTime', 'receiveTime', 'lastReceiveTime', 'expireTime']:
                 try:
                     alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -254,7 +254,7 @@ class AlertDocument(object):
     @staticmethod
     def parse_alert(alert):
 
-        for k, v in alert.iteritems():
+        for k, v in alert.items():
             if k in ['createTime', 'receiveTime', 'lastReceiveTime', 'expireTime']:
                 if '.' in v:
                     try:
