@@ -163,7 +163,7 @@ class AlertCommand(object):
             if args.color:
                 line_color = _COLOR_MAP.get(a.severity, _COLOR_MAP['unknown'])
 
-            print(line_color + '%s|%s|%s|%5d|%-5s|%-10s|%-18s|%12s|%16s|%12s' % (
+            print(line_color + '{0}|{1}|{2}|{3:5d}|{4:<5s}|{5:<10s}|{6:<18s}|{7:12s}|{8:16s}|{9:12s}'.format(
                 a.id[0:8],
                 a.get_date('last_receive_time', 'local', args.timezone),
                 a.severity,
@@ -174,38 +174,38 @@ class AlertCommand(object):
                 a.group,
                 a.event,
                 a.value) + end_color)
-            print(line_color + '   |%s' % (a.text.encode('utf-8')) + end_color)
+            print(line_color + '   |{}'.format(a.text) + end_color)
 
             if args.details:
-                print(line_color + '    severity   | %s -> %s' % (a.previous_severity, a.severity) + end_color)
-                print(line_color + '    trend      | %s' % a.trend_indication + end_color)
-                print(line_color + '    status     | %s' % a.status + end_color)
-                print(line_color + '    resource   | %s' % a.resource + end_color)
-                print(line_color + '    group      | %s' % a.group + end_color)
-                print(line_color + '    event      | %s' % a.event + end_color)
-                print(line_color + '    value      | %s' % a.value + end_color)
-                print(line_color + '    tags       | %s' % ' '.join(a.tags) + end_color)
+                print(line_color + '    severity   | {} -> {}'.format(a.previous_severity, a.severity) + end_color)
+                print(line_color + '    trend      | {}'.format(a.trend_indication) + end_color)
+                print(line_color + '    status     | {}'.format(a.status) + end_color)
+                print(line_color + '    resource   | {}'.format(a.resource) + end_color)
+                print(line_color + '    group      | {}'.format(a.group) + end_color)
+                print(line_color + '    event      | {}'.format(a.event) + end_color)
+                print(line_color + '    value      | {}'.format(a.value) + end_color)
+                print(line_color + '    tags       | {}'.format(' '.join(a.tags)) + end_color)
 
                 for key, value in a.attributes.items():
-                    print(line_color + '    %s | %s' % (key.ljust(10), value) + end_color)
+                    print(line_color + '    {} | {}'.format(key.ljust(10), value) + end_color)
 
                 latency = a.receive_time - a.create_time
 
-                print(line_color + '        time created  | %s' % a.get_date('create_time', 'iso', args.timezone) + end_color)
-                print(line_color + '        time received | %s' % a.get_date('receive_time', 'iso', args.timezone) + end_color)
-                print(line_color + '        last received | %s' % a.get_date('last_receive_time', 'iso', args.timezone) + end_color)
-                print(line_color + '        latency       | %sms' % (latency.microseconds / 1000) + end_color)
-                print(line_color + '        timeout       | %ss' % a.timeout + end_color)
+                print(line_color + '        time created  | {}'.format(a.get_date('create_time', 'iso', args.timezone)) + end_color)
+                print(line_color + '        time received | {}'.format(a.get_date('receive_time', 'iso', args.timezone)) + end_color)
+                print(line_color + '        last received | {}'.format(a.get_date('last_receive_time', 'iso', args.timezone)) + end_color)
+                print(line_color + '        latency       | {}ms'.format((latency.microseconds / 1000)) + end_color)
+                print(line_color + '        timeout       | {}s'.format(a.timeout) + end_color)
 
-                print(line_color + '            alert id     | %s' % a.id + end_color)
-                print(line_color + '            last recv id | %s' % a.last_receive_id + end_color)
-                print(line_color + '            environment  | %s' % a.environment + end_color)
-                print(line_color + '            service      | %s' % ','.join(a.service) + end_color)
-                print(line_color + '            resource     | %s' % a.resource + end_color)
-                print(line_color + '            type         | %s' % a.event_type + end_color)
-                print(line_color + '            repeat       | %s' % a.repeat + end_color)
-                print(line_color + '            origin       | %s' % a.origin + end_color)
-                print(line_color + '            correlate    | %s' % ','.join(a.correlate) + end_color)
+                print(line_color + '            alert id     | {}'.format(a.id) + end_color)
+                print(line_color + '            last recv id | {}'.format(a.last_receive_id) + end_color)
+                print(line_color + '            environment  | {}'.format(a.environment) + end_color)
+                print(line_color + '            service      | {}'.format(','.join(a.service)) + end_color)
+                print(line_color + '            resource     | {}'.format(a.resource) + end_color)
+                print(line_color + '            type         | {}'.format(a.event_type) + end_color)
+                print(line_color + '            repeat       | {}'.format(a.repeat) + end_color)
+                print(line_color + '            origin       | {}'.format(a.origin) + end_color)
+                print(line_color + '            correlate    | {}'.format(','.join(a.correlate)) + end_color)
 
         return response.get('lastTime', '')
 
@@ -1077,7 +1077,9 @@ def main():
 
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
+    # Only mangle the terminal if using Python 2.x
+    if sys.version_info[0] == 2:
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
     try:
         AlertaShell().run()
