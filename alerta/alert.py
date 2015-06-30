@@ -105,14 +105,14 @@ class Alert(object):
 
         try:
             alert = json.loads(alert)
-        except ValueError, e:
+        except ValueError as e:
             raise ValueError('Could not parse alert - %s: %s' % (e, alert))
 
         for k, v in alert.iteritems():
             if k in ['createTime', 'receiveTime', 'lastReceiveTime', 'expireTime']:
                 try:
                     alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%fZ')
-                except ValueError, e:
+                except ValueError as e:
                     raise ValueError('Could not parse date time string: %s' % e)
             if k in ['correlate', 'service', 'tags']:
                 if not isinstance(alert[k], list):
@@ -259,12 +259,12 @@ class AlertDocument(object):
                 if '.' in v:
                     try:
                         alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%fZ')
-                    except ValueError, e:
+                    except ValueError as e:
                         raise ValueError('Could not parse date time string: %s' % e)
                 else:
                     try:
                         alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%SZ')  # if us = 000000
-                    except ValueError, e:
+                    except ValueError as e:
                         raise ValueError('Could not parse date time string: %s' % e)
 
         return AlertDocument(

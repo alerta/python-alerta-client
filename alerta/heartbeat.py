@@ -69,13 +69,13 @@ class Heartbeat(object):
 
         try:
             heartbeat = json.loads(heartbeat)
-        except ValueError, e:
+        except ValueError as e:
             raise ValueError('Could not parse heartbeat - %s: %s' % (e, heartbeat))
 
         if heartbeat.get('createTime', None):
             try:
                 heartbeat['createTime'] = datetime.datetime.strptime(heartbeat['createTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
-            except ValueError, e:
+            except ValueError as e:
                 raise ValueError('Could not parse date time string: %s' % e)
         if heartbeat.get('tags', None):
             if not isinstance(heartbeat['tags'], list):

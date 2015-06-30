@@ -71,7 +71,7 @@ class Alert(threading.Thread):
 
         try:
             response.raise_for_status()
-        except requests.HTTPError, e:
+        except requests.HTTPError:
             pass
 
         status = response.json()
@@ -127,7 +127,7 @@ class Alert(threading.Thread):
 
         try:
             response.raise_for_status()
-        except requests.HTTPError, e:
+        except requests.HTTPError:
             pass
 
         response = response.json()
@@ -228,7 +228,7 @@ class Screen(object):
 
         try:
             curses.curs_set(0)
-        except Exception, e:
+        except Exception:
             pass
 
         screen.keypad(1)
@@ -311,7 +311,7 @@ class Screen(object):
                             self.w.resources[key]['environment'],
                             self.w.resources[key]['resource'])
                         )
-                    except curses.error, e:
+                    except curses.error:
                         pass
                     if i == self.max_y - 3:
                         break
@@ -329,7 +329,7 @@ class Screen(object):
                             self.w.events[key]['group'],
                             self.w.events[key]['event'])
                         )
-                    except curses.error, e:
+                    except curses.error:
                         pass
                     if i == self.max_y - 3:
                         break
@@ -346,7 +346,7 @@ class Screen(object):
                             self.w.origins[key]['count'],
                             self.w.origins[key]['origin']
                         ))
-                    except curses.error, e:
+                    except curses.error:
                         pass
                     if i == self.max_y - 3:
                         break

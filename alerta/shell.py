@@ -9,10 +9,14 @@ import argparse
 import time
 import json
 import requests
-import ConfigParser
 import logging
 import codecs
 import locale
+
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 from datetime import datetime, timedelta
 
@@ -105,13 +109,13 @@ class AlertCommand(object):
 
         if response['status'] == 'ok':
             if not 'alert' in response:
-                print response['id']
+                print(response['id'])
                 sys.exit(0)
             if response['alert']['repeat']:
                 info = "%s duplicates" % response['alert']['duplicateCount']
             else:
                 info = "%s -> %s" % (response['alert']['previousSeverity'], response['alert']['severity'])
-            print "%s (%s)" % (response['id'], info)
+            print("{} ({})".format(response['id'], info))
         else:
             LOG.error(response['message'])
             sys.exit(1)
@@ -135,7 +139,7 @@ class AlertCommand(object):
             sys.exit(1)
 
         if response['status'] == 'ok':
-            print response['id']
+            print(response['id'])
         else:
             LOG.error(response['message'])
             sys.exit(1)
@@ -146,7 +150,7 @@ class AlertCommand(object):
         alerts = response['alerts']
 
         if args.output == "json":
-            print json.dumps(alerts, indent=4)
+            print(json.dumps(alerts, indent=4))
             sys.exit(0)
 
         for alert in reversed(alerts):
@@ -221,14 +225,14 @@ class AlertCommand(object):
 
         try:
             screen.run()
-        except RuntimeError, e:
+        except RuntimeError as e:
             screen._reset()
-            print e
+            print(e)
             sys.exit(1)
         except (KeyboardInterrupt, SystemExit):
             screen.w.running = False
             screen._reset()
-            print 'Exiting...'
+            print('Exiting...')
             sys.exit(0)
 
     def raw(self, args):
@@ -237,7 +241,7 @@ class AlertCommand(object):
         alerts = response['alerts']
 
         if args.output == "json":
-            print json.dumps(alerts, indent=4)
+            print(json.dumps(alerts, indent=4))
             sys.exit(0)
 
         for alert in reversed(alerts):
@@ -252,7 +256,7 @@ class AlertCommand(object):
         history = response['history']
 
         if args.output == "json":
-            print json.dumps(history, indent=4)
+            print(json.dumps(history, indent=4))
             sys.exit(0)
 
         for hist in history:
@@ -441,14 +445,14 @@ class AlertCommand(object):
 
         for metric in [m for m in metrics if m['type'] in ['gauge', 'counter', 'timer']]:
             if metric['type'] == 'gauge':
-                print '%-28s %-8s %-26s %-10s' % (metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value'])
+                print('{0:-28s} {1:-8s} {2:-26s} {3:-10s}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
             else:
                 value = metric.get('count', 0)
                 avg = int(metric['totalTime']) * 1.0 / int(metric['count'])
-                print '%-28s %-8s %-26s %-10s %-3.2f ms' % (metric['title'], metric['type'], metric['group'] + '.' + metric['name'], value, avg)
+                print('{0:-28s} {1:-8s} {2:-26s} {3:-10s} {4:-3.2f} ms'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], value, avg))
 
         for metric in [m for m in metrics if m['type'] == 'text']:
-            print '%-28s %-8s %-26s %-10s' % (metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value'])
+            print('{0:-28s} {1:-8s} {2:-26s} {3:-10s}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
 
     @staticmethod
     def _build(filters, from_date=None, to_date=None):
@@ -538,21 +542,21 @@ class AlertCommand(object):
         now = datetime.fromtimestamp(int(response['time']) / 1000.0)
         d = datetime(1, 1, 1) + timedelta(seconds=int(response['uptime']) / 1000.0)
 
-        print '%s up %s days %02d:%02d' % (
+        print('{0} up {1} days {2:02d}:{3:02d}'.format(
             now.strftime('%H:%M'),
             d.day - 1, d.hour, d.minute
-        )
+        ))
 
     def version(self, args):
 
         response = self._status()
 
-        print '%s %s' % (
+        print('{0} {1}'.format(
             response['application'],
             response['version'],
-        )
-        print 'alerta client %s' % __version__
-        print 'requests %s' % requests.__version__
+        ))
+        print('alerta client {0}'.format(__version__))
+        print('requests {0}'.format(requests.__version__))
 
 
 class AlertaShell(object):
@@ -564,10 +568,10 @@ class AlertaShell(object):
 
         config_file = os.environ.get('ALERTA_CONF_FILE') or OPTIONS['config_file']
 
-        config = ConfigParser.RawConfigParser(defaults=OPTIONS)
+        config = configparser.RawConfigParser(defaults=OPTIONS)
         try:
             config.read(os.path.expanduser(config_file))
-        except Exception as e:
+        except Exception:
             LOG.warning("Problem reading configuration file %s - is this an ini file?", config_file)
             sys.exit(1)
 
