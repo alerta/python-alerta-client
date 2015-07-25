@@ -82,13 +82,32 @@ class Alert(object):
             'attributes': self.attributes,
             'origin': self.origin,
             'type': self.event_type,
-            'createTime': self.create_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.create_time.microsecond // 1000),
+            'createTime': self.get_date('create_time', 'iso'),
             'timeout': self.timeout,
             'rawData': self.raw_data
         }
 
-    def get_type(self):
-        return self.event_type
+    def get_date(self, attr, fmt='iso', timezone='Europe/London'):
+
+        tz = pytz.timezone(timezone)
+
+        if hasattr(self, attr):
+            if fmt == 'local':
+                return getattr(self, attr).replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S')
+            elif fmt == 'iso' or fmt == 'iso8601':
+                return getattr(self, attr).replace(microsecond=0).isoformat() + ".%03dZ" % (getattr(self, attr).microsecond // 1000)
+            elif fmt == 'rfc' or fmt == 'rfc2822':
+                return utils.formatdate(time.mktime(getattr(self, attr).replace(tzinfo=pytz.UTC).timetuple()), True)
+            elif fmt == 'short':
+                return getattr(self, attr).replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%a %d %H:%M:%S')
+            elif fmt == 'epoch':
+                return time.mktime(getattr(self, attr).replace(tzinfo=pytz.UTC).timetuple())
+            elif fmt == 'raw':
+                return getattr(self, attr)
+            else:
+                raise ValueError("Unknown date format %s" % fmt)
+        else:
+            return ValueError("Attribute %s not a date" % attr)
 
     def receive_now(self):
         self.receive_time = datetime.datetime.utcnow()
@@ -191,6 +210,37 @@ class AlertDocument(object):
             "correlation-id": self.id
         }
 
+    def get_body(self):
+
+        return {
+            'id': self.id,
+            'resource': self.resource,
+            'event': self.event,
+            'environment': self.environment,
+            'severity': self.severity,
+            'correlate': self.correlate,
+            'status': self.status,
+            'service': self.service,
+            'group': self.group,
+            'value': self.value,
+            'text': self.text,
+            'tags': self.tags,
+            'attributes': self.attributes,
+            'origin': self.origin,
+            'type': self.event_type,
+            'createTime': self.get_date('create_time', 'iso'),
+            'timeout': self.timeout,
+            'rawData': self.raw_data,
+            'duplicateCount': self.duplicate_count,
+            'repeat': self.repeat,
+            'previousSeverity': self.previous_severity,
+            'trendIndication': self.trend_indication,
+            'receiveTime': self.get_date('receive_time', 'iso'),
+            'lastReceiveId': self.last_receive_id,
+            'lastReceiveTime': self.get_date('last_receive_time', 'iso'),
+            'history': self.history
+        }
+
     def get_date(self, attr, fmt='iso', timezone='Europe/London'):
 
         tz = pytz.timezone(timezone)
@@ -212,37 +262,6 @@ class AlertDocument(object):
                 raise ValueError("Unknown date format %s" % fmt)
         else:
             return ValueError("Attribute %s not a date" % attr)
-
-    def get_body(self):
-
-        return {
-            'id': self.id,
-            'resource': self.resource,
-            'event': self.event,
-            'environment': self.environment,
-            'severity': self.severity,
-            'correlate': self.correlate,
-            'status': self.status,
-            'service': self.service,
-            'group': self.group,
-            'value': self.value,
-            'text': self.text,
-            'tags': self.tags,
-            'attributes': self.attributes,
-            'origin': self.origin,
-            'type': self.event_type,
-            'createTime': self.create_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.create_time.microsecond // 1000),
-            'timeout': self.timeout,
-            'rawData': self.raw_data,
-            'duplicateCount': self.duplicate_count,
-            'repeat': self.repeat,
-            'previousSeverity': self.previous_severity,
-            'trendIndication': self.trend_indication,
-            'receiveTime': self.receive_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.receive_time.microsecond // 1000),
-            'lastReceiveId': self.last_receive_id,
-            'lastReceiveTime': self.last_receive_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.last_receive_time.microsecond // 1000),
-            'history': self.history
-        }
 
     def __repr__(self):
         return 'AlertDocument(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r)' % (
