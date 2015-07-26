@@ -460,7 +460,7 @@ class AlertCommand(object):
         response = self._heartbeats()
         heartbeats = response['heartbeats']
 
-        print('{:<28} {:<26} {:<19} {:8} {:7} {}'.format('ORIGIN', 'TAGS', 'CREATED', 'LATENCY', 'TIMEOUT', 'SINCE'))
+        print('{:<28} {:<26} {:<19} {:>8} {:7} {}'.format('ORIGIN', 'TAGS', 'CREATED', 'LATENCY', 'TIMEOUT', 'SINCE'))
 
         for heartbeat in heartbeats:
             hb = HeartbeatDocument.parse_heartbeat(heartbeat)
