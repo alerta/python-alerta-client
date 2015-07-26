@@ -442,6 +442,8 @@ class AlertCommand(object):
         response = self._status()
         metrics = response['metrics']
 
+        print('{:<28} {:<8} {:<26} {:10} {}'.format('METRIC', 'TYPE', 'NAME', 'VALUE', 'AVG'))
+
         for metric in [m for m in metrics if m['type'] in ['gauge', 'counter', 'timer']]:
             if metric['type'] == 'gauge':
                 print('{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
@@ -458,17 +460,19 @@ class AlertCommand(object):
         response = self._heartbeats()
         heartbeats = response['heartbeats']
 
+        print('{:<28} {:<26} {:<19} {:8} {:7} {}'.format('ORIGIN', 'TAGS', 'CREATED', 'LATENCY', 'TIMEOUT', 'SINCE'))
+
         for heartbeat in heartbeats:
             hb = HeartbeatDocument.parse_heartbeat(heartbeat)
             latency = hb.receive_time - hb.create_time
             since = datetime.utcnow() - hb.receive_time
-            print('{:<28} {:<26} {} {:6}ms {}s {}'.format(
+            print('{:<28} {:<26} {} {:6}ms {:6}s {}'.format(
                 hb.origin,
                 ' '.join(hb.tags),
                 hb.get_date('create_time', 'local', args.timezone),
                 latency.microseconds / 1000,
                 hb.timeout,
-                since
+                since - timedelta(microseconds=since.microseconds)
             ))
 
     @staticmethod
