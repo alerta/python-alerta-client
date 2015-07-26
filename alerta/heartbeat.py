@@ -1,22 +1,23 @@
 
 import os
 import sys
-import json
+import time
 import datetime
-import logging
+import pytz
+import json
 
 from uuid import uuid4
+from email import utils
 
-prog = os.path.basename(sys.argv[0])
-
-LOG = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = 300  # seconds
+
+prog = os.path.basename(sys.argv[0])
 
 
 class Heartbeat(object):
 
-    def __init__(self, origin=None, tags=[], create_time=None, timeout=None):
+    def __init__(self, origin=None, tags=None, create_time=None, timeout=None):
 
         self.id = str(uuid4())
         self.origin = origin or '%s/%s' % (prog, os.uname()[1])
@@ -48,9 +49,31 @@ class Heartbeat(object):
             'origin': self.origin,
             'tags': self.tags,
             'type': self.event_type,
-            'createTime': self.create_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.create_time.microsecond // 1000),
+            'createTime': self.get_date('create_time', 'iso'),
             'timeout': self.timeout,
         }
+
+    def get_date(self, attr, fmt='iso', timezone='Europe/London'):
+
+        tz = pytz.timezone(timezone)
+
+        if hasattr(self, attr):
+            if fmt == 'local':
+                return getattr(self, attr).replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S')
+            elif fmt == 'iso' or fmt == 'iso8601':
+                return getattr(self, attr).replace(microsecond=0).isoformat() + ".%03dZ" % (getattr(self, attr).microsecond // 1000)
+            elif fmt == 'rfc' or fmt == 'rfc2822':
+                return utils.formatdate(time.mktime(getattr(self, attr).replace(tzinfo=pytz.UTC).timetuple()), True)
+            elif fmt == 'short':
+                return getattr(self, attr).replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%a %d %H:%M:%S')
+            elif fmt == 'epoch':
+                return time.mktime(getattr(self, attr).replace(tzinfo=pytz.UTC).timetuple())
+            elif fmt == 'raw':
+                return getattr(self, attr)
+            else:
+                raise ValueError("Unknown date format %s" % fmt)
+        else:
+            return ValueError("Attribute %s not a date" % attr)
 
     def get_type(self):
         return self.event_type
@@ -62,7 +85,7 @@ class Heartbeat(object):
         return 'Heartbeat(id=%r, origin=%r, create_time=%r, timeout=%r)' % (self.id, self.origin, self.create_time, self.timeout)
 
     def __str__(self):
-        return json.dumps(self.get_body(), indent=4)
+        return json.dumps(self.get_body(), indent=2)
 
     @staticmethod
     def parse_heartbeat(heartbeat):
@@ -123,14 +146,61 @@ class HeartbeatDocument(object):
             'origin': self.origin,
             'tags': self.tags,
             'type': self.event_type,
-            'createTime': self.create_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.create_time.microsecond // 1000),
+            'createTime': self.get_date('create_time', 'iso'),
             'timeout': self.timeout,
-            'receiveTime': self.receive_time.replace(microsecond=0).isoformat() + ".%03dZ" % (self.receive_time.microsecond // 1000)
+            'receiveTime': self.get_date('receive_time', 'iso')
         }
+
+    def get_date(self, attr, fmt='iso', timezone='Europe/London'):
+
+        tz = pytz.timezone(timezone)
+
+        if hasattr(self, attr):
+            if fmt == 'local':
+                return getattr(self, attr).replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S')
+            elif fmt == 'iso' or fmt == 'iso8601':
+                return getattr(self, attr).replace(microsecond=0).isoformat() + ".%03dZ" % (getattr(self, attr).microsecond // 1000)
+            elif fmt == 'rfc' or fmt == 'rfc2822':
+                return utils.formatdate(time.mktime(getattr(self, attr).replace(tzinfo=pytz.UTC).timetuple()), True)
+            elif fmt == 'short':
+                return getattr(self, attr).replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%a %d %H:%M:%S')
+            elif fmt == 'epoch':
+                return time.mktime(getattr(self, attr).replace(tzinfo=pytz.UTC).timetuple())
+            elif fmt == 'raw':
+                return getattr(self, attr)
+            else:
+                raise ValueError("Unknown date format %s" % fmt)
+        else:
+            return ValueError("Attribute %s not a date" % attr)
 
     def __repr__(self):
         return 'HeartbeatDocument(id=%r, origin=%r, create_time=%r, timeout=%r)' % (self.id, self.origin, self.create_time, self.timeout)
 
     def __str__(self):
-        return json.dumps(self.get_body(), indent=4)
+        return json.dumps(self.get_body(), indent=2)
 
+    @staticmethod
+    def parse_heartbeat(heartbeat):
+
+        for k, v in heartbeat.items():
+            if k in ['createTime', 'receiveTime']:
+                if '.' in v:
+                    try:
+                        heartbeat[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%fZ')
+                    except ValueError as e:
+                        raise ValueError('Could not parse date time string: %s' % e)
+                else:
+                    try:
+                        heartbeat[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%SZ')  # if us = 000000
+                    except ValueError as e:
+                        raise ValueError('Could not parse date time string: %s' % e)
+
+        return HeartbeatDocument(
+            id=heartbeat.get('id', None),
+            origin=heartbeat.get('origin', None),
+            tags=heartbeat.get('tags', list()),
+            event_type=heartbeat.get('type', None),
+            create_time=heartbeat.get('createTime', None),
+            timeout=heartbeat.get('timeout', None),
+            receive_time=heartbeat.get('receiveTime', None)
+        )

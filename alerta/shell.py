@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 
 from alerta.api import ApiClient
 from alerta.alert import Alert, AlertDocument
-from alerta.heartbeat import Heartbeat
+from alerta.heartbeat import Heartbeat, HeartbeatDocument
 from alerta.top import Screen
 
 import pkg_resources  # part of setuptools
@@ -444,14 +444,32 @@ class AlertCommand(object):
 
         for metric in [m for m in metrics if m['type'] in ['gauge', 'counter', 'timer']]:
             if metric['type'] == 'gauge':
-                print('{0:-28s} {1:-8s} {2:-26s} {3:-10s}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
+                print('{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
             else:
                 value = metric.get('count', 0)
                 avg = int(metric['totalTime']) * 1.0 / int(metric['count'])
-                print('{0:-28s} {1:-8s} {2:-26s} {3:-10s} {4:-3.2f} ms'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], value, avg))
+                print('{0:<28} {1:<8} {2:<26} {3:<10} {4:-3.2f} ms'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], value, avg))
 
         for metric in [m for m in metrics if m['type'] == 'text']:
-            print('{0:-28s} {1:-8s} {2:-26s} {3:-10s}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
+            print('{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
+
+    def heartbeats(self, args):
+
+        response = self._heartbeats()
+        heartbeats = response['heartbeats']
+
+        for heartbeat in heartbeats:
+            hb = HeartbeatDocument.parse_heartbeat(heartbeat)
+            latency = hb.receive_time - hb.create_time
+            since = datetime.utcnow() - hb.receive_time
+            print('{:<28} {:<26} {} {:6}ms {}s {}'.format(
+                hb.origin,
+                ' '.join(hb.tags),
+                hb.get_date('create_time', 'local', args.timezone),
+                latency.microseconds / 1000,
+                hb.timeout,
+                since
+            ))
 
     @staticmethod
     def _build(filters, from_date=None, to_date=None):
@@ -510,6 +528,20 @@ class AlertCommand(object):
 
         try:
             response = self.api.get_history(query)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == "error":
+            LOG.error(response['message'])
+            sys.exit(1)
+
+        return response
+
+    def _heartbeats(self):
+
+        try:
+            response = self.api.get_heartbeats()
         except Exception as e:
             LOG.error(e)
             sys.exit(1)
@@ -1023,6 +1055,13 @@ class AlertaShell(object):
             help='Timeout in seconds before a heartbeat will be considered stale'
         )
         parser_heartbeat.set_defaults(func=cli.heartbeat)
+
+        parser_heartbeats = subparsers.add_parser(
+            'heartbeats',
+            help='List all heartbeats',
+            usage='alerta [OPTIONS] heartbeats [-h]'
+        )
+        parser_heartbeats.set_defaults(func=cli.heartbeats)
 
         parser_status = subparsers.add_parser(
             'status',

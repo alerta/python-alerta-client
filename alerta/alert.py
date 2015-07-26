@@ -109,6 +109,9 @@ class Alert(object):
         else:
             return ValueError("Attribute %s not a date" % attr)
 
+    def get_type(self):
+        return self.event_type
+
     def receive_now(self):
         self.receive_time = datetime.datetime.utcnow()
 
@@ -117,7 +120,7 @@ class Alert(object):
             self.id, self.environment, self.resource, self.event, self.severity, self.status)
 
     def __str__(self):
-        return json.dumps(self.get_body())
+        return json.dumps(self.get_body(), indent=2)
 
     @staticmethod
     def parse_alert(alert):
@@ -268,7 +271,7 @@ class AlertDocument(object):
             self.id, self.environment, self.resource, self.event, self.severity, self.status)
 
     def __str__(self):
-        return json.dumps(self.get_body())
+        return json.dumps(self.get_body(), indent=2)
 
     @staticmethod
     def parse_alert(alert):
