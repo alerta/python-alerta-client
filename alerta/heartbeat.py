@@ -91,7 +91,10 @@ class Heartbeat(object):
     def parse_heartbeat(heartbeat):
 
         try:
-            heartbeat = json.loads(heartbeat)
+            if isinstance(heartbeat, bytes):
+                heartbeat = json.loads(heartbeat.decode('utf-8'))  # See https://bugs.python.org/issue10976
+            else:
+                heartbeat = json.loads(heartbeat)
         except ValueError as e:
             raise ValueError('Could not parse heartbeat - %s: %s' % (e, heartbeat))
 

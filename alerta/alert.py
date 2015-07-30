@@ -126,7 +126,10 @@ class Alert(object):
     def parse_alert(alert):
 
         try:
-            alert = json.loads(alert)
+            if isinstance(alert, bytes):
+                alert = json.loads(alert.decode('utf-8'))  # See https://bugs.python.org/issue10976
+            else:
+                alert = json.loads(alert)
         except ValueError as e:
             raise ValueError('Could not parse alert - %s: %s' % (e, alert))
 
