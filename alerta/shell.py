@@ -46,7 +46,8 @@ OPTIONS = {
 }
 
 DEFAULT_SEVERITY = "normal"  # "normal", "ok" or "clear"
-DEFAULT_TIMEOUT = 86400
+DEFAULT_TIMEOUT = 86400  # seconds
+MAX_LATENCY = 2000  # ms
 
 _COLOR_MAP = {
     "critical": '\033[91m',
@@ -464,16 +465,66 @@ class AlertCommand(object):
 
         for heartbeat in heartbeats:
             hb = HeartbeatDocument.parse_heartbeat(heartbeat)
-            latency = hb.receive_time - hb.create_time
+            latency = (hb.receive_time - hb.create_time).microseconds / 1000
             since = datetime.utcnow() - hb.receive_time
-            print('{:<28} {:<26} {} {:6}ms {:6}s {}'.format(
+            since = since - timedelta(microseconds=since.microseconds)
+
+            latency_exceeded = latency > MAX_LATENCY
+            timeout_exceeded = since.seconds > hb.timeout
+
+            print('{:<28} {:<26} {} {}{:6}ms {:6}s {}{}'.format(
                 hb.origin,
                 ' '.join(hb.tags),
                 hb.get_date('create_time', 'local', args.timezone),
-                latency.microseconds / 1000,
+                '*' if latency_exceeded else ' ', latency,
                 hb.timeout,
-                since - timedelta(microseconds=since.microseconds)
+                '*' if timeout_exceeded else ' ', since
             ))
+
+            if args.alert:
+                if timeout_exceeded:
+                    alert = Alert(
+                        resource=hb.origin,
+                        event='HeartbeatFail',
+                        correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
+                        group='System',
+                        environment='Production',
+                        service=['Alerta'],
+                        severity='major',
+                        value='{}'.format(since),
+                        text='Heartbeat not received in {} seconds'.format(hb.timeout),
+                        tags=hb.tags,
+                        type='heartbeatAlert'
+                    )
+                elif latency_exceeded:
+                    alert = Alert(
+                        resource=hb.origin,
+                        event='HeartbeatSlow',
+                        correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
+                        group='System',
+                        environment='Production',
+                        service=['Alerta'],
+                        severity='major',
+                        value='{}ms'.format(latency),
+                        text='Heartbeat took more than {}ms to be processed'.format(MAX_LATENCY),
+                        tags=hb.tags,
+                        type='heartbeatAlert'
+                    )
+                else:
+                    alert = Alert(
+                        resource=hb.origin,
+                        event='HeartbeatOK',
+                        correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
+                        group='System',
+                        environment='Production',
+                        service=['Alerta'],
+                        severity='normal',
+                        value='',
+                        text='Heartbeat OK',
+                        tags=hb.tags,
+                        type='heartbeatAlert'
+                    )
+                self.send(alert)
 
     @staticmethod
     def _build(filters, from_date=None, to_date=None):
@@ -784,7 +835,8 @@ class AlertaShell(object):
         parser_send.add_argument(
             '--timeout',
             default=None,
-            help='Timeout in seconds before an "open" alert will be automatically "expired" or "deleted"'
+            help='Timeout in seconds before an "open" alert will be automatically "expired" or "deleted"',
+            type=int
         )
         parser_send.add_argument(
             '--raw-data',
@@ -1056,7 +1108,8 @@ class AlertaShell(object):
         parser_heartbeat.add_argument(
             '--timeout',
             default=None,
-            help='Timeout in seconds before a heartbeat will be considered stale'
+            help='Timeout in seconds before a heartbeat will be considered stale',
+            type=int
         )
         parser_heartbeat.set_defaults(func=cli.heartbeat)
 
@@ -1064,6 +1117,12 @@ class AlertaShell(object):
             'heartbeats',
             help='List all heartbeats',
             usage='alerta [OPTIONS] heartbeats [-h]'
+        )
+        parser_heartbeats.add_argument(
+            '--alert',
+            default=False,
+            help='Send alerts on stale or slow heartbeats',
+            action='store_true'
         )
         parser_heartbeats.set_defaults(func=cli.heartbeats)
 
