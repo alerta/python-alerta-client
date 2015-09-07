@@ -109,9 +109,8 @@ class AlertCommand(object):
 
         if response['status'] == 'ok':
             if not 'alert' in response:
-                print(response['id'])
-                sys.exit(0)
-            if response['alert']['repeat']:
+                info = response['message']
+            elif response['alert']['repeat']:
                 info = "%s duplicates" % response['alert']['duplicateCount']
             else:
                 info = "%s -> %s" % (response['alert']['previousSeverity'], response['alert']['severity'])
