@@ -568,6 +568,14 @@ class AlertCommand(object):
         for blackout in blackouts:
             start_time = datetime.strptime(blackout['startTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
             tz = pytz.timezone(args.timezone)
+
+            if args.purge and blackout['status'] == 'expired':
+                response = self.api.delete_blackout(blackout['id'])
+                if response['status'] == 'ok':
+                    blackout['status'] = 'deleted'
+                else:
+                    blackout['status'] = 'error'
+
             print('{:<8} {:<16} {:16} {:16} {:16} {:16} {:24} {:8} {} {}s'.format(
                 blackout['id'][:8],
                 blackout.get('environment', '*'),
@@ -1200,7 +1208,7 @@ class AlertaShell(object):
             usage='alerta [OPTIONS] blackouts [-h]'
         )
         parser_blackouts.add_argument(
-            '--delete-expired',
+            '--purge',
             default=False,
             help='Delete all expired blackout periods',
             action='store_true'
