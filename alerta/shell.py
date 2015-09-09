@@ -525,6 +525,38 @@ class AlertCommand(object):
                     )
                 self.send(alert)
 
+    def blackout(self, args):
+
+        if '.' not in args.start:
+            args.start = args.start.replace('Z', '.000Z')
+
+        try:
+            blackout = {
+                "environment": args.environment,
+                "resource": args.resource,
+                "service": args.service,
+                "event": args.event,
+                "group": args.group,
+                "tags": args.tags,
+                "startTime": args.start,
+                "duration": args.duration
+            }
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        try:
+            response = self.api.blackout_alerts(blackout)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == 'ok':
+            print(response['blackout'])
+        else:
+            LOG.error(response['message'])
+            sys.exit(1)
+
     @staticmethod
     def _build(filters, from_date=None, to_date=None):
 
@@ -1083,6 +1115,60 @@ class AlertaShell(object):
             help='KEY=VALUE eg. serverity=warning resource=web'
         )
         parser_delete.set_defaults(func=cli.delete)
+
+        parser_blackout = subparsers.add_parser(
+            'blackout',
+            help='Blackout alerts based on attributes',
+            usage='alerta [OPTIONS] blackout [-r RESOURCE] [-e EVENT] [-E ENVIRONMENT]\n'
+                '                            [-S SERVICE] [-g GROUP] [-T TAG]\n'
+        )
+        parser_blackout.add_argument(
+            '-r',
+            '--resource',
+            help='resource under alarm'
+        )
+        parser_blackout.add_argument(
+            '-e',
+            '--event',
+            help='event'
+        )
+        parser_blackout.add_argument(
+            '-E',
+            '--environment',
+            help='environment eg. "production", "development", "testing"'
+        )
+        parser_blackout.add_argument(
+            '-S',
+            '--service',
+            action='append',
+            help='service affected eg. the application name, "Web", "Network", "Storage", "Database", "Security"'
+        )
+        parser_blackout.add_argument(
+            '-g',
+            '--group',
+            help='group'
+        )
+        parser_blackout.add_argument(
+            '-T',
+            '--tag',
+            metavar='TAG',
+            action='append',
+            dest='tags',
+            default=list(),
+            help='List of tags eg. "London", "os:linux", "AWS/EC2".'
+        )
+        parser_blackout.add_argument(
+            '--start',
+            default=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+            help='Start of blackout period'
+        )
+        parser_blackout.add_argument(
+            '--duration',
+            default=3600,
+            help='Duration of blackout period (default: 1 hour)',
+            type=int
+        )
+        parser_blackout.set_defaults(func=cli.blackout)
 
         parser_heartbeat = subparsers.add_parser(
             'heartbeat',
