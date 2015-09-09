@@ -125,6 +125,22 @@ class ApiClient(object):
 
         return self._delete('/heartbeat/%s' % heartbeatid)
 
+    def blackout_alerts(self, blackout):
+        """
+        Define a blackout period
+        """
+        return self._post('/blackout', data=json.dumps(blackout))
+
+    def get_blackouts(self):
+        """
+        Get list of blackouts
+        """
+        return self._get('/blackouts')
+
+    def delete_blackout(self, blackoutid):
+
+        return self._delete('/blackout/%s' % blackoutid)
+
     def get_status(self):
 
         return self._get('/management/status')
