@@ -11,6 +11,7 @@ import json
 import requests
 import logging
 import codecs
+import pytz
 
 try:
     import configparser
@@ -556,6 +557,29 @@ class AlertCommand(object):
         else:
             LOG.error(response['message'])
             sys.exit(1)
+
+    def blackouts(self, args):
+
+        response = self.api.get_blackouts()
+        blackouts = response['blackouts']
+
+        print('{:<8} {:<16} {:<16} {:<16} {:16} {:16} {:24} {:8} {:19} {}'.format('ID', 'ENVIRONMENT', 'SERVICE', 'RESOURCE', 'EVENT', 'GROUP', 'TAGS', 'STATUS', 'START', 'DURATION'))
+
+        for blackout in blackouts:
+            start_time = datetime.strptime(blackout['startTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            tz = pytz.timezone(args.timezone)
+            print('{:<8} {:<16} {:16} {:16} {:16} {:16} {:24} {:8} {} {}s'.format(
+                blackout['id'][:8],
+                blackout.get('environment', '*'),
+                ','.join(blackout.get('service', '*')),
+                blackout.get('resource', '*'),
+                blackout.get('event', '*'),
+                blackout.get('group', '*'),
+                ' '.join(blackout.get('tags', '*')),
+                blackout['status'],
+                start_time.replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
+                blackout['duration']
+            ))
 
     @staticmethod
     def _build(filters, from_date=None, to_date=None):
@@ -1169,6 +1193,19 @@ class AlertaShell(object):
             type=int
         )
         parser_blackout.set_defaults(func=cli.blackout)
+
+        parser_blackouts = subparsers.add_parser(
+            'blackouts',
+            help='List all blackout periods',
+            usage='alerta [OPTIONS] blackouts [-h]'
+        )
+        parser_blackouts.add_argument(
+            '--delete-expired',
+            default=False,
+            help='Delete all expired blackout periods',
+            action='store_true'
+        )
+        parser_blackouts.set_defaults(func=cli.blackouts)
 
         parser_heartbeat = subparsers.add_parser(
             'heartbeat',
