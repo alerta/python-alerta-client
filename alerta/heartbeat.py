@@ -85,7 +85,7 @@ class Heartbeat(object):
         return 'Heartbeat(id=%r, origin=%r, create_time=%r, timeout=%r)' % (self.id, self.origin, self.create_time, self.timeout)
 
     def __str__(self):
-        return json.dumps(self.get_body(), indent=2)
+        return json.dumps(self.get_body())
 
     @staticmethod
     def parse_heartbeat(heartbeat):
@@ -180,7 +180,7 @@ class HeartbeatDocument(object):
         return 'HeartbeatDocument(id=%r, origin=%r, create_time=%r, timeout=%r)' % (self.id, self.origin, self.create_time, self.timeout)
 
     def __str__(self):
-        return json.dumps(self.get_body(), indent=2)
+        return json.dumps(self.get_body())
 
     @staticmethod
     def parse_heartbeat(heartbeat):

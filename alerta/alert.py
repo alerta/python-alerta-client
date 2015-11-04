@@ -120,7 +120,7 @@ class Alert(object):
             self.id, self.environment, self.resource, self.event, self.severity, self.status)
 
     def __str__(self):
-        return json.dumps(self.get_body(), indent=2)
+        return json.dumps(self.get_body())
 
     @staticmethod
     def parse_alert(alert):
@@ -274,7 +274,7 @@ class AlertDocument(object):
             self.id, self.environment, self.resource, self.event, self.severity, self.status)
 
     def __str__(self):
-        return json.dumps(self.get_body(), indent=2)
+        return json.dumps(self.get_body())
 
     @staticmethod
     def parse_alert(alert):
