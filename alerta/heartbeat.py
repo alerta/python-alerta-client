@@ -17,7 +17,7 @@ prog = os.path.basename(sys.argv[0])
 
 class Heartbeat(object):
 
-    def __init__(self, origin=None, tags=None, create_time=None, timeout=None):
+    def __init__(self, origin=None, tags=None, create_time=None, timeout=None, customer=None):
 
         self.id = str(uuid4())
         self.origin = origin or '%s/%s' % (prog, os.uname()[1])
@@ -26,6 +26,7 @@ class Heartbeat(object):
         self.create_time = create_time or datetime.datetime.utcnow()
         self.timeout = timeout or DEFAULT_TIMEOUT
         self.receive_time = None
+        self.customer = customer
 
     def get_id(self, short=False):
 
@@ -51,6 +52,7 @@ class Heartbeat(object):
             'type': self.event_type,
             'createTime': self.get_date('create_time', 'iso'),
             'timeout': self.timeout,
+            'customer': self.customer
         }
 
     def get_date(self, attr, fmt='iso', timezone='Europe/London'):
@@ -82,7 +84,8 @@ class Heartbeat(object):
         self.receive_time = datetime.datetime.utcnow()
 
     def __repr__(self):
-        return 'Heartbeat(id=%r, origin=%r, create_time=%r, timeout=%r)' % (self.id, self.origin, self.create_time, self.timeout)
+        return 'Heartbeat(id=%r, origin=%r, create_time=%r, timeout=%r, customer=%r)' % (
+            self.id, self.origin, self.create_time, self.timeout, self.customer)
 
     def __str__(self):
         return json.dumps(self.get_body())
@@ -112,12 +115,13 @@ class Heartbeat(object):
             tags=heartbeat.get('tags', list()),
             create_time=heartbeat.get('createTime', None),
             timeout=heartbeat.get('timeout', None),
+            customer=heartbeat.get('customer', None)
         )
 
 
 class HeartbeatDocument(object):
 
-    def __init__(self, id, origin, tags, event_type, create_time, timeout, receive_time):
+    def __init__(self, id, origin, tags, event_type, create_time, timeout, receive_time, customer):
 
         self.id = id
         self.origin = origin
@@ -126,6 +130,7 @@ class HeartbeatDocument(object):
         self.create_time = create_time or datetime.datetime.utcnow()
         self.timeout = timeout or DEFAULT_TIMEOUT
         self.receive_time = receive_time
+        self.customer = customer
 
     def get_id(self, short=False):
 
@@ -151,7 +156,8 @@ class HeartbeatDocument(object):
             'type': self.event_type,
             'createTime': self.get_date('create_time', 'iso'),
             'timeout': self.timeout,
-            'receiveTime': self.get_date('receive_time', 'iso')
+            'receiveTime': self.get_date('receive_time', 'iso'),
+            'customer': self.customer
         }
 
     def get_date(self, attr, fmt='iso', timezone='Europe/London'):
@@ -177,7 +183,8 @@ class HeartbeatDocument(object):
             return ValueError("Attribute %s not a date" % attr)
 
     def __repr__(self):
-        return 'HeartbeatDocument(id=%r, origin=%r, create_time=%r, timeout=%r)' % (self.id, self.origin, self.create_time, self.timeout)
+        return 'HeartbeatDocument(id=%r, origin=%r, create_time=%r, timeout=%r, customer=%r)' % (
+            self.id, self.origin, self.create_time, self.timeout, self.customer)
 
     def __str__(self):
         return json.dumps(self.get_body())
@@ -205,5 +212,6 @@ class HeartbeatDocument(object):
             event_type=heartbeat.get('type', None),
             create_time=heartbeat.get('createTime', None),
             timeout=heartbeat.get('timeout', None),
-            receive_time=heartbeat.get('receiveTime', None)
+            receive_time=heartbeat.get('receiveTime', None),
+            customer=heartbeat.get('customer', None)
         )

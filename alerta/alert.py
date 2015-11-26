@@ -48,6 +48,7 @@ class Alert(object):
         self.receive_time = None
         self.timeout = kwargs.get('timeout', None) or DEFAULT_TIMEOUT
         self.raw_data = kwargs.get('raw_data', kwargs.get('rawData', None)) or ""
+        self.customer = kwargs.get('customer', None)
 
     def get_id(self, short=False):
 
@@ -84,7 +85,8 @@ class Alert(object):
             'type': self.event_type,
             'createTime': self.get_date('create_time', 'iso'),
             'timeout': self.timeout,
-            'rawData': self.raw_data
+            'rawData': self.raw_data,
+            'customer': self.customer
         }
 
     def get_date(self, attr, fmt='iso', timezone='Europe/London'):
@@ -116,8 +118,8 @@ class Alert(object):
         self.receive_time = datetime.datetime.utcnow()
 
     def __repr__(self):
-        return 'Alert(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r)' % (
-            self.id, self.environment, self.resource, self.event, self.severity, self.status)
+        return 'Alert(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r, customer=%r)' % (
+            self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)
 
     def __str__(self):
         return json.dumps(self.get_body())
@@ -164,6 +166,7 @@ class Alert(object):
             create_time=alert.get('createTime', None),
             timeout=alert.get('timeout', None),
             raw_data=alert.get('rawData', None),
+            customer=alert.get('customer', None)
         )
 
 
@@ -171,7 +174,7 @@ class AlertDocument(object):
 
     def __init__(self, id, resource, event, environment, severity, correlate, status, service, group, value, text,
                  tags, attributes, origin, event_type, create_time, timeout, raw_data, duplicate_count, repeat,
-                 previous_severity, trend_indication, receive_time, last_receive_id, last_receive_time, history):
+                 previous_severity, trend_indication, receive_time, last_receive_id, last_receive_time, history, customer):
 
         self.id = id
         self.resource = resource
@@ -191,6 +194,7 @@ class AlertDocument(object):
         self.create_time = create_time or datetime.datetime.utcnow()
         self.timeout = timeout or DEFAULT_TIMEOUT
         self.raw_data = raw_data
+        self.customer = customer
 
         self.duplicate_count = duplicate_count
         self.repeat = repeat
@@ -237,6 +241,7 @@ class AlertDocument(object):
             'createTime': self.get_date('create_time', 'iso'),
             'timeout': self.timeout,
             'rawData': self.raw_data,
+            'customer': self.customer,
             'duplicateCount': self.duplicate_count,
             'repeat': self.repeat,
             'previousSeverity': self.previous_severity,
@@ -270,8 +275,8 @@ class AlertDocument(object):
             return ValueError("Attribute %s not a date" % attr)
 
     def __repr__(self):
-        return 'AlertDocument(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r)' % (
-            self.id, self.environment, self.resource, self.event, self.severity, self.status)
+        return 'AlertDocument(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r, customer=%r)' % (
+            self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)
 
     def __str__(self):
         return json.dumps(self.get_body())
@@ -311,6 +316,7 @@ class AlertDocument(object):
             create_time=alert.get('createTime', None),
             timeout=alert.get('timeout', None),
             raw_data=alert.get('rawData', None),
+            customer=alert.get('customer', None),
             duplicate_count=alert.get('duplicateCount', None),
             repeat=alert.get('repeat', None),
             previous_severity=alert.get('previousSeverity', None),
