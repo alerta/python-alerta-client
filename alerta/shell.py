@@ -163,11 +163,12 @@ class AlertCommand(object):
             if args.color:
                 line_color = _COLOR_MAP.get(a.severity, _COLOR_MAP['unknown'])
 
-            print(line_color + '{0}|{1}|{2}|{3:5d}|{4:<5s}|{5:<10s}|{6:<18s}|{7:12s}|{8:16s}|{9:12s}'.format(
+            print(line_color + '{0}|{1}|{2}|{3:5d}|{4}|{5:<5s}|{6:<10s}|{7:<18s}|{8:12s}|{9:16s}|{10:12s}'.format(
                 a.id[0:8],
                 a.get_date('last_receive_time', 'local', args.timezone),
                 a.severity,
                 a.duplicate_count,
+                a.customer or "-",
                 a.environment,
                 ','.join(a.service),
                 a.resource,
@@ -199,6 +200,7 @@ class AlertCommand(object):
 
                 print(line_color + '            alert id     | {}'.format(a.id) + end_color)
                 print(line_color + '            last recv id | {}'.format(a.last_receive_id) + end_color)
+                print(line_color + '            customer     | {}'.format(a.customer) + end_color)
                 print(line_color + '            environment  | {}'.format(a.environment) + end_color)
                 print(line_color + '            service      | {}'.format(','.join(a.service)) + end_color)
                 print(line_color + '            resource     | {}'.format(a.resource) + end_color)
@@ -269,10 +271,11 @@ class AlertCommand(object):
             if 'severity' in hist:
                 if args.color:
                     line_color = _COLOR_MAP.get(hist['severity'], _COLOR_MAP['unknown'])
-                print(line_color + '%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s' % (
+                print(line_color + '%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s' % (
                     hist['id'][0:8],
                     update_time.strftime('%Y/%m/%d %H:%M:%S'),
                     hist['severity'],
+                    hist['customer'],
                     hist['environment'],
                     ','.join(hist['service']),
                     hist['resource'],
@@ -283,10 +286,11 @@ class AlertCommand(object):
                 ) + end_color)
 
             if 'status' in hist:
-                print(line_color + '%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s' % (
+                print(line_color + '%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s' % (
                     hist['id'][0:8],
                     update_time.strftime('%Y/%m/%d %H:%M:%S'),
                     hist['status'],
+                    hist['customer'],
                     hist['environment'],
                     ','.join(hist['service']),
                     hist['resource'],
@@ -563,7 +567,7 @@ class AlertCommand(object):
         response = self.api.get_blackouts()
         blackouts = response['blackouts']
 
-        print('{:<8} {:<16} {:<16} {:<16} {:16} {:16} {:24} {:8} {:19} {}'.format('ID', 'ENVIRONMENT', 'SERVICE', 'RESOURCE', 'EVENT', 'GROUP', 'TAGS', 'STATUS', 'START', 'DURATION'))
+        print('{:<8} {:<16} {:<16} {:<16} {:<16} {:16} {:16} {:24} {:8} {:19} {}'.format('ID', 'CUSTOMER', 'ENVIRONMENT', 'SERVICE', 'RESOURCE', 'EVENT', 'GROUP', 'TAGS', 'STATUS', 'START', 'DURATION'))
 
         for blackout in blackouts:
             start_time = datetime.strptime(blackout['startTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -576,8 +580,9 @@ class AlertCommand(object):
                 else:
                     blackout['status'] = 'error'
 
-            print('{:<8} {:<16} {:16} {:16} {:16} {:16} {:24} {:8} {} {}s'.format(
+            print('{:<8} {:<16} {:<16} {:16} {:16} {:16} {:16} {:24} {:8} {} {}s'.format(
                 blackout['id'][:8],
+                blackout.get('customer', '*'),
                 blackout.get('environment', '*'),
                 ','.join(blackout.get('service', '*')),
                 blackout.get('resource', '*'),

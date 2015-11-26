@@ -46,6 +46,7 @@ class TestAlert(unittest.TestCase):
                         "receiveTime": self.RECEIVE_TIME,
                         "createTime": self.CREATE_TIME
                         }]
+        self.CUSTOMER = 'ACME Corp.'
 
     def test_alertdoc(self):
         """
@@ -60,7 +61,7 @@ class TestAlert(unittest.TestCase):
             origin=self.ORIGIN, event_type=self.EVENT_TYPE, create_time=self.CREATE_TIME, timeout=self.TIMEOUT,
             raw_data=self.RAW_DATA, duplicate_count=self.DUPLICATE_COUNT, repeat=self.REPEAT,
             previous_severity=self.PREVIOUS_SEVERITY, trend_indication=self.TREND_INDICATION, receive_time=self.RECEIVE_TIME,
-            last_receive_id=self.ALERTID, last_receive_time=self.RECEIVE_TIME, history=self.HISTORY)
+            last_receive_id=self.ALERTID, last_receive_time=self.RECEIVE_TIME, history=self.HISTORY, customer=self.CUSTOMER)
 
         self.assertEquals(alert.resource, self.RESOURCE)
         self.assertEquals(alert.event, self.EVENT)
@@ -86,6 +87,7 @@ class TestAlert(unittest.TestCase):
         self.assertEquals(alert.trend_indication, self.TREND_INDICATION)
         self.assertEquals(alert.raw_data, self.RAW_DATA)
         self.assertEquals(alert.history, self.HISTORY)
+        self.assertEquals(alert.customer, self.CUSTOMER)
 
     def test_date_formats(self):
 
@@ -99,7 +101,7 @@ class TestAlert(unittest.TestCase):
             origin=self.ORIGIN, event_type=self.EVENT_TYPE, create_time=self.CREATE_TIME, timeout=self.TIMEOUT,
             raw_data=self.RAW_DATA, duplicate_count=self.DUPLICATE_COUNT, repeat=self.REPEAT,
             previous_severity=self.PREVIOUS_SEVERITY, trend_indication=self.TREND_INDICATION, receive_time=self.RECEIVE_TIME,
-            last_receive_id=self.ALERTID, last_receive_time=self.RECEIVE_TIME, history=self.HISTORY)
+            last_receive_id=self.ALERTID, last_receive_time=self.RECEIVE_TIME, history=self.HISTORY, customer=self.CUSTOMER)
 
         self.assertEqual(alert.get_date('create_time', 'local'), '2012/11/10 09:08:07')
         self.assertEqual(alert.get_date('create_time', 'iso'), '2012-11-10T09:08:07.543Z')
