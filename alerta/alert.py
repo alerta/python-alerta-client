@@ -1,7 +1,7 @@
 
 import os
-import platform
 import sys
+import platform
 import time
 import datetime
 import pytz
@@ -190,7 +190,7 @@ class AlertDocument(object):
         self.text = text or ""
         self.tags = tags or list()
         self.attributes = attributes or dict()
-        self.origin = origin or '%s/%s' % (prog, os.uname()[1])
+        self.origin = origin or '%s/%s' % (prog, platform.uname()[1])
         self.event_type = event_type or 'exceptionAlert'
         self.create_time = create_time or datetime.datetime.utcnow()
         self.timeout = timeout or DEFAULT_TIMEOUT

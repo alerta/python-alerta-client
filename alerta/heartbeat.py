@@ -1,6 +1,7 @@
 
 import os
 import sys
+import platform
 import time
 import datetime
 import pytz
@@ -20,7 +21,7 @@ class Heartbeat(object):
     def __init__(self, origin=None, tags=None, create_time=None, timeout=None, customer=None):
 
         self.id = str(uuid4())
-        self.origin = origin or '%s/%s' % (prog, os.uname()[1])
+        self.origin = origin or '%s/%s' % (prog, platform.uname()[1])
         self.tags = tags or list()
         self.event_type = 'Heartbeat'
         self.create_time = create_time or datetime.datetime.utcnow()
