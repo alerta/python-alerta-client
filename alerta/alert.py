@@ -1,5 +1,6 @@
 
 import os
+import platform
 import sys
 import time
 import datetime
@@ -42,7 +43,7 @@ class Alert(object):
         self.text = kwargs.get('text', None) or ""
         self.tags = kwargs.get('tags', None) or list()
         self.attributes = kwargs.get('attributes', None) or dict()
-        self.origin = kwargs.get('origin', None) or '%s/%s' % (prog, os.uname()[1])
+        self.origin = kwargs.get('origin', None) or '%s/%s' % (prog, platform.uname()[1])
         self.event_type = kwargs.get('event_type', kwargs.get('type', None)) or "exceptionAlert"
         self.create_time = kwargs.get('create_time', None) or datetime.datetime.utcnow()
         self.receive_time = None
