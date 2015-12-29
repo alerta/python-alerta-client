@@ -594,6 +594,19 @@ class AlertCommand(object):
                 blackout['duration']
             ))
 
+    def user(self, args):
+
+        if args.password:
+            response = self.api.update_user(args.user, args.password)
+            if response['status'] == 'ok':
+                print('Password reset OK.')
+            else:
+                LOG.error(response['message'])
+                sys.exit(1)
+        else:
+            LOG.error('Only change password supported at present.')
+            sys.exit(1)
+
     @staticmethod
     def _build(filters, from_date=None, to_date=None):
 
@@ -1260,6 +1273,23 @@ class AlertaShell(object):
             action='store_true'
         )
         parser_heartbeats.set_defaults(func=cli.heartbeats)
+
+        parser_user = subparsers.add_parser(
+            'user',
+            help='Manage user details (Basic Auth only).',
+            usage='alerta [OPTIONS] user --user-name USER [--password PASSWORD]'
+        )
+        parser_user.add_argument(
+            '--user-name',
+            dest='user',
+            required=True,
+            help='User name'
+        )
+        parser_user.add_argument(
+            '--password',
+            help='New password'
+        )
+        parser_user.set_defaults(func=cli.user)
 
         parser_status = subparsers.add_parser(
             'status',

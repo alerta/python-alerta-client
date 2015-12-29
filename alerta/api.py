@@ -141,6 +141,10 @@ class ApiClient(object):
 
         return self._delete('/blackout/%s' % blackoutid)
 
+    def update_user(self, user, password):
+
+        return self._put('/user/%s' % user, data=json.dumps({"password": password}))
+
     def get_status(self):
 
         return self._get('/management/status')
@@ -172,6 +176,18 @@ class ApiClient(object):
         LOG.debug('Request Body: %s', data)
 
         response = self.session.post(url, data=data, auth=ApiAuth(self.key), headers=headers)
+
+        return response.json()
+
+    def _put(self, path, data=None):
+
+        url = self.endpoint + path
+        headers = {'Content-Type': 'application/json'}
+
+        LOG.debug('Request Headers: %s', headers)
+        LOG.debug('Request Body: %s', data)
+
+        response = self.session.put(url, data=data, auth=ApiAuth(self.key), headers=headers)
 
         return response.json()
 
