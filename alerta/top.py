@@ -24,7 +24,6 @@ class Alert(threading.Thread):
         self.endpoint = endpoint
         self.filter = filter or list()
         self.interval = interval
-        self.from_date = datetime.utcnow().isoformat()+'Z'
 
         self.last_metrics = dict()
         self.app_last_time = None
@@ -60,9 +59,12 @@ class Alert(threading.Thread):
 
         self.running = True
 
+        now = datetime.utcnow()
+        from_date = now.replace(microsecond=0).isoformat() + ".%03dZ" % (now.microsecond // 1000)
+
         while self.running:
             self.status = 'updating...'
-            self.from_date = self._get_alerts(self.filter, self.from_date)
+            from_date = self._get_alerts(self.filter, from_date)
             try:
                 time.sleep(self.interval)
             except (KeyboardInterrupt, SystemExit):
@@ -126,13 +128,13 @@ class Alert(threading.Thread):
         if 'sort-by' not in query:
             query['sort-by'] = 'lastReceiveTime'
 
-        url = self.endpoint + '/api/alerts?' + urlencode(query, doseq=True)
+        url = self.endpoint + '/alerts?' + urlencode(query, doseq=True)
         response = requests.get(url)
 
         try:
             response.raise_for_status()
         except requests.HTTPError:
-            pass
+            return ''
 
         response = response.json()
 
