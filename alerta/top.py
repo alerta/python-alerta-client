@@ -4,6 +4,7 @@ import time
 import curses
 import threading
 import signal
+import copy
 
 try:
     from urllib.parse import urlencode
@@ -13,6 +14,8 @@ except ImportError:
 from datetime import datetime
 
 from alerta.api import ApiClient
+from alerta.alert import AlertDocument
+from alerta.utils import Helpers
 
 SCREEN_REDRAW_INTERVAL = 2
 lock = threading.Lock()
@@ -35,7 +38,7 @@ class UpdateThread(threading.Thread):
 
         self.status = ''
         self.total = 0
-        self.alerts = None
+        self.alerts = []
         self.last_time = datetime.utcnow()
 
         self.resources = dict()
@@ -67,7 +70,7 @@ class UpdateThread(threading.Thread):
 
         while self.running:
             self.status = 'updating...'
-            from_date = self._update(from_date)
+            from_date = self._update()
             try:
                 time.sleep(self.interval)
             except (KeyboardInterrupt, SystemExit):
@@ -185,7 +188,7 @@ class Screen(object):
         self.last_time = None
         self.max_dupl_rate = 0.0
 
-        self.dedup_by = "resource"
+        self.dedup_by = None
 
     def run(self):
 
@@ -219,7 +222,41 @@ class Screen(object):
     def _get_screen(self):
 
         screen = curses.initscr()
+        curses.start_color()
+        curses.use_default_colors()
         curses.noecho()
+        curses.cbreak()
+
+        curses.init_pair(1, curses.COLOR_RED, -1)
+        curses.init_pair(2, curses.COLOR_MAGENTA, -1)
+        curses.init_pair(3, curses.COLOR_YELLOW, -1)
+        curses.init_pair(4, curses.COLOR_BLUE, -1)
+        curses.init_pair(5, curses.COLOR_CYAN, -1)
+        curses.init_pair(6, curses.COLOR_GREEN, -1)
+        curses.init_pair(7, curses.COLOR_WHITE, curses.COLOR_BLACK)
+
+        COLOR_RED = curses.color_pair(1)
+        COLOR_MAGENTA = curses.color_pair(2)
+        COLOR_YELLOW = curses.color_pair(3)
+        COLOR_BLUE = curses.color_pair(4)
+        COLOR_CYAN = curses.color_pair(5)
+        COLOR_GREEN = curses.color_pair(6)
+        COLOR_BLACK = curses.color_pair(7)
+
+        self._COLOR_MAP = {
+            "critical": COLOR_RED,
+            "major": COLOR_MAGENTA,
+            "minor": COLOR_YELLOW,
+            "warning": COLOR_BLUE,
+            "indeterminate": COLOR_CYAN,
+            "cleared": COLOR_GREEN,
+            "normal": COLOR_GREEN,
+            "informational": COLOR_GREEN,
+            "ok": COLOR_GREEN,
+            "debug": COLOR_BLACK,
+            "auth": COLOR_BLACK,
+            "unknown": COLOR_BLACK
+        }
 
         try:
             curses.curs_set(0)
@@ -311,7 +348,7 @@ class Screen(object):
                     if i == self.max_y - 3:
                         break
 
-            if self.dedup_by == "event" and self.w.events:
+            elif self.dedup_by == "event" and self.w.events:
 
                 self._addstr(5, 1, 'Count Group       Event', curses.A_BOLD)
 
@@ -329,7 +366,7 @@ class Screen(object):
                     if i == self.max_y - 3:
                         break
 
-            if self.dedup_by == "origin" and self.w.origins:
+            elif self.dedup_by == "origin" and self.w.origins:
 
                 self._addstr(5, 1, 'Count Origin', curses.A_BOLD)
 
@@ -343,6 +380,30 @@ class Screen(object):
                         ))
                     except curses.error:
                         pass
+                    if i == self.max_y - 3:
+                        break
+            else:
+                self._addstr(2, 1, 'Sev. Time     Dupl. Env.        Service    Resource     Event        Value', curses.A_LOW)
+                i = 2
+                alerts = copy.deepcopy(self.w.alerts)
+                for alert in sorted(alerts, key=lambda x: Helpers.name_to_code(x['severity'])):
+                    a = AlertDocument.parse_alert(alert)
+                    i += 1
+                    color = self._COLOR_MAP.get(a.severity, self._COLOR_MAP['unknown'])
+                    try:
+                        self._addstr(i, 1, '{0} {1} {2:5d} {3:<11} {4:<10} {5:<12.12} {6:<12.12} {7:<5.5}'.format(
+                            Helpers.to_short_sev(a.severity),
+                            a.get_date('last_receive_time', 'short')[7:],
+                            a.duplicate_count,
+                            a.environment,
+                            ','.join(a.service),
+                            a.resource,
+                            a.event,
+                            a.value
+                        ), color)
+                    except curses.error as e:
+                        print str(e)
+                        sys.exit(1)
                     if i == self.max_y - 3:
                         break
 
@@ -359,7 +420,8 @@ class Screen(object):
         self.screen.clear()
 
         self._draw_header()
-        self._draw_bars()
+        if self.dedup_by:
+            self._draw_bars()
         self._draw_alerts()
         self._draw_footer()
 
@@ -374,7 +436,9 @@ class Screen(object):
 
     # Event handlers
     def _handle_key_event(self, key):
-        if key in 'rR':
+        if key in 'aA':
+            self.dedup_by = None
+        elif key in 'rR':
             self.dedup_by = "resource"
         elif key in 'eE':
             self.dedup_by = "event"
