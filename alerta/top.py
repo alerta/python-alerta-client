@@ -1,7 +1,6 @@
 
 import sys
 import time
-import requests
 import curses
 import threading
 import signal
@@ -13,17 +12,21 @@ except ImportError:
 
 from datetime import datetime
 
+from alerta.api import ApiClient
+
 SCREEN_REDRAW_INTERVAL = 2
 lock = threading.Lock()
 
 
-class Alert(threading.Thread):
+class UpdateThread(threading.Thread):
 
-    def __init__(self, endpoint="http://localhost:8080", filter=None, interval=2):
+    def __init__(self, endpoint, key, interval=2):
 
-        self.endpoint = endpoint
-        self.filter = filter or list()
+        self.api = ApiClient(endpoint=endpoint, key=key)
+
         self.interval = interval
+
+        self.version = ''
 
         self.last_metrics = dict()
         self.app_last_time = None
@@ -64,23 +67,17 @@ class Alert(threading.Thread):
 
         while self.running:
             self.status = 'updating...'
-            from_date = self._get_alerts(self.filter, from_date)
+            from_date = self._update(from_date)
             try:
                 time.sleep(self.interval)
             except (KeyboardInterrupt, SystemExit):
                 sys.exit(0)
 
-    def _get_alerts(self, filter, from_date=None):
+    def _update(self, from_date=None):
 
-        url = self.endpoint + '/management/status'
-        response = requests.get(url)
+        status = self.api.get_status()
 
-        try:
-            response.raise_for_status()
-        except requests.HTTPError:
-            pass
-
-        status = response.json()
+        self.version = 'v' + status['version']
 
         app_time = status['time'] / 1000  # epoch ms
 
@@ -120,23 +117,14 @@ class Alert(threading.Thread):
 
         self.app_last_time = app_time
 
-        query = dict([x.split('=', 1) for x in filter if '=' in x])
-
+        query = dict()
         if from_date:
             query['from-date'] = from_date
 
         if 'sort-by' not in query:
             query['sort-by'] = 'lastReceiveTime'
 
-        url = self.endpoint + '/alerts?' + urlencode(query, doseq=True)
-        response = requests.get(url)
-
-        try:
-            response.raise_for_status()
-        except requests.HTTPError:
-            return ''
-
-        response = response.json()
+        response = self.api.get_alerts(query)
 
         with lock:
             self.status = '%s - %s' % (response['status'], response.get('message', 'no errors'))
@@ -201,7 +189,7 @@ class Screen(object):
 
     def run(self):
 
-        self.w = Alert(endpoint=self.endpoint)
+        self.w = UpdateThread(endpoint=self.endpoint, key=self.key)
         self.w.start()
 
         self.mainloop()
@@ -221,7 +209,8 @@ class Screen(object):
                     self._handle_event(event)
 
                 time.sleep(SCREEN_REDRAW_INTERVAL)
-            except Exception:
+            except Exception as e:
+                print str(e)
                 self.w.running = False
                 break
 
@@ -248,8 +237,8 @@ class Screen(object):
 
         now = datetime.utcnow().strftime("%H:%M:%S %d/%m/%y")
 
-        self._addstr(self.min_y, self.min_x, self.w.endpoint, curses.A_BOLD)
-        self._addstr(self.min_y, self.ALIGN_CENTRE, 'alerta', curses.A_BOLD)
+        self._addstr(self.min_y, self.min_x, self.endpoint, curses.A_BOLD)
+        self._addstr(self.min_y, self.ALIGN_CENTRE, 'alerta ' + self.w.version, curses.A_BOLD)
         self._addstr(self.min_y, self.ALIGN_RIGHT, now, curses.A_BOLD)
 
     def _draw_bars(self):
