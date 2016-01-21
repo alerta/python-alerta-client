@@ -444,7 +444,7 @@ class Screen(object):
                     if i == self.max_y - 3:
                         break
             else:
-                if self.max_x < 100:
+                if self.max_x < 132:
                     self._addstr(2, 1, 'Sev. Time     Dupl. Env.         Service      Resource     Event        Value ',
                                  curses.A_UNDERLINE)
                 else:
@@ -465,7 +465,7 @@ class Screen(object):
                     i += 1
                     color = self._COLOR_MAP.get(a.severity, self._COLOR_MAP['unknown'])
                     try:
-                        if self.max_x < 100:
+                        if self.max_x < 132:
                             self._addstr(i, 1, '{0:<4} {1} {2:5d} {3:<12} {4:<12} {5:<12.12} {6:<12.12} {7:<6.6}'.format(
                                 to_short_sev(a.severity),
                                 a.get_date('last_receive_time', 'short')[7:],
@@ -488,7 +488,7 @@ class Screen(object):
                                 a.event,
                                 a.value,
                                 a.text,
-                                self.max_x - 102
+                                self.max_x - 106
                             ), color)
                     except curses.error as e:
                         print str(e)
