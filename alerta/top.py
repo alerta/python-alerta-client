@@ -274,7 +274,7 @@ class Screen(object):
 
                 time.sleep(SCREEN_REDRAW_INTERVAL)
             except Exception as e:
-                print str(e)
+                print(e)
                 self.w.running = False
                 break
 
@@ -491,7 +491,7 @@ class Screen(object):
                                 self.max_x - 106
                             ), color)
                     except curses.error as e:
-                        print str(e)
+                        print(e)
                         sys.exit(1)
                     if i == self.max_y - 3:
                         break
