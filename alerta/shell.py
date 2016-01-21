@@ -109,15 +109,16 @@ class AlertCommand(object):
             sys.exit(1)
 
         if response['status'] == 'ok':
-            if not 'alert' in response:
-                info = response['message']
-            elif response['alert']['repeat']:
-                info = "%s duplicates" % response['alert']['duplicateCount']
+            if 'alert' in response:
+                if response['alert']['repeat']:
+                    info = "%s duplicates" % response['alert']['duplicateCount']
+                else:
+                    info = "%s -> %s" % (response['alert']['previousSeverity'], response['alert']['severity'])
             else:
-                info = "%s -> %s" % (response['alert']['previousSeverity'], response['alert']['severity'])
+                info = response.get('message', 'v1')
             print("{} ({})".format(response['id'], info))
         else:
-            LOG.error(response['message'])
+            LOG.error(response.get('message', 'no error message'))
             sys.exit(1)
 
     def heartbeat(self, args):
