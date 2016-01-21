@@ -5,7 +5,7 @@ Alerta Command-Line Tool
 
 Unified command-line tool, terminal GUI and python SDK for [alerta](https://github.com/guardian/alerta) monitoring system.
 
-[![screen shot](/docs/images/alerta-top-132x25.png?raw=true&v=1)
+![screen shot](/docs/images/alerta-top-80x25.png?raw=true&v=1)
 
 Installation
 ------------
