@@ -186,13 +186,10 @@ class UpdateThread(threading.Thread):
         response = self.api.get_alerts(query)
 
         with lock:
-            self.status = '%s - %s' % (response['status'], response.get('message', 'no errors'))
-            self.total = response.get('total', 0)
             alert_delta = response.get('alerts', [])
             self.last_time = datetime.strptime(response.get('lastTime', ''), "%Y-%m-%dT%H:%M:%S.%fZ")
 
             for alert in alert_delta:
-
                 key = (alert['environment'], alert['resource'])
                 if key not in self.resources:
                     self.resources[key] = dict()
@@ -220,6 +217,7 @@ class UpdateThread(threading.Thread):
         with lock:
             self.alerts = response.get('alerts', [])
             self.total = response.get('total', 0)
+            self.status = '%s - %s' % (response['status'], response.get('message', 'no errors'))
 
         return response.get('lastTime', '')
 
