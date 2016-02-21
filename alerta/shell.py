@@ -41,9 +41,7 @@ OPTIONS = {
     'timezone':    'Europe/London',
     'output':      'text',
     'color':       True,
-    'debug':       False,
-    'severity':    "normal",
-    'timeout':     86400
+    'debug':       False
 }
 
 DEFAULT_SEVERITY = "normal"  # "normal", "ok" or "clear"
@@ -852,6 +850,7 @@ class AlertaShell(object):
         parser_send.add_argument(
             '-s',
             '--severity',
+            default=DEFAULT_SEVERITY,
             help='severity'
         )
         parser_send.add_argument(
@@ -916,7 +915,7 @@ class AlertaShell(object):
         )
         parser_send.add_argument(
             '--timeout',
-            default=None,
+            default=DEFAULT_TIMEOUT,
             help='Timeout in seconds before an "open" alert will be automatically "expired" or "deleted"',
             type=int
         )
