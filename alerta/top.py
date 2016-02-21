@@ -12,6 +12,7 @@ except ImportError:
     from urllib import urlencode
 
 from datetime import datetime
+from requests import ConnectionError
 
 from alerta.api import ApiClient
 from alerta.alert import AlertDocument
@@ -140,7 +141,10 @@ class UpdateThread(threading.Thread):
 
     def _update(self, from_date=None):
 
-        status = self.api.get_status()
+        try:
+            status = self.api.get_status()
+        except ConnectionError:
+            return ''
 
         self.version = 'v' + status['version']
 
@@ -183,7 +187,10 @@ class UpdateThread(threading.Thread):
         self.app_last_time = app_time
 
         query = {'from-date': from_date}
-        response = self.api.get_alerts(query)
+        try:
+            response = self.api.get_alerts(query)
+        except ConnectionError:
+            return ''
 
         with lock:
             alert_delta = response.get('alerts', [])
@@ -213,7 +220,11 @@ class UpdateThread(threading.Thread):
                 self.origins[key]['count'] += 1
                 self.origins[key]['origin'] = alert['origin']
 
-        response = self.api.get_alerts({})
+        try:
+            response = self.api.get_alerts({})
+        except ConnectionError:
+            return ''
+
         with lock:
             self.alerts = response.get('alerts', [])
             self.total = response.get('total', 0)
