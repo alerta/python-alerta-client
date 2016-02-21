@@ -24,7 +24,7 @@ class TestAlert(unittest.TestCase):
         self.ORIGIN = 'test_alert'
         self.EVENT_TYPE = 'exceptionAlert'
         self.CREATE_TIME = datetime.datetime.utcnow()
-        self.TIMEOUT = 86400
+        self.TIMEOUT = 3600
         self.RAW_DATA = 'lots of raw text'
 
         self.DUPLICATE_COUNT = 0
@@ -43,7 +43,7 @@ class TestAlert(unittest.TestCase):
         self.assertEquals(alert.event, self.EVENT)
         self.assertEquals(alert.severity, 'normal')
         self.assertEquals(alert.group, 'Misc')
-        self.assertEquals(alert.timeout, self.TIMEOUT)
+        self.assertEquals(alert.timeout, 86400)
 
     def test_alert_with_some_values(self):
         """
@@ -77,6 +77,7 @@ class TestAlert(unittest.TestCase):
         self.assertEquals(alert.service, self.SERVICE)
         self.assertEquals(alert.tags, self.TAGS)
         self.assertEquals(alert.attributes, self.ATTRIBUTES)
+        self.assertEquals(alert.timeout, self.TIMEOUT)
 
     def test_alert_receive_now(self):
         """
@@ -91,3 +92,12 @@ class TestAlert(unittest.TestCase):
 
         alert.receive_now()
         self.assertIsInstance(alert.receive_time, datetime.datetime)
+
+    def test_zero_timeout(self):
+
+        alert = Alert(
+            self.RESOURCE,
+            self.EVENT,
+            timeout=0
+        )
+        self.assertEquals(alert.timeout, 0)

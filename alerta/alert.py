@@ -47,7 +47,7 @@ class Alert(object):
         self.event_type = kwargs.get('event_type', kwargs.get('type', None)) or "exceptionAlert"
         self.create_time = kwargs.get('create_time', None) or datetime.datetime.utcnow()
         self.receive_time = None
-        self.timeout = kwargs.get('timeout', None) or DEFAULT_TIMEOUT
+        self.timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
         self.raw_data = kwargs.get('raw_data', kwargs.get('rawData', None)) or ""
         self.customer = kwargs.get('customer', None)
 
@@ -193,7 +193,7 @@ class AlertDocument(object):
         self.origin = origin or '%s/%s' % (prog, platform.uname()[1])
         self.event_type = event_type or 'exceptionAlert'
         self.create_time = create_time or datetime.datetime.utcnow()
-        self.timeout = timeout or DEFAULT_TIMEOUT
+        self.timeout = timeout if timeout is not None else DEFAULT_TIMEOUT
         self.raw_data = raw_data
         self.customer = customer
 
