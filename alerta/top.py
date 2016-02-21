@@ -254,6 +254,7 @@ class Screen(object):
         self.w = UpdateThread(endpoint=self.endpoint, key=self.key)
         self.w.start()
 
+        self.register_exit_handlers()
         self.mainloop()
 
     def mainloop(self):
@@ -559,14 +560,14 @@ class Screen(object):
             # Redraw the screen on resize
             self._redraw()
 
+    def exit_handler(signum, frame):
 
-def exit_handler(signum, frame):
+        curses.echo()
+        curses.nocbreak()
+        curses.endwin()
+        sys.exit(0)
 
-    curses.echo()
-    curses.nocbreak()
-    curses.endwin()
-    sys.exit(0)
-
-# Register exit signals
-signal.signal(signal.SIGTERM, exit_handler)
-signal.signal(signal.SIGINT, exit_handler)
+    def register_exit_handlers(self):
+        # Register exit signals
+        signal.signal(signal.SIGTERM, self.exit_handler)
+        signal.signal(signal.SIGINT, self.exit_handler)
