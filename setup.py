@@ -5,7 +5,7 @@ import setuptools
 with open('VERSION') as f:
     version = f.read().strip()
 
-with open('README.rst') as f:
+with open('README.md') as f:
     readme = f.read()
 
 setuptools.setup(

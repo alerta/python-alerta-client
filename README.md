@@ -3,37 +3,42 @@ Alerta Command-Line Tool
 
 [![Build Status](https://travis-ci.org/alerta/python-alerta.svg?branch=master)](https://travis-ci.org/alerta/python-alerta) [![Gitter chat](https://badges.gitter.im/alerta/chat.png)](https://gitter.im/alerta/chat)
 
-Unified command-line tool, terminal GUI and python SDK for [alerta](https://github.com/guardian/alerta) monitoring system.
+Unified command-line tool, terminal GUI and python SDK for the Alerta monitoring system.
 
 ![screen shot](/docs/images/alerta-top-80x25.png?raw=true&v=1)
+
+Related projects can be found on the Alerta Org Repo at <https://github.com/alerta/>.
+
+----
 
 Installation
 ------------
 
-    $ pip install alerta
+To install the Alerta CLI tool run::
 
+    $ pip install alerta
 
 Configuration
 -------------
 
-Options can be set in a configuration file, as environment variables or on the command line. Profiles can be used to easily switch between different configuration settings.
+Options can be set in a configuration file, as environment variables or on the command line.
+Profiles can be used to easily switch between different configuration settings.
 
-
-| Option      | Config File | Environment Variable              | Optional Argument               | Default                   |
-|-------------|-------------|-----------------------------------|---------------------------------|---------------------------|
-| file        |     n/a     | `ALERTA_CONF_FILE`                |     n/a                         | `~/.alerta.conf`          |
-| profile     |  profile    | `ALERTA_DEFAULT_PROFILE`          | `--profile PROFILE`             | None                      |
-| endpoint    |  endpoint   | `ALERTA_ENDPOINT`                 | `--endpoint-url URL`            | `http://localhost:8080`   |
-| key         |  key        | `ALERTA_API_KEY`                  | n/a                             | None                      |
-| timezone    |  timezone   | n/a                               | n/a                             | Europe/London             |
-| output      |  output     | n/a                               | `--output OUTPUT`, `--json`     | text                      |
-| color       |  color      | `CLICOLOR`                        | `--color`, `--no-color`         | color on                  |
-| debug       |  debug      | `DEBUG`                           | `--debug`                       | no debug                  |
+    | Option   | Config File | Environment Variable       | Optional Argument               | Default                   |
+    |----------|-------------|----------------------------|---------------------------------|---------------------------|
+    | file     | n/a         | ``ALERTA_CONF_FILE``       | n/a                             | ``~/.alerta.conf``        |
+    | profile  | profile     | ``ALERTA_DEFAULT_PROFILE`` | ``--profile PROFILE``           | None                      |
+    | endpoint | endpoint    | ``ALERTA_ENDPOINT``        | ``--endpoint-url URL``          | ``http://localhost:8080`` |
+    | key      | key         | ``ALERTA_API_KEY``         | n/a                             | None                      |
+    | timezone | timezone    | n/a                        | n/a                             | Europe/London             |
+    | output   | output      | n/a                        | ``--output OUTPUT``, ``--json`` | text                      |
+    | color    | color       | ``CLICOLOR``               | ``--color``, ``--no-color``     | color on                  |
+    | debug    | debug       | ``DEBUG``                  | ``--debug``                     | no debug                  |
 
 Example
 -------
 
-Configuration file ~/.alerta.conf:
+Configuration file ``~/.alerta.conf``::
 
     [DEFAULT]
     timezone = Australia/Sydney
@@ -51,23 +56,21 @@ Configuration file ~/.alerta.conf:
 Environment Variables
 ---------------------
 
-Set environment variables:
+Set environment variables to use production configuration settings by default::
 
     $ export ALERTA_CONF_FILE=~/.alerta.conf
     $ export ALERTA_DEFAULT_PROFILE=production
 
-Use production configuration settings by default:
-
     $ alerta query
-    Switch to development configuration settings when required:
+
+And to switch to development configuration settings when required use the ``--profile`` option::
 
     $ alerta --profile development query
-
 
 Usage
 -----
 
-    $ alerta -h
+    $ alerta help
     usage: alerta [OPTIONS] COMMAND [FILTERS]
 
     Alerta client unified command-line tool
@@ -95,7 +98,11 @@ Usage
         unack             Unacknowledge alerts
         close             Close alerts
         delete            Delete alerts
+        blackout          Blackout alerts based on attributes
+        blackouts         List all blackout periods
         heartbeat         Send heartbeat to server
+        heartbeats        List all heartbeats
+        user              Manage user details (Basic Auth only).
         status            Show status and metrics
         uptime            Show server uptime
         version           Show alerta version info
@@ -116,7 +123,6 @@ Python SDK
 ==========
 
 The alerta client python package can also be used as a Python SDK.
-
 
 Example
 -------
