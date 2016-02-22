@@ -141,9 +141,13 @@ class ApiClient(object):
 
         return self._delete('/blackout/%s' % blackoutid)
 
-    def update_user(self, user, password):
+    def get_users(self, query):
 
-        return self._put('/user/%s' % user, data=json.dumps({"password": password}))
+        return self._get('/users', query)
+
+    def update_user(self, user, data):
+
+        return self._put('/user/%s' % user, data=json.dumps(data))
 
     def get_status(self):
 

@@ -595,8 +595,15 @@ class AlertCommand(object):
 
     def user(self, args):
 
+        response = self._users(login=args.user)
+        if response['total'] == 1:
+            user_id = response['users'][0]['id']
+        else:
+            print('User %s lookup failed.' % args.user)
+            sys.exit(1)
+
         if args.password:
-            response = self.api.update_user(args.user, args.password)
+            response = self.api.update_user(user=user_id, data={'password': args.password})
             if response['status'] == 'ok':
                 print('Password reset OK.')
             else:
@@ -677,6 +684,28 @@ class AlertCommand(object):
 
         try:
             response = self.api.get_heartbeats()
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == "error":
+            LOG.error(response['message'])
+            sys.exit(1)
+
+        return response
+
+    def _users(self, id=None, login=None, name=None):
+
+        query = list()
+        if id:
+            query.append(('id', id))
+        if login:
+            query.append(('login', login))
+        if name:
+            query.append(('name', name))
+
+        try:
+            response = self.api.get_users(query)
         except Exception as e:
             LOG.error(e)
             sys.exit(1)
