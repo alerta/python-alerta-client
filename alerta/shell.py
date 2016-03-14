@@ -613,6 +613,33 @@ class AlertCommand(object):
             LOG.error('Only change password supported at present.')
             sys.exit(1)
 
+    def keys(self, args):
+
+        response = self._keys()
+        keys = response['keys']
+
+        print('{:<40} {:<16} {:<16} {:<10} {:19} {:19} {:4}'.format('API KEY', 'DESCRIPTION', 'CUSTOMER', 'RO / RW', 'EXPIRES', 'LAST USED', 'COUNT'))
+
+        for key in keys:
+            expire_time = datetime.strptime(key['expireTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            tz = pytz.timezone(args.timezone)
+
+            try:
+                last_used_time = datetime.strptime(key['lastUsedTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                last_used_time_or_none = last_used_time.replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S')
+            except TypeError:
+                last_used_time_or_none = 'not used'
+
+            print('{} {:<16} {:<16} {:<10} {:19} {:19} {:>5}'.format(
+                key['key'],
+                key['text'],
+                key.get('customer', '') or '-',
+                key['type'],
+                expire_time.replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
+                last_used_time_or_none,
+                key['count']
+            ))
+
     @staticmethod
     def _build(filters, from_date=None, to_date=None):
 
@@ -706,6 +733,20 @@ class AlertCommand(object):
 
         try:
             response = self.api.get_users(query)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == "error":
+            LOG.error(response['message'])
+            sys.exit(1)
+
+        return response
+
+    def _keys(self):
+
+        try:
+            response = self.api.get_keys()
         except Exception as e:
             LOG.error(e)
             sys.exit(1)
@@ -1319,6 +1360,13 @@ class AlertaShell(object):
             help='New password'
         )
         parser_user.set_defaults(func=cli.user)
+
+        parser_keys = subparsers.add_parser(
+            'keys',
+            help='List all API keys',
+            usage='alerta [OPTIONS] keys [-h]'
+        )
+        parser_keys.set_defaults(func=cli.keys)
 
         parser_status = subparsers.add_parser(
             'status',

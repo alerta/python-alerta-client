@@ -149,6 +149,10 @@ class ApiClient(object):
 
         return self._put('/user/%s' % user, data=json.dumps(data))
 
+    def get_keys(self):
+
+        return self._get('/keys')
+
     def get_status(self):
 
         return self._get('/management/status')
