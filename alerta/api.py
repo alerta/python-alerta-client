@@ -149,9 +149,17 @@ class ApiClient(object):
 
         return self._put('/user/%s' % user, data=json.dumps(data))
 
+    def create_key(self, key):
+
+        return self._post('/key', data=json.dumps(key))
+
     def get_keys(self):
 
         return self._get('/keys')
+
+    def revoke_key(self, key):
+
+        return self._delete('/key/%s' % key)
 
     def get_status(self):
 
@@ -203,10 +211,5 @@ class ApiClient(object):
 
         url = self.endpoint + path
         response = self.session.delete(url, auth=ApiAuth(self.key))
-
-        try:
-            response.raise_for_status()
-        except requests.HTTPError:
-            raise
 
         return response.json()

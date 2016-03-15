@@ -613,12 +613,43 @@ class AlertCommand(object):
             LOG.error('Only change password supported at present.')
             sys.exit(1)
 
+    def key(self, args):
+
+        if args.readonly:
+            key_type = 'read-only'
+        else:
+            key_type = 'read-write'
+
+        key = {
+            "type": key_type,
+            "text": args.text or ''
+        }
+        if args.user:
+            key['user'] = args.user
+        if args.customer:
+            key['customer'] = args.customer
+        elif not args.no_customer:
+            LOG.error("Must use '--customer' or '--no-customer'")
+            sys.exit(1)
+
+        try:
+            response = self.api.create_key(key)
+        except Exception as e:
+            LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == 'ok':
+            print(response['key'])
+        else:
+            LOG.error(response['message'])
+            sys.exit(1)
+
     def keys(self, args):
 
         response = self._keys()
         keys = response['keys']
 
-        print('{:<40} {:<16} {:<16} {:<10} {:19} {:19} {:4}'.format('API KEY', 'DESCRIPTION', 'CUSTOMER', 'RO / RW', 'EXPIRES', 'LAST USED', 'COUNT'))
+        print('{:<40} {:<24} {:<20} {:<16} {:<10} {:19} {:19} {:4}'.format('API KEY', 'USER', 'DESCRIPTION', 'CUSTOMER', 'RO / RW', 'EXPIRES', 'LAST USED', 'COUNT'))
 
         for key in keys:
             expire_time = datetime.strptime(key['expireTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -630,8 +661,9 @@ class AlertCommand(object):
             except TypeError:
                 last_used_time_or_none = 'not used'
 
-            print('{} {:<16} {:<16} {:<10} {:19} {:19} {:>5}'.format(
+            print('{} {:<24} {:<20} {:<16} {:<10} {:19} {:19} {:>5}'.format(
                 key['key'],
+                key['user'],
                 key['text'],
                 key.get('customer', '') or '-',
                 key['type'],
@@ -639,6 +671,16 @@ class AlertCommand(object):
                 last_used_time_or_none,
                 key['count']
             ))
+
+    def revoke(self, args):
+
+        response = self.api.revoke_key(args.api_key)
+
+        if response['status'] == 'ok':
+            print("OK")
+        else:
+            LOG.error(response['message'])
+            sys.exit(1)
 
     @staticmethod
     def _build(filters, from_date=None, to_date=None):
@@ -1350,16 +1392,53 @@ class AlertaShell(object):
             usage='alerta [OPTIONS] user --user-name USER [--password PASSWORD]'
         )
         parser_user.add_argument(
+            '-u',
             '--user-name',
             dest='user',
             required=True,
             help='User name'
         )
         parser_user.add_argument(
+            '-p',
             '--password',
             help='New password'
         )
         parser_user.set_defaults(func=cli.user)
+
+        parser_key = subparsers.add_parser(
+            'key',
+            help='Create API key',
+            usage='alerta [OPTIONS] key [-u USER] [--readonly] [--customer CUSTOMER|--no-customer] [-t TEXT]\n'
+        )
+        parser_key.add_argument(
+            '-u',
+            '--user-name',
+            dest='user',
+            help='User name'
+        )
+        parser_key.add_argument(
+            '-O',
+            '--readonly',
+            help='read only API key',
+            action='store_true',
+            default=False
+        )
+        parser_key.add_argument(
+            '--customer',
+            help='customer view'
+        )
+        parser_key.add_argument(
+            '--no-customer',
+            help='do not associate with customer',
+            action='store_true',
+            default=False
+        )
+        parser_key.add_argument(
+            '-t',
+            '--text',
+            help='text'
+        )
+        parser_key.set_defaults(func=cli.key)
 
         parser_keys = subparsers.add_parser(
             'keys',
@@ -1367,6 +1446,19 @@ class AlertaShell(object):
             usage='alerta [OPTIONS] keys [-h]'
         )
         parser_keys.set_defaults(func=cli.keys)
+
+        parser_revoke = subparsers.add_parser(
+            'revoke',
+            help='Revoke API key',
+            usage='alerta [OPTIONS] revoke [--api-key KEY]'
+        )
+        parser_revoke.add_argument(
+            '-K',
+            '--api-key',
+            required=True,
+            help='API key to be revoked.'
+        )
+        parser_revoke.set_defaults(func=cli.revoke)
 
         parser_status = subparsers.add_parser(
             'status',
