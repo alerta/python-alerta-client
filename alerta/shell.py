@@ -1408,7 +1408,7 @@ class AlertaShell(object):
         parser_key = subparsers.add_parser(
             'key',
             help='Create API key',
-            usage='alerta [OPTIONS] key [-u USER] [-O] [-t TEXT]\n'
+            usage='alerta [OPTIONS] key [-u USER] [--readonly] [--customer CUSTOMER|--no-customer] [-t TEXT]\n'
         )
         parser_key.add_argument(
             '-u',
@@ -1425,11 +1425,11 @@ class AlertaShell(object):
         )
         parser_key.add_argument(
             '--customer',
-            help='customer'
+            help='customer view'
         )
         parser_key.add_argument(
             '--no-customer',
-            help='do not assign customer',
+            help='do not associate with customer',
             action='store_true',
             default=False
         )
