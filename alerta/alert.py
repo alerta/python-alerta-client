@@ -10,6 +10,8 @@ import json
 from uuid import uuid4
 from email import utils
 
+from alerta.utils import DateEncoder
+
 DEFAULT_SEVERITY = "normal"  # "normal", "cleared " or "ok"
 DEFAULT_TIMEOUT = 86400
 
@@ -123,7 +125,7 @@ class Alert(object):
             self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)
 
     def __str__(self):
-        return json.dumps(self.get_body())
+        return json.dumps(self.get_body(), cls=DateEncoder)
 
     @staticmethod
     def parse_alert(alert):
@@ -221,9 +223,9 @@ class AlertDocument(object):
             "correlation-id": self.id
         }
 
-    def get_body(self):
+    def get_body(self, history=True):
 
-        return {
+        body = {
             'id': self.id,
             'resource': self.resource,
             'event': self.event,
@@ -249,9 +251,12 @@ class AlertDocument(object):
             'trendIndication': self.trend_indication,
             'receiveTime': self.get_date('receive_time', 'iso'),
             'lastReceiveId': self.last_receive_id,
-            'lastReceiveTime': self.get_date('last_receive_time', 'iso'),
-            'history': self.history
+            'lastReceiveTime': self.get_date('last_receive_time', 'iso')
         }
+        if history:
+            body['history'] = self.history
+
+        return body
 
     def get_date(self, attr, fmt='iso', timezone='Europe/London'):
 
@@ -280,7 +285,7 @@ class AlertDocument(object):
             self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)
 
     def __str__(self):
-        return json.dumps(self.get_body())
+        return json.dumps(self.get_body(), cls=DateEncoder)
 
     @staticmethod
     def parse_alert(alert):
