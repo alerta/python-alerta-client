@@ -464,7 +464,7 @@ class AlertCommand(object):
         response = self._heartbeats()
         heartbeats = response['heartbeats']
 
-        print('{:<28} {:<26} {:<19} {:>8} {:7} {}'.format('ORIGIN', 'TAGS', 'CREATED', 'LATENCY', 'TIMEOUT', 'SINCE'))
+        print('{:<28} {:<26} {:<19} {:>8} {:7} {:17} {:7}'.format('ORIGIN', 'TAGS', 'CREATED', 'LATENCY', 'TIMEOUT', 'SINCE', 'STATUS'))
 
         for heartbeat in heartbeats:
             hb = HeartbeatDocument.parse_heartbeat(heartbeat)
@@ -475,13 +475,28 @@ class AlertCommand(object):
             latency_exceeded = latency > MAX_LATENCY
             timeout_exceeded = since.seconds > hb.timeout
 
-            print('{:<28} {:<26} {} {}{:6}ms {:6}s {}{}'.format(
+            def status():
+                if args.purge and (latency_exceeded or timeout_exceeded):
+                    r = self.api.delete_heartbeat(heartbeat['id'])
+                    if r['status'] == 'ok':
+                        return 'deleted'
+                    else:
+                        return 'error'
+                elif latency_exceeded:
+                    return 'slow'
+                elif timeout_exceeded:
+                    return 'stale'
+                else:
+                    return 'ok'
+
+            print('{:<28} {:<26} {:19} {:6}ms {:6}s {:17} {:7}'.format(
                 hb.origin,
                 ' '.join(hb.tags),
                 hb.get_date('create_time', 'local', args.timezone),
-                '*' if latency_exceeded else ' ', latency,
+                latency,
                 hb.timeout,
-                '*' if timeout_exceeded else ' ', since
+                since,
+                status()
             ))
 
             if args.alert:
@@ -1382,6 +1397,12 @@ class AlertaShell(object):
             '--alert',
             default=False,
             help='Send alerts on stale or slow heartbeats',
+            action='store_true'
+        )
+        parser_heartbeats.add_argument(
+            '--purge',
+            default=False,
+            help='Delete all expired heartbeats',
             action='store_true'
         )
         parser_heartbeats.set_defaults(func=cli.heartbeats)
