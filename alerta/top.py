@@ -86,11 +86,9 @@ _DISPLAY_SEVERITY = {
 
 class UpdateThread(threading.Thread):
 
-    def __init__(self, endpoint, key, interval=2):
+    def __init__(self, endpoint, key):
 
         self.api = ApiClient(endpoint=endpoint, key=key)
-
-        self.interval = interval
 
         self.version = ''
 
@@ -99,26 +97,25 @@ class UpdateThread(threading.Thread):
         self.rate_metrics = dict()
         self.latency_metrics = dict()
 
-        self.status = ''
-        self.total = 0
         self.alerts = []
+        self.total = 0
+        self.status = ''
+        self.groupby = None
+        self.top10 = []
+
         self.last_time = datetime.utcnow()
 
-        self.resources = dict()
-        self.events = dict()
-        self.origins = dict()
-
-        self.prev_time = None
-        self.diff_time = 0
-        self.running_total = 0
-        self.start_time = time.time()
-        self.max_rate = 0.0
-        self.latency = 0
-        self.running_latency = 0
-
-        self.dupl_cache = dict()
-        self.dupl_total = 0
-        self.running_dupl_total = 0
+        # self.prev_time = None
+        # self.diff_time = 0
+        # self.running_total = 0
+        # self.start_time = time.time()
+        # self.max_rate = 0.0
+        # self.latency = 0
+        # self.running_latency = 0
+        #
+        # self.dupl_cache = dict()
+        # self.dupl_total = 0
+        # self.running_dupl_total = 0
 
         self.running = True
 
@@ -128,18 +125,21 @@ class UpdateThread(threading.Thread):
 
         self.running = True
 
-        now = datetime.utcnow()
-        from_date = now.replace(microsecond=0).isoformat() + ".%03dZ" % (now.microsecond // 1000)
-
         while self.running:
             self.status = 'updating...'
-            from_date = self._update(from_date)
+            self._update()
             try:
-                time.sleep(self.interval)
+                time.sleep(2)
             except (KeyboardInterrupt, SystemExit):
                 sys.exit(0)
 
-    def _update(self, from_date=None):
+    def set_groupby(self, groupby):
+        self.groupby = groupby
+
+    def get_groupby(self):
+        return self.groupby
+
+    def _update(self):
 
         try:
             status = self.api.get_status()
@@ -186,42 +186,8 @@ class UpdateThread(threading.Thread):
 
         self.app_last_time = app_time
 
-        query = {'from-date': from_date}
         try:
-            response = self.api.get_alerts(query)
-        except ConnectionError:
-            return ''
-
-        with lock:
-            alert_delta = response.get('alerts', [])
-            self.last_time = datetime.strptime(response.get('lastTime', ''), "%Y-%m-%dT%H:%M:%S.%fZ")
-
-            for alert in alert_delta:
-                key = (alert['environment'], alert['resource'])
-                if key not in self.resources:
-                    self.resources[key] = dict()
-                    self.resources[key]['count'] = 0
-                self.resources[key]['count'] += 1
-                self.resources[key]['environment'] = alert['environment']
-                self.resources[key]['resource'] = alert['resource']
-
-                key = alert['event']
-                if key not in self.events:
-                    self.events[key] = dict()
-                    self.events[key]['count'] = 0
-                self.events[key]['count'] += 1
-                self.events[key]['group'] = alert['group']
-                self.events[key]['event'] = alert['event']
-
-                key = alert['origin']
-                if key not in self.origins:
-                    self.origins[key] = dict()
-                    self.origins[key]['count'] = 0
-                self.origins[key]['count'] += 1
-                self.origins[key]['origin'] = alert['origin']
-
-        try:
-            response = self.api.get_alerts({})
+            response = self.api.get_alerts()
         except ConnectionError:
             return ''
 
@@ -230,7 +196,13 @@ class UpdateThread(threading.Thread):
             self.total = response.get('total', 0)
             self.status = '%s - %s' % (response['status'], response.get('message', 'no errors'))
 
-        return response.get('lastTime', '')
+        try:
+            response = self.api.get_top10(self.groupby)
+        except ConnectionError:
+            return ''
+
+        with lock:
+            self.top10 = response.get('top10', [])
 
 
 class Screen(object):
@@ -258,7 +230,7 @@ class Screen(object):
         self.last_time = None
         self.max_dupl_rate = 0.0
 
-        self.dedup_by = None
+        self.w =None
 
     def run(self):
 
@@ -385,7 +357,7 @@ class Screen(object):
 
     def _draw_footer(self):
 
-        self._addstr(self.max_y - 1, 0, "Last Update: %s" % self.w.last_time.strftime("%H:%M:%S"), curses.A_BOLD)
+        self._addstr(self.max_y - 1, 0, "Last Update: %s (group by %s)" % (self.w.last_time.strftime("%H:%M:%S"), self.w.get_groupby()), curses.A_BOLD)
         self._addstr(self.max_y - 1, self.ALIGN_CENTRE, self.w.status, curses.A_BOLD)
         self._addstr(self.max_y - 1, self.ALIGN_RIGHT, "Count: %s" % self.w.total, curses.A_BOLD)
 
@@ -401,56 +373,29 @@ class Screen(object):
     def _draw_alerts(self):
 
         with lock:
-            if self.dedup_by == "resource" and self.w.resources:
-
-                self._addstr(5, 1, 'Count Environment Resource', curses.A_BOLD)
-
-                i = 5  # start after line 5
-                for key in sorted(self.w.resources, key=lambda x: self.w.resources[x]['count'], reverse=True):
+            if self.w.get_groupby():
+                self._addstr(2, 1, '{:<20} Count Dupl. Environments             Services                 Resources'.format(
+                    self.w.get_groupby().capitalize()
+                ), curses.A_UNDERLINE)
+                i = 2
+                alerts = copy.deepcopy(self.w.top10)
+                for alert in alerts:
                     i += 1
                     try:
-                        self._addstr(i, 1, '%5s %-11s %-30s' % (
-                            self.w.resources[key]['count'],
-                            self.w.resources[key]['environment'],
-                            self.w.resources[key]['resource'])
-                        )
-                    except curses.error:
-                        pass
-                    if i == self.max_y - 3:
-                        break
-
-            elif self.dedup_by == "event" and self.w.events:
-
-                self._addstr(5, 1, 'Count Group       Event', curses.A_BOLD)
-
-                i = 5  # start after line 5
-                for key in sorted(self.w.events, key=lambda x: self.w.events[x]['count'], reverse=True):
-                    i += 1
-                    try:
-                        self._addstr(i, 1, '%5s %-11s %-30s' % (
-                            self.w.events[key]['count'],
-                            self.w.events[key]['group'],
-                            self.w.events[key]['event'])
-                        )
-                    except curses.error:
-                        pass
-                    if i == self.max_y - 3:
-                        break
-
-            elif self.dedup_by == "origin" and self.w.origins:
-
-                self._addstr(5, 1, 'Count Origin', curses.A_BOLD)
-
-                i = 5  # start after line 5
-                for key in sorted(self.w.origins, key=lambda x: self.w.origins[x]['count'], reverse=True):
-                    i += 1
-                    try:
-                        self._addstr(i, 1, '%5s %-30s' % (
-                            self.w.origins[key]['count'],
-                            self.w.origins[key]['origin']
+                        self._addstr(i, 1, '{:<20} {:5} {:5} {:<24} {:<24} {}'.format(
+                            alert[self.w.get_groupby()],
+                            alert['count'],
+                            alert['duplicateCount'],
+                            ','.join(alert['environments']),
+                            ','.join(alert['services']),
+                            ','.join([r['resource'] for r in alert['resources']]),
+                            self.max_x - 160
                         ))
-                    except curses.error:
-                        pass
+                    except curses.error as e:
+                        print(e)
+                        sys.exit(1)
+                    except Exception:
+                        break
                     if i == self.max_y - 3:
                         break
             else:
@@ -519,8 +464,8 @@ class Screen(object):
         self.screen.clear()
 
         self._draw_header()
-        if self.dedup_by:
-            self._draw_bars()
+        # if not self.w.get_groupby():
+        #     self._draw_bars()
         self._draw_alerts()
         self._draw_footer()
 
@@ -536,13 +481,23 @@ class Screen(object):
     # Event handlers
     def _handle_key_event(self, key):
         if key in 'aA':
-            self.dedup_by = None
-        elif key in 'rR':
-            self.dedup_by = "resource"
+            self.w.set_groupby(groupby=None)
         elif key in 'eE':
-            self.dedup_by = "event"
+            self.w.set_groupby("event")
+        elif key in 'rR':
+            self.w.set_groupby("resource")
+        elif key in 'gG':
+            self.w.set_groupby("group")
         elif key in 'oO':
-            self.dedup_by = "origin"
+            self.w.set_groupby("origin")
+        elif key in 'tT':
+            self.w.set_groupby("type")
+        elif key in 'cC':
+            self.w.set_groupby("customer")
+        elif key in 'sS':
+            self.w.set_groupby("severity")
+        elif key in 'vV':
+            self.w.set_groupby("value")
         elif key in 'qQ':
             self._reset()
             sys.exit(0)

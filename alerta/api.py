@@ -40,17 +40,17 @@ class ApiClient(object):
 
         return 'ApiClient(endpoint=%r, key=%r)' % (self.endpoint, self.key)
 
-    def get_alerts(self, query):
+    def get_alerts(self, query=None):
 
         return self._get('/alerts', query)
 
     def get_counts(self, query):
 
-        return self._get('/alerts/count', query)
+        return self._get('/alerts/count', query=None)
 
     def get_history(self, query):
 
-        return self._get('/alerts/history', query)
+        return self._get('/alerts/history', query=None)
 
     def send_alert(self, alert):
 
@@ -124,6 +124,10 @@ class ApiClient(object):
     def delete_heartbeat(self, heartbeatid):
 
         return self._delete('/heartbeat/%s' % heartbeatid)
+
+    def get_top10(self, group='event'):
+
+        return self._get('/alerts/top10', {'group-by': group})
 
     def blackout_alerts(self, blackout):
         """
