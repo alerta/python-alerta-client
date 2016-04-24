@@ -446,15 +446,19 @@ class AlertCommand(object):
         response = self._status()
         metrics = response['metrics']
 
-        print('{:<28} {:<8} {:<26} {:10} {}'.format('METRIC', 'TYPE', 'NAME', 'VALUE', 'AVG'))
+        print('{:<28} {:<8} {:<26} {:10} {}'.format('METRIC', 'TYPE', 'NAME', 'VALUE', 'AVERAGE'))
 
         for metric in [m for m in metrics if m['type'] in ['gauge', 'counter', 'timer']]:
             if metric['type'] == 'gauge':
                 print('{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
-            else:
+            elif metric['type'] == 'counter':
+                print('{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['count']))
+            elif metric['type'] == 'timer':
                 value = metric.get('count', 0)
                 avg = int(metric['totalTime']) * 1.0 / int(metric['count'])
                 print('{0:<28} {1:<8} {2:<26} {3:<10} {4:-3.2f} ms'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], value, avg))
+            else:
+                pass
 
         for metric in [m for m in metrics if m['type'] == 'text']:
             print('{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
