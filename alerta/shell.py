@@ -628,6 +628,26 @@ class AlertCommand(object):
             LOG.error('Only change password supported at present.')
             sys.exit(1)
 
+    def users(self, args):
+
+        response = self._users()
+        users = response['users']
+
+        print('{:<36} {:<24} {:<30} {:<19} {:<8} {:19}'.format('USER ID', 'NAME', 'LOGIN', 'CREATE TIME', 'PROVIDER', 'TEXT'))
+
+        tz = pytz.timezone(args.timezone)
+        for user in users:
+            create_time = datetime.strptime(user['createTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
+
+            print('{} {:<24} {:<30} {:<19} {:<8} {}'.format(
+                user['id'],
+                user['name'],
+                user['login'],
+                create_time.replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
+                user['provider'],
+                user['text']
+            ))
+
     def key(self, args):
 
         if args.readonly:
@@ -1425,6 +1445,13 @@ class AlertaShell(object):
             help='New password'
         )
         parser_user.set_defaults(func=cli.user)
+
+        parser_users = subparsers.add_parser(
+            'users',
+            help='List all users',
+            usage='alerta [OPTIONS] users [-h]'
+        )
+        parser_users.set_defaults(func=cli.users)
 
         parser_key = subparsers.add_parser(
             'key',
