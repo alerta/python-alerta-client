@@ -101,3 +101,14 @@ class TestAlert(unittest.TestCase):
             timeout=0
         )
         self.assertEquals(alert.timeout, 0)
+
+    def test_parse_alert(self):
+
+        def parse_attribute(k, v):
+            return Alert.parse_alert('{"resource": "%s", "event": "%s", "%s": %s}' % (self.RESOURCE, self.EVENT, k, v))
+
+        self.assertRaises(ValueError, parse_attribute, "service", "\"Common\"")
+        self.assertEqual(parse_attribute("service", "[\"Common\"]").service, self.SERVICE)
+
+        self.assertRaises(ValueError, parse_attribute, "timeout", "\"3600\"")
+        self.assertEqual(parse_attribute("timeout", self.TIMEOUT).timeout, self.TIMEOUT)

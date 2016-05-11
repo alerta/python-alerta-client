@@ -144,12 +144,15 @@ class Alert(object):
                     alert[k] = datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%fZ')
                 except ValueError as e:
                     raise ValueError('Could not parse date time string: %s' % e)
-            if k in ['correlate', 'service', 'tags']:
+            elif k in ['correlate', 'service', 'tags']:
                 if not isinstance(alert[k], list):
                     raise ValueError('Attribute must be list: %s' % k)
-            if k == 'attributes':
+            elif k == 'attributes':
                 if not isinstance(alert[k], dict):
                     raise ValueError('Attribute must be name/value pairs: attributes')
+            elif k == 'timeout':
+                if not isinstance(alert[k], int):
+                    raise ValueError('Timeout must be an integer')
 
         return Alert(
             resource=alert.get('resource', None),
