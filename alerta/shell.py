@@ -270,10 +270,11 @@ class AlertCommand(object):
             if 'severity' in hist:
                 if args.color:
                     line_color = _COLOR_MAP.get(hist['severity'], _COLOR_MAP['unknown'])
-                print(line_color + '%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s' % (
+                print(line_color + '%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s|%s' % (
                     hist['id'][0:8],
                     update_time.strftime('%Y/%m/%d %H:%M:%S'),
                     hist['severity'],
+                    hist.get('type', 'unknown'),
                     hist['customer'],
                     hist['environment'],
                     ','.join(hist['service']),
@@ -285,10 +286,11 @@ class AlertCommand(object):
                 ) + end_color)
 
             if 'status' in hist:
-                print(line_color + '%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s' % (
+                print(line_color + '%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s|%s' % (
                     hist['id'][0:8],
                     update_time.strftime('%Y/%m/%d %H:%M:%S'),
                     hist['status'],
+                    hist.get('type', 'unknown'),
                     hist['customer'],
                     hist['environment'],
                     ','.join(hist['service']),
