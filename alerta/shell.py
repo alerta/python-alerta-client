@@ -639,16 +639,17 @@ class AlertCommand(object):
         response = self._users()
         users = response['users']
 
-        print('{:<36} {:<24} {:<30} {:<19} {:<8} {:19}'.format('USER ID', 'NAME', 'LOGIN', 'CREATE TIME', 'PROVIDER', 'TEXT'))
+        print('{:<36} {:<24} {:<30} {:<5} {:<19} {:<8} {:19}'.format('USER ID', 'NAME', 'LOGIN', 'ROLE', 'CREATE TIME', 'PROVIDER', 'TEXT'))
 
         tz = pytz.timezone(args.timezone)
         for user in users:
             create_time = datetime.strptime(user['createTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
 
-            print('{} {:<24} {:<30} {:<19} {:<8} {}'.format(
+            print('{} {:<24} {:<30} {:<5} {:<19} {:<8} {}'.format(
                 user['id'],
                 user['name'],
                 user['login'],
+                user.get('role', 'n/a'),
                 create_time.replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
                 user['provider'],
                 user['text']
