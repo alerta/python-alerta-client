@@ -162,7 +162,7 @@ class AlertCommand(object):
             if args.color:
                 line_color = _COLOR_MAP.get(a.severity, _COLOR_MAP['unknown'])
 
-            print(line_color + '{0}|{1}|{2}|{3:5d}|{4}|{5:<5s}|{6:<10s}|{7:<18s}|{8:12s}|{9:16s}|{10:12s}'.format(
+            print(line_color + u'{0}|{1}|{2}|{3:5d}|{4}|{5:<5s}|{6:<10s}|{7:<18s}|{8:12s}|{9:16s}|{10:12s}'.format(
                 a.id[0:8],
                 a.get_date('last_receive_time', 'local', args.timezone),
                 a.severity,
@@ -174,39 +174,39 @@ class AlertCommand(object):
                 a.group,
                 a.event,
                 a.value) + end_color)
-            print(line_color + '   |{}'.format(a.text) + end_color)
+            print(line_color + u'   |{}'.format(a.text) + end_color)
 
             if args.details:
-                print(line_color + '    severity   | {} -> {}'.format(a.previous_severity, a.severity) + end_color)
-                print(line_color + '    trend      | {}'.format(a.trend_indication) + end_color)
-                print(line_color + '    status     | {}'.format(a.status) + end_color)
-                print(line_color + '    resource   | {}'.format(a.resource) + end_color)
-                print(line_color + '    group      | {}'.format(a.group) + end_color)
-                print(line_color + '    event      | {}'.format(a.event) + end_color)
-                print(line_color + '    value      | {}'.format(a.value) + end_color)
-                print(line_color + '    tags       | {}'.format(' '.join(a.tags)) + end_color)
+                print(line_color + u'    severity   | {} -> {}'.format(a.previous_severity, a.severity) + end_color)
+                print(line_color + u'    trend      | {}'.format(a.trend_indication) + end_color)
+                print(line_color + u'    status     | {}'.format(a.status) + end_color)
+                print(line_color + u'    resource   | {}'.format(a.resource) + end_color)
+                print(line_color + u'    group      | {}'.format(a.group) + end_color)
+                print(line_color + u'    event      | {}'.format(a.event) + end_color)
+                print(line_color + u'    value      | {}'.format(a.value) + end_color)
+                print(line_color + u'    tags       | {}'.format(' '.join(a.tags)) + end_color)
 
                 for key, value in a.attributes.items():
                     print(line_color + '    {} | {}'.format(key.ljust(10), value) + end_color)
 
                 latency = a.receive_time - a.create_time
 
-                print(line_color + '        time created  | {}'.format(a.get_date('create_time', 'iso', args.timezone)) + end_color)
-                print(line_color + '        time received | {}'.format(a.get_date('receive_time', 'iso', args.timezone)) + end_color)
-                print(line_color + '        last received | {}'.format(a.get_date('last_receive_time', 'iso', args.timezone)) + end_color)
-                print(line_color + '        latency       | {}ms'.format((latency.microseconds / 1000)) + end_color)
-                print(line_color + '        timeout       | {}s'.format(a.timeout) + end_color)
+                print(line_color + u'        time created  | {}'.format(a.get_date('create_time', 'iso', args.timezone)) + end_color)
+                print(line_color + u'        time received | {}'.format(a.get_date('receive_time', 'iso', args.timezone)) + end_color)
+                print(line_color + u'        last received | {}'.format(a.get_date('last_receive_time', 'iso', args.timezone)) + end_color)
+                print(line_color + u'        latency       | {}ms'.format((latency.microseconds / 1000)) + end_color)
+                print(line_color + u'        timeout       | {}s'.format(a.timeout) + end_color)
 
-                print(line_color + '            alert id     | {}'.format(a.id) + end_color)
-                print(line_color + '            last recv id | {}'.format(a.last_receive_id) + end_color)
-                print(line_color + '            customer     | {}'.format(a.customer) + end_color)
-                print(line_color + '            environment  | {}'.format(a.environment) + end_color)
-                print(line_color + '            service      | {}'.format(','.join(a.service)) + end_color)
-                print(line_color + '            resource     | {}'.format(a.resource) + end_color)
-                print(line_color + '            type         | {}'.format(a.event_type) + end_color)
-                print(line_color + '            repeat       | {}'.format(a.repeat) + end_color)
-                print(line_color + '            origin       | {}'.format(a.origin) + end_color)
-                print(line_color + '            correlate    | {}'.format(','.join(a.correlate)) + end_color)
+                print(line_color + u'            alert id     | {}'.format(a.id) + end_color)
+                print(line_color + u'            last recv id | {}'.format(a.last_receive_id) + end_color)
+                print(line_color + u'            customer     | {}'.format(a.customer) + end_color)
+                print(line_color + u'            environment  | {}'.format(a.environment) + end_color)
+                print(line_color + u'            service      | {}'.format(','.join(a.service)) + end_color)
+                print(line_color + u'            resource     | {}'.format(a.resource) + end_color)
+                print(line_color + u'            type         | {}'.format(a.event_type) + end_color)
+                print(line_color + u'            repeat       | {}'.format(a.repeat) + end_color)
+                print(line_color + u'            origin       | {}'.format(a.origin) + end_color)
+                print(line_color + u'            correlate    | {}'.format(','.join(a.correlate)) + end_color)
 
         return response.get('lastTime', '')
 
