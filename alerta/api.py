@@ -176,7 +176,8 @@ class ApiClient(object):
         url = self.endpoint + path + '?' + urlencode(query, doseq=True)
         response = self.session.get(url, auth=ApiAuth(self.key))
 
-        LOG.debug('Content type from response: %s', response.headers['content-type'])
+        LOG.debug('Request Headers: %s', response.request.headers)
+
         LOG.debug('Response Headers: %s', response.headers)
         LOG.debug('Response Body: %s', response.text)
 
@@ -192,10 +193,13 @@ class ApiClient(object):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
 
-        LOG.debug('Request Headers: %s', headers)
+        response = self.session.post(url, data=data, auth=ApiAuth(self.key), headers=headers)
+
+        LOG.debug('Request Headers: %s', response.request.headers)
         LOG.debug('Request Body: %s', data)
 
-        response = self.session.post(url, data=data, auth=ApiAuth(self.key), headers=headers)
+        LOG.debug('Response Headers: %s', response.headers)
+        LOG.debug('Response Body: %s', response.text)
 
         return response.json()
 
@@ -204,10 +208,13 @@ class ApiClient(object):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
 
-        LOG.debug('Request Headers: %s', headers)
+        response = self.session.put(url, data=data, auth=ApiAuth(self.key), headers=headers)
+
+        LOG.debug('Request Headers: %s', response.request.headers)
         LOG.debug('Request Body: %s', data)
 
-        response = self.session.put(url, data=data, auth=ApiAuth(self.key), headers=headers)
+        LOG.debug('Response Headers: %s', response.headers)
+        LOG.debug('Response Body: %s', response.text)
 
         return response.json()
 
@@ -215,5 +222,10 @@ class ApiClient(object):
 
         url = self.endpoint + path
         response = self.session.delete(url, auth=ApiAuth(self.key))
+
+        LOG.debug('Request Headers: %s', response.request.headers)
+
+        LOG.debug('Response Headers: %s', response.headers)
+        LOG.debug('Response Body: %s', response.text)
 
         return response.json()
