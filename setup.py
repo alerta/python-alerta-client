@@ -25,7 +25,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'alerta = alerta.shell:main'
+            'alerta = alertaclient.shell:main'
         ]
     },
     keywords="alerta client unified command line tool sdk",
