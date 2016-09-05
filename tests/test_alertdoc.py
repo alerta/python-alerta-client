@@ -2,7 +2,7 @@
 import unittest
 import datetime
 
-from alerta.alert import Alert, AlertDocument
+from alertaclient.alert import Alert, AlertDocument
 
 
 class TestAlert(unittest.TestCase):
