@@ -10,13 +10,19 @@ import json
 from uuid import uuid4
 from email import utils
 
-from alerta.utils import DateEncoder
-
 DEFAULT_SEVERITY = "normal"  # "normal", "cleared " or "ok"
 DEFAULT_TIMEOUT = 86400
 
 prog = os.path.basename(sys.argv[0])
 
+
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+
+        if isinstance(obj, (datetime.date, datetime.datetime)):
+            return obj.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + ".%03dZ" % (obj.microsecond // 1000)
+        else:
+            return json.JSONEncoder.default(self, obj)
 
 class Alert(object):
 

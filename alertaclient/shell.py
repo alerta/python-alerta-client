@@ -20,10 +20,10 @@ except ImportError:
 
 from datetime import datetime, timedelta
 
-from alerta.api import ApiClient
-from alerta.alert import Alert, AlertDocument
-from alerta.heartbeat import Heartbeat, HeartbeatDocument
-from alerta.top import Screen
+from alertaclient.api import ApiClient
+from alertaclient.alert import Alert, AlertDocument
+from alertaclient.heartbeat import Heartbeat, HeartbeatDocument
+from alertaclient.top import Screen
 
 import pkg_resources  # part of setuptools
 __version__ = pkg_resources.require("alerta")[0].version

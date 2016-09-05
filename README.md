@@ -127,8 +127,8 @@ The alerta client python package can also be used as a Python SDK.
 Example
 -------
 
-    >>> from alerta.api import ApiClient
-    >>> from alerta.alert import Alert
+    >>> from alertaclient.api import ApiClient
+    >>> from alertaclient.alert import Alert
     >>>
     >>> api = ApiClient(endpoint='http://api.alerta.io', key='tiPMW41QA+cVy05E7fQA/roxAAwHqZq/jznh8MOk')
     >>> alert = Alert(resource='foo', event='bar')
@@ -143,7 +143,7 @@ Example
     >>> api.get_alerts(resource='foo')['alerts'][0]['id']
     u'5fdb224b-9378-422d-807e-fdf8610416d2'
 
-    >>> from alerta.heartbeat import Heartbeat
+    >>> from alertaclient.heartbeat import Heartbeat
     >>> hb = Heartbeat(origin='baz')
     >>> hb
     Heartbeat(id='21d586a6-9bd5-4b18-b0bb-4fb876db4851', origin='baz', create_time=datetime.datetime(2014, 6, 14, 20, 2, 33, 55118), timeout=300)

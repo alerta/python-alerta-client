@@ -14,8 +14,8 @@ except ImportError:
 from datetime import datetime
 from requests import ConnectionError
 
-from alerta.api import ApiClient
-from alerta.alert import AlertDocument
+from alertaclient.api import ApiClient
+from alertaclient.alert import AlertDocument
 
 SCREEN_REDRAW_INTERVAL = 2
 lock = threading.Lock()
