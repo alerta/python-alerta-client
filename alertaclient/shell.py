@@ -39,6 +39,7 @@ OPTIONS = {
     'endpoint':    'http://localhost:8080',
     'key':         '',
     'timezone':    'Europe/London',
+    'sslverify':   True,
     'output':      'text',
     'color':       True,
     'debug':       False
@@ -71,9 +72,9 @@ class AlertCommand(object):
 
         self.api = ApiClient()
 
-    def set(self, endpoint, key):
+    def set(self, endpoint, key, ssl_verify=True):
 
-        self.api = ApiClient(endpoint=endpoint, key=key)
+        self.api = ApiClient(endpoint=endpoint, key=key, ssl_verify=ssl_verify)
 
     def send(self, args):
 
@@ -908,10 +909,16 @@ class AlertaShell(object):
 
         if want_profile and config.has_section('profile %s' % want_profile):
             for opt in OPTIONS:
-                OPTIONS[opt] = config.get('profile %s' % want_profile, opt)
+                try:
+                    OPTIONS[opt] = config.getboolean('profile %s' % want_profile, opt)
+                except (ValueError, AttributeError):
+                    OPTIONS[opt] = config.get('profile %s' % want_profile, opt)
         else:
             for opt in OPTIONS:
-                OPTIONS[opt] = config.get('DEFAULT', opt)
+                try:
+                    OPTIONS[opt] = config.getboolean('DEFAULT', opt)
+                except (ValueError, AttributeError):
+                    OPTIONS[opt] = config.get('DEFAULT', opt)
 
         OPTIONS['endpoint'] = os.environ.get('ALERTA_ENDPOINT') or OPTIONS['endpoint']
         OPTIONS['key'] = os.environ.get('ALERTA_API_KEY') or OPTIONS['key']
@@ -1558,7 +1565,7 @@ class AlertaShell(object):
             args.filters += ['id='+i for i in args.ids]
         args.output = 'json' if args.json else args.output
 
-        cli.set(endpoint=args.endpoint, key=args.key)
+        cli.set(endpoint=args.endpoint, key=args.key, ssl_verify=args.sslverify)
 
         args.func(args)
 

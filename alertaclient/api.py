@@ -30,10 +30,11 @@ class ApiAuth(AuthBase):
 
 class ApiClient(object):
 
-    def __init__(self, endpoint=None, key=None):
+    def __init__(self, endpoint=None, key=None, ssl_verify=True):
 
         self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', "http://localhost:8080")
         self.key = key or os.environ.get('ALERTA_API_KEY', '')
+        self.ssl_verify = ssl_verify  # or REQUESTS_CA_BUNDLE env var
         self.session = requests.Session()
 
     def __repr__(self):
@@ -174,7 +175,7 @@ class ApiClient(object):
         query = query or tuple()
 
         url = self.endpoint + path + '?' + urlencode(query, doseq=True)
-        response = self.session.get(url, auth=ApiAuth(self.key))
+        response = self.session.get(url, auth=ApiAuth(self.key), verify=self.ssl_verify)
 
         LOG.debug('Request Headers: %s', response.request.headers)
 
@@ -193,7 +194,7 @@ class ApiClient(object):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
 
-        response = self.session.post(url, data=data, auth=ApiAuth(self.key), headers=headers)
+        response = self.session.post(url, data=data, headers=headers, auth=ApiAuth(self.key), verify=self.ssl_verify)
 
         LOG.debug('Request Headers: %s', response.request.headers)
         LOG.debug('Request Body: %s', data)
@@ -208,7 +209,7 @@ class ApiClient(object):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
 
-        response = self.session.put(url, data=data, auth=ApiAuth(self.key), headers=headers)
+        response = self.session.put(url, data=data, headers=headers, auth=ApiAuth(self.key), verify=self.ssl_verify)
 
         LOG.debug('Request Headers: %s', response.request.headers)
         LOG.debug('Request Body: %s', data)
@@ -221,7 +222,7 @@ class ApiClient(object):
     def _delete(self, path):
 
         url = self.endpoint + path
-        response = self.session.delete(url, auth=ApiAuth(self.key))
+        response = self.session.delete(url, auth=ApiAuth(self.key), verify=self.ssl_verify)
 
         LOG.debug('Request Headers: %s', response.request.headers)
 

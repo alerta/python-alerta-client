@@ -24,16 +24,17 @@ Configuration
 Options can be set in a configuration file, as environment variables or on the command line.
 Profiles can be used to easily switch between different configuration settings.
 
-    | Option   | Config File | Environment Variable       | Optional Argument               | Default                   |
-    |----------|-------------|----------------------------|---------------------------------|---------------------------|
-    | file     | n/a         | ``ALERTA_CONF_FILE``       | n/a                             | ``~/.alerta.conf``        |
-    | profile  | profile     | ``ALERTA_DEFAULT_PROFILE`` | ``--profile PROFILE``           | None                      |
-    | endpoint | endpoint    | ``ALERTA_ENDPOINT``        | ``--endpoint-url URL``          | ``http://localhost:8080`` |
-    | key      | key         | ``ALERTA_API_KEY``         | n/a                             | None                      |
-    | timezone | timezone    | n/a                        | n/a                             | Europe/London             |
-    | output   | output      | n/a                        | ``--output OUTPUT``, ``--json`` | text                      |
-    | color    | color       | ``CLICOLOR``               | ``--color``, ``--no-color``     | color on                  |
-    | debug    | debug       | ``DEBUG``                  | ``--debug``                     | no debug                  |
+| Option     | Config File | Environment Variable       | Optional Argument               | Default                   |
+|------------|-------------|----------------------------|---------------------------------|---------------------------|
+| file       | n/a         | ``ALERTA_CONF_FILE``       | n/a                             | ``~/.alerta.conf``        |
+| profile    | profile     | ``ALERTA_DEFAULT_PROFILE`` | ``--profile PROFILE``           | None                      |
+| endpoint   | endpoint    | ``ALERTA_ENDPOINT``        | ``--endpoint-url URL``          | ``http://localhost:8080`` |
+| key        | key         | ``ALERTA_API_KEY``         | n/a                             | None                      |
+| timezone   | timezone    | n/a                        | n/a                             | Europe/London             |
+| SSL verify | sslverify   | ``REQUESTS_CA_BUNDLE``     | n/a                             | verify SSL certificates   |
+| output     | output      | n/a                        | ``--output OUTPUT``, ``--json`` | text                      |
+| color      | color       | ``CLICOLOR``               | ``--color``, ``--no-color``     | color on                  |
+| debug      | debug       | ``DEBUG``                  | ``--debug``                     | no debug                  |
 
 Example
 -------
@@ -50,7 +51,8 @@ Configuration file ``~/.alerta.conf``::
     key = demo-key
 
     [profile development]
-    endpoint = http://localhost:8080
+    endpoint = https://localhost:8443
+    sslverify = off
     debug = yes
 
 Environment Variables
