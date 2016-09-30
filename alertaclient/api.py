@@ -44,13 +44,13 @@ class ApiClient(object):
 
         return self._get('/alerts', query)
 
-    def get_counts(self, query):
+    def get_counts(self, query=None):
 
-        return self._get('/alerts/count', query=None)
+        return self._get('/alerts/count', query)
 
-    def get_history(self, query):
+    def get_history(self, query=None):
 
-        return self._get('/alerts/history', query=None)
+        return self._get('/alerts/history', query)
 
     def send_alert(self, alert):
 
@@ -145,7 +145,7 @@ class ApiClient(object):
 
         return self._delete('/blackout/%s' % blackoutid)
 
-    def get_users(self, query):
+    def get_users(self, query=None):
 
         return self._get('/users', query)
 
