@@ -1,10 +1,15 @@
 
 import sys
 import time
-import curses
 import threading
 import signal
 import copy
+
+try:
+    import curses
+except ImportError:
+    print('Failed to load curses library')
+    sys.exit(1)
 
 try:
     from urllib.parse import urlencode

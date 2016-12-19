@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from alertaclient.api import ApiClient
 from alertaclient.alert import Alert, AlertDocument
 from alertaclient.heartbeat import Heartbeat, HeartbeatDocument
-from alertaclient.top import Screen
+
 
 import pkg_resources  # part of setuptools
 __version__ = pkg_resources.require("alerta")[0].version
@@ -223,6 +223,7 @@ class AlertCommand(object):
 
     def top(self, args):
 
+        from alertaclient.top import Screen
         screen = Screen(endpoint=args.endpoint, key=args.key)
 
         try:
