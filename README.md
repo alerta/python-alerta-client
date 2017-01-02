@@ -1,7 +1,7 @@
 Alerta Command-Line Tool
 ========================
 
-[![Build Status](https://travis-ci.org/alerta/python-alerta.svg?branch=master)](https://travis-ci.org/alerta/python-alerta) [![Gitter chat](https://badges.gitter.im/alerta/chat.png)](https://gitter.im/alerta/chat)
+[![Build Status](https://travis-ci.org/alerta/python-alerta-client.svg?branch=master)](https://travis-ci.org/alerta/python-alerta-client) [![Gitter chat](https://badges.gitter.im/alerta/chat.png)](https://gitter.im/alerta/chat)
 
 Unified command-line tool, terminal GUI and python SDK for the Alerta monitoring system.
 
