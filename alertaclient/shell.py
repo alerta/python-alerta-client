@@ -508,18 +508,22 @@ class AlertCommand(object):
             ))
 
             if args.alert:
+                params = dict(filter(lambda a: len(a) == 2, map(lambda a: a.split(':'), hb.tags)))
+                environment = params.get('environment', 'Production')
+                group = params.get('group', 'System')
+                tags = list(filter(lambda a: not a.startswith('environment:') and not a.startswith('group:'), hb.tags))
                 if timeout_exceeded:
                     alert = Alert(
                         resource=hb.origin,
                         event='HeartbeatFail',
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
-                        group='System',
-                        environment='Production',
+                        group=group,
+                        environment=environment,
                         service=['Alerta'],
                         severity='major',
                         value='{}'.format(since),
                         text='Heartbeat not received in {} seconds'.format(hb.timeout),
-                        tags=hb.tags,
+                        tags=tags,
                         type='heartbeatAlert'
                     )
                 elif latency_exceeded:
@@ -527,13 +531,13 @@ class AlertCommand(object):
                         resource=hb.origin,
                         event='HeartbeatSlow',
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
-                        group='System',
-                        environment='Production',
+                        group=group,
+                        environment=environment,
                         service=['Alerta'],
                         severity='major',
                         value='{}ms'.format(latency),
                         text='Heartbeat took more than {}ms to be processed'.format(MAX_LATENCY),
-                        tags=hb.tags,
+                        tags=tags,
                         type='heartbeatAlert'
                     )
                 else:
@@ -541,13 +545,13 @@ class AlertCommand(object):
                         resource=hb.origin,
                         event='HeartbeatOK',
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
-                        group='System',
-                        environment='Production',
+                        group=group,
+                        environment=environment,
                         service=['Alerta'],
                         severity='normal',
                         value='',
                         text='Heartbeat OK',
-                        tags=hb.tags,
+                        tags=tags,
                         type='heartbeatAlert'
                     )
                 self.send(alert)
