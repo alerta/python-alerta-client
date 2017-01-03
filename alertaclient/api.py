@@ -73,14 +73,14 @@ class ApiClient(object):
         if not isinstance(tags, list):
             raise
 
-        return self._post('/alert/%s/tag' % alertid, data=json.dumps({"tags": tags}))
+        return self._put('/alert/%s/tag' % alertid, data=json.dumps({"tags": tags}))
 
     def untag_alert(self, alertid, tags):
 
         if not isinstance(tags, list):
             raise
 
-        return self._post('/alert/%s/untag' % alertid, data=json.dumps({"tags": tags}))
+        return self._put('/alert/%s/untag' % alertid, data=json.dumps({"tags": tags}))
 
     def open_alert(self, alertid):
 
@@ -104,7 +104,7 @@ class ApiClient(object):
 
     def update_status(self, alertid, status):
 
-        return self._post('/alert/%s/status' % alertid, data=json.dumps({"status": status}))
+        return self._put('/alert/%s/status' % alertid, data=json.dumps({"status": status}))
 
     def delete_alert(self, alertid):
 
