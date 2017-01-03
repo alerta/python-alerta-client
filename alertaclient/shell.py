@@ -622,15 +622,19 @@ class AlertCommand(object):
 
     def user(self, args):
 
-        response = self._users(login=args.user)
+        response = self._users(login=args.login)
         if response['total'] == 1:
-            user_id = response['users'][0]['id']
+            user = response['users'][0]
         else:
-            print('User %s lookup failed.' % args.user)
+            print('User login %s lookup failed.' % args.login)
+            sys.exit(1)
+
+        if user['provider'] != 'basic':
+            print('Can only reset password for Basic Auth logins.')
             sys.exit(1)
 
         if args.password:
-            response = self.api.update_user(user=user_id, data={'password': args.password})
+            response = self.api.update_user(user=user['id'], data={'password': args.password})
             if response['status'] == 'ok':
                 print('Password reset OK.')
             else:
@@ -1449,14 +1453,14 @@ class AlertaShell(object):
         parser_user = subparsers.add_parser(
             'user',
             help='Manage user details (Basic Auth only).',
-            usage='alerta [OPTIONS] user --user-name USER [--password PASSWORD]'
+            usage='alerta [OPTIONS] user --user LOGIN [--password PASSWORD]'
         )
         parser_user.add_argument(
             '-u',
-            '--user-name',
-            dest='user',
+            '--user',
+            dest='login',
             required=True,
-            help='User name'
+            help='User login'
         )
         parser_user.add_argument(
             '-p',
