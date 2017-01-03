@@ -583,7 +583,10 @@ class AlertCommand(object):
             sys.exit(1)
 
         if response['status'] == 'ok':
-            print(response['blackout'])
+            try:
+                print(response['blackout']['id'])
+            except:
+                print(response['blackout'])
         else:
             LOG.error(response['message'])
             sys.exit(1)
