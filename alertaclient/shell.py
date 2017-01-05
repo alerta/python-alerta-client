@@ -503,7 +503,7 @@ class AlertCommand(object):
                 hb.get_date('create_time', 'local', args.timezone),
                 latency,
                 hb.timeout,
-                since,
+                str(since),
                 status()
             ))
 
