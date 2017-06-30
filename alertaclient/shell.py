@@ -473,7 +473,7 @@ class AlertCommand(object):
         response = self._heartbeats()
         heartbeats = response['heartbeats']
 
-        print('{:<28} {:<26} {:<19} {:>8} {:7} {:17} {:7}'.format('ORIGIN', 'TAGS', 'CREATED', 'LATENCY', 'TIMEOUT', 'SINCE', 'STATUS'))
+        print('{:<28} {:<28} {:<26} {:<19} {:>8} {:7} {:17} {:7}'.format('ORIGIN', 'CUSTOMER', 'TAGS', 'CREATED', 'LATENCY', 'TIMEOUT', 'SINCE', 'STATUS'))
 
         for heartbeat in heartbeats:
             hb = HeartbeatDocument.parse_heartbeat(heartbeat)
@@ -498,8 +498,9 @@ class AlertCommand(object):
                 else:
                     return 'ok'
 
-            print('{:<28} {:<26} {:19} {:6}ms {:6}s {:17} {:7}'.format(
+            print('{:<28} {:<28} {:<26} {:19} {:6}ms {:6}s {:17} {:7}'.format(
                 hb.origin,
+                hb.customer,
                 ' '.join(hb.tags),
                 hb.get_date('create_time', 'local', args.timezone),
                 latency,
@@ -555,7 +556,7 @@ class AlertCommand(object):
                         tags=tags,
                         type='heartbeatAlert'
                     )
-                self.send(alert)
+                self.api.send(alert)
 
     def blackout(self, args):
 
