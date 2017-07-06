@@ -116,7 +116,7 @@ class AlertCommand(object):
                     info = "%s -> %s" % (response['alert']['previousSeverity'], response['alert']['severity'])
             else:
                 info = response.get('message', 'v1')
-            print("{} ({})".format(response['id'], info))
+            print(u'{} ({})'.format(response['id'], info))
         else:
             LOG.error(response.get('message', 'no error message'))
             sys.exit(1)
@@ -273,7 +273,7 @@ class AlertCommand(object):
             if 'severity' in hist:
                 if args.color:
                     line_color = _COLOR_MAP.get(hist['severity'], _COLOR_MAP['unknown'])
-                print(line_color + '%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s|%s' % (
+                print(line_color + u'%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s|%s' % (
                     hist['id'][0:8],
                     update_time.strftime('%Y/%m/%d %H:%M:%S'),
                     hist['severity'],
@@ -289,7 +289,7 @@ class AlertCommand(object):
                 ) + end_color)
 
             if 'status' in hist:
-                print(line_color + '%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s|%s' % (
+                print(line_color + u'%s|%s|%s|%s|%-5s|%-10s|%-18s|%s|%s|%s|%s|%s' % (
                     hist['id'][0:8],
                     update_time.strftime('%Y/%m/%d %H:%M:%S'),
                     hist['status'],
@@ -455,18 +455,18 @@ class AlertCommand(object):
 
         for metric in [m for m in metrics if m['type'] in ['gauge', 'counter', 'timer']]:
             if metric['type'] == 'gauge':
-                print('{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
+                print(u'{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
             elif metric['type'] == 'counter':
-                print('{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['count']))
+                print(u'{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['count']))
             elif metric['type'] == 'timer':
                 value = metric.get('count', 0)
                 avg = int(metric['totalTime']) * 1.0 / int(metric['count'])
-                print('{0:<28} {1:<8} {2:<26} {3:<10} {4:-3.2f} ms'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], value, avg))
+                print(u'{0:<28} {1:<8} {2:<26} {3:<10} {4:-3.2f} ms'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], value, avg))
             else:
                 pass
 
         for metric in [m for m in metrics if m['type'] == 'text']:
-            print('{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
+            print(u'{0:<28} {1:<8} {2:<26} {3:<10}'.format(metric['title'], metric['type'], metric['group'] + '.' + metric['name'], metric['value']))
 
     def heartbeats(self, args):
 
@@ -498,9 +498,9 @@ class AlertCommand(object):
                 else:
                     return 'ok'
 
-            print('{:<28} {:<28} {:<26} {:19} {:6}ms {:6}s {:17} {:7}'.format(
+            print(u'{:<28} {:<28} {:<26} {:19} {:6}ms {:6}s {:17} {:7}'.format(
                 hb.origin,
-                hb.customer,
+                hb.customer or "-",
                 ' '.join(hb.tags),
                 hb.get_date('create_time', 'local', args.timezone),
                 latency,
@@ -611,7 +611,7 @@ class AlertCommand(object):
                 else:
                     blackout['status'] = 'error'
 
-            print('{:<8} {:<16} {:<16} {:16} {:16} {:16} {:16} {:24} {:8} {} {}s'.format(
+            print(u'{:<8} {:<16} {:<16} {:16} {:16} {:16} {:16} {:24} {:8} {} {}s'.format(
                 blackout['id'][:8],
                 blackout.get('customer', '*'),
                 blackout.get('environment', '*'),
@@ -660,7 +660,7 @@ class AlertCommand(object):
         for user in users:
             create_time = datetime.strptime(user['createTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
 
-            print('{} {:<24} {:<30} {:<5} {:<19} {:<8} {}'.format(
+            print(u'{} {:<24} {:<30} {:<5} {:<19} {:<8} {}'.format(
                 user['id'],
                 user['name'],
                 user['login'],
@@ -718,7 +718,7 @@ class AlertCommand(object):
             except TypeError:
                 last_used_time_or_none = 'not used'
 
-            print('{} {:<24} {:<20} {:<16} {:<10} {:19} {:19} {:>5}'.format(
+            print(u'{} {:<24} {:<20} {:<16} {:<10} {:19} {:19} {:>5}'.format(
                 key['key'],
                 key['user'],
                 key['text'],
