@@ -319,10 +319,15 @@ class AlertCommand(object):
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             try:
-                self.api.tag_alert(alert['id'], args.tags)
+                response = self.api.tag_alert(alert['id'], args.tags)
             except Exception as e:
                 print()
                 LOG.error(e)
+                sys.exit(1)
+
+            if response['status'] == "error":
+                print()
+                LOG.error(response['message'])
                 sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
@@ -342,10 +347,15 @@ class AlertCommand(object):
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             try:
-                self.api.untag_alert(alert['id'], args.tags)
+                response = self.api.untag_alert(alert['id'], args.tags)
             except Exception as e:
                 print()
                 LOG.error(e)
+                sys.exit(1)
+
+            if response['status'] == "error":
+                print()
+                LOG.error(response['message'])
                 sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
@@ -366,10 +376,15 @@ class AlertCommand(object):
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             try:
-                self.api.ack_alert(alert['id'])
+                response = self.api.ack_alert(alert['id'])
             except Exception as e:
                 print()
                 LOG.error(e)
+                sys.exit(1)
+
+            if response['status'] == "error":
+                print()
+                LOG.error(response['message'])
                 sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
@@ -390,10 +405,15 @@ class AlertCommand(object):
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             try:
-                self.api.unack_alert(alert['id'])
+                response = self.api.unack_alert(alert['id'])
             except Exception as e:
                 print()
                 LOG.error(e)
+                sys.exit(1)
+
+            if response['status'] == "error":
+                print()
+                LOG.error(response['message'])
                 sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
@@ -414,10 +434,15 @@ class AlertCommand(object):
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             try:
-                self.api.close_alert(alert['id'])
+                response = self.api.close_alert(alert['id'])
             except Exception as e:
                 print()
                 LOG.error(e)
+                sys.exit(1)
+
+            if response['status'] == "error":
+                print()
+                LOG.error(response['message'])
                 sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
@@ -438,10 +463,15 @@ class AlertCommand(object):
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
             try:
-                self.api.delete_alert(alert['id'])
+                response = self.api.delete_alert(alert['id'])
             except Exception as e:
                 print()
                 LOG.error(e)
+                sys.exit(1)
+
+            if response['status'] == "error":
+                print()
+                LOG.error(response['message'])
                 sys.exit(1)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
@@ -673,12 +703,14 @@ class AlertCommand(object):
     def key(self, args):
 
         if args.readonly:
-            key_type = 'read-only'
+            scopes = ['read']
+        elif args.readwrite:
+            scopes = ['read', 'write']
         else:
-            key_type = 'read-write'
+            scopes = args.scopes
 
         key = {
-            "type": key_type,
+            "scopes": scopes,
             "text": args.text or ''
         }
         if args.user:
@@ -706,7 +738,7 @@ class AlertCommand(object):
         response = self._keys()
         keys = response['keys']
 
-        print('{:<40} {:<24} {:<20} {:<16} {:<10} {:19} {:19} {:4}'.format('API KEY', 'USER', 'DESCRIPTION', 'CUSTOMER', 'RO / RW', 'EXPIRES', 'LAST USED', 'COUNT'))
+        print('{:<40} {:<24} {:<20} {:<16} {:<10} {:19} {:19} {:4}'.format('API KEY', 'USER', 'DESCRIPTION', 'CUSTOMER', 'SCOPES', 'EXPIRES', 'LAST USED', 'COUNT'))
 
         for key in keys:
             expire_time = datetime.strptime(key['expireTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -723,7 +755,7 @@ class AlertCommand(object):
                 key['user'],
                 key['text'],
                 key.get('customer', '') or '-',
-                key['type'],
+                ','.join(key.get("scopes")),
                 expire_time.replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
                 last_used_time_or_none,
                 key['count']
@@ -862,6 +894,10 @@ class AlertCommand(object):
             response = self.api.get_status()
         except Exception as e:
             LOG.error(e)
+            sys.exit(1)
+
+        if response['status'] == "error":
+            LOG.error(response['message'])
             sys.exit(1)
 
         return response
@@ -1500,9 +1536,29 @@ class AlertaShell(object):
         parser_key.add_argument(
             '-O',
             '--readonly',
-            help='read only API key',
+            '--read-only',
+            '--ro',
+            help='read-only API key',
             action='store_true',
             default=False
+        )
+        parser_key.add_argument(
+            '-W',
+            '--readwrite',
+            '--read-write',
+            '--rw',
+            help='read/write API key',
+            action='store_true',
+            default=False
+        )
+        parser_key.add_argument(
+            '-S',
+            '--scope',
+            metavar='SCOPE',
+            action='append',
+            dest='scopes',
+            default=list(),
+            help='List of scopes eg. "admin", "read", "write", "read:alerts", "write:keys".'
         )
         parser_key.add_argument(
             '--customer',
