@@ -182,11 +182,6 @@ class ApiClient(object):
         LOG.debug('Response Headers: %s', response.headers)
         LOG.debug('Response Body: %s', response.text)
 
-        try:
-            response.raise_for_status()
-        except requests.HTTPError:
-            raise
-
         return response.json()
 
     def _post(self, path, data=None):
