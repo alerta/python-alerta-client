@@ -1642,7 +1642,11 @@ class AlertaShell(object):
 
         cli.set(endpoint=args.endpoint, key=args.key, ssl_verify=args.sslverify)
 
-        args.func(args)
+        if hasattr(args, 'func'):
+            args.func(args)
+        else:
+            parser.print_usage()
+            sys.exit('alerta: error: too few arguments')
 
 
 def main():
