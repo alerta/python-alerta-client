@@ -896,10 +896,6 @@ class AlertCommand(object):
             LOG.error(e)
             sys.exit(1)
 
-        if response['status'] == "error":
-            LOG.error(response['message'])
-            sys.exit(1)
-
         return response
 
     def help(self, args):
