@@ -717,9 +717,6 @@ class AlertCommand(object):
             key['user'] = args.user
         if args.customer:
             key['customer'] = args.customer
-        elif not args.no_customer:
-            LOG.error("Must use '--customer' or '--no-customer'")
-            sys.exit(1)
 
         try:
             response = self.api.create_key(key)
@@ -1521,7 +1518,7 @@ class AlertaShell(object):
         parser_key = subparsers.add_parser(
             'key',
             help='Create API key',
-            usage='alerta [OPTIONS] key [-u USER] [--readonly] [--customer CUSTOMER|--no-customer] [-t TEXT]\n'
+            usage='alerta [OPTIONS] key [-u USER] [--readonly] [--customer CUSTOMER] [-t TEXT]\n'
         )
         parser_key.add_argument(
             '-u',
@@ -1559,12 +1556,6 @@ class AlertaShell(object):
         parser_key.add_argument(
             '--customer',
             help='customer view'
-        )
-        parser_key.add_argument(
-            '--no-customer',
-            help='do not associate with customer',
-            action='store_true',
-            default=False
         )
         parser_key.add_argument(
             '-t',
