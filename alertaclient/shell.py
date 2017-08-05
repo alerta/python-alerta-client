@@ -738,7 +738,7 @@ class AlertCommand(object):
         response = self._keys()
         keys = response['keys']
 
-        print('{:<40} {:<24} {:<20} {:<16} {:<10} {:19} {:19} {:4}'.format('API KEY', 'USER', 'DESCRIPTION', 'CUSTOMER', 'SCOPES', 'EXPIRES', 'LAST USED', 'COUNT'))
+        print('{:<40} {:<24} {:<20} {:<16} {:<16} {:19} {:19} {:4}'.format('API KEY', 'USER', 'DESCRIPTION', 'CUSTOMER', 'SCOPES', 'EXPIRES', 'LAST USED', 'COUNT'))
 
         for key in keys:
             expire_time = datetime.strptime(key['expireTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -750,7 +750,7 @@ class AlertCommand(object):
             except TypeError:
                 last_used_time_or_none = 'not used'
 
-            print(u'{} {:<24} {:<20} {:<16} {:<10} {:19} {:19} {:>5}'.format(
+            print(u'{:<40} {:<24} {:<20} {:<16} {:<16} {:19} {:19} {:>5}'.format(
                 key['key'],
                 key['user'],
                 key['text'],
