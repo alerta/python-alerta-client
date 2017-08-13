@@ -83,23 +83,23 @@ class ApiClient(object):
 
         return self._put('/alert/%s/untag' % alertid, data=json.dumps({"tags": tags}))
 
-    def open_alert(self, alertid, text):
+    def open_alert(self, alertid, text=''):
 
         self.update_status(alertid, 'open', text)
 
-    def ack_alert(self, alertid, text=None):
+    def ack_alert(self, alertid, text=''):
 
         self.update_status(alertid, 'ack', text)
 
-    def unack_alert(self, alertid, text=None):
+    def unack_alert(self, alertid, text=''):
 
         self.open_alert(alertid, text)
 
-    def assign_alert(self, alertid, text=None):
+    def assign_alert(self, alertid, text=''):
 
         self.update_status(alertid, 'assigned', text)
 
-    def close_alert(self, alertid, text=None):
+    def close_alert(self, alertid, text=''):
 
         self.update_status(alertid, 'closed', text)
 

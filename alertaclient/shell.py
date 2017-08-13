@@ -1124,6 +1124,7 @@ class AlertaShell(object):
         parser_ack.add_argument(
             '-t',
             '--text',
+            default='',
             help='text'
         )
         parser_ack.set_defaults(func=cli.ack)
@@ -1149,6 +1150,7 @@ class AlertaShell(object):
         parser_unack.add_argument(
             '-t',
             '--text',
+            default='',
             help='text'
         )
         parser_unack.set_defaults(func=cli.unack)
@@ -1175,6 +1177,7 @@ class AlertaShell(object):
         parser_close.add_argument(
             '-t',
             '--text',
+            default='',
             help='text'
         )
         parser_close.set_defaults(func=cli.close)
