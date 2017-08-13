@@ -79,71 +79,45 @@ class AlertCommand(object):
 
     def send(self, args):
 
-        try:
-            alert = Alert(
-                resource=args.resource,
-                event=args.event,
-                environment=args.environment,
-                severity=args.severity,
-                correlate=args.correlate,
-                status=args.status,
-                service=args.service,
-                group=args.group,
-                value=args.value,
-                text=args.text,
-                tags=args.tags,
-                attributes=dict([attrib.split('=') for attrib in args.attributes]),
-                origin=args.origin,
-                event_type=args.event_type,
-                timeout=args.timeout,
-                raw_data=args.raw_data
-            )
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
+        alert = Alert(
+            resource=args.resource,
+            event=args.event,
+            environment=args.environment,
+            severity=args.severity,
+            correlate=args.correlate,
+            status=args.status,
+            service=args.service,
+            group=args.group,
+            value=args.value,
+            text=args.text,
+            tags=args.tags,
+            attributes=dict([attrib.split('=') for attrib in args.attributes]),
+            origin=args.origin,
+            event_type=args.event_type,
+            timeout=args.timeout,
+            raw_data=args.raw_data
+        )
 
-        try:
-            response = self.api.send(alert)
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == 'ok':
-            if 'alert' in response:
-                if response['alert']['repeat']:
-                    info = "%s duplicates" % response['alert']['duplicateCount']
-                else:
-                    info = "%s -> %s" % (response['alert']['previousSeverity'], response['alert']['severity'])
+        response = self.api.send(alert)
+        if 'alert' in response:
+            if response['alert']['repeat']:
+                info = "%s duplicates" % response['alert']['duplicateCount']
             else:
-                info = response.get('message', 'v1')
-            print(u'{} ({})'.format(response['id'], info))
+                info = "%s -> %s" % (response['alert']['previousSeverity'], response['alert']['severity'])
         else:
-            LOG.error(response.get('message', 'no error message'))
-            sys.exit(1)
+            info = response.get('message', 'v1')
+        print(u'{} ({})'.format(response['id'], info))
 
     def heartbeat(self, args):
 
-        try:
-            heartbeat = Heartbeat(
-                origin=args.origin,
-                tags=args.tags,
-                timeout=args.timeout
-            )
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
+        heartbeat = Heartbeat(
+            origin=args.origin,
+            tags=args.tags,
+            timeout=args.timeout
+        )
 
-        try:
-            response = self.api.send(heartbeat)
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == 'ok':
-            print(response['id'])
-        else:
-            LOG.error(response['message'])
-            sys.exit(1)
+        response = self.api.send(heartbeat)
+        print(response['id'])
 
     def query(self, args, from_date=None):
 
@@ -318,17 +292,7 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            try:
-                response = self.api.tag_alert(alert['id'], args.tags)
-            except Exception as e:
-                print()
-                LOG.error(e)
-                sys.exit(1)
-
-            if response['status'] == "error":
-                print()
-                LOG.error(response['message'])
-                sys.exit(1)
+            self.api.tag_alert(alert['id'], args.tags)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -346,17 +310,7 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            try:
-                response = self.api.untag_alert(alert['id'], args.tags)
-            except Exception as e:
-                print()
-                LOG.error(e)
-                sys.exit(1)
-
-            if response['status'] == "error":
-                print()
-                LOG.error(response['message'])
-                sys.exit(1)
+            self.api.untag_alert(alert['id'], args.tags)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -375,17 +329,7 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            try:
-                response = self.api.ack_alert(alert['id'])
-            except Exception as e:
-                print()
-                LOG.error(e)
-                sys.exit(1)
-
-            if response['status'] == "error":
-                print()
-                LOG.error(response['message'])
-                sys.exit(1)
+            self.api.ack_alert(alert['id'])
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -404,17 +348,7 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            try:
-                response = self.api.unack_alert(alert['id'])
-            except Exception as e:
-                print()
-                LOG.error(e)
-                sys.exit(1)
-
-            if response['status'] == "error":
-                print()
-                LOG.error(response['message'])
-                sys.exit(1)
+            self.api.unack_alert(alert['id'])
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -433,17 +367,7 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            try:
-                response = self.api.close_alert(alert['id'])
-            except Exception as e:
-                print()
-                LOG.error(e)
-                sys.exit(1)
-
-            if response['status'] == "error":
-                print()
-                LOG.error(response['message'])
-                sys.exit(1)
+            self.api.close_alert(alert['id'])
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -462,17 +386,7 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            try:
-                response = self.api.delete_alert(alert['id'])
-            except Exception as e:
-                print()
-                LOG.error(e)
-                sys.exit(1)
-
-            if response['status'] == "error":
-                print()
-                LOG.error(response['message'])
-                sys.exit(1)
+            self.api.delete_alert(alert['id'])
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -593,35 +507,22 @@ class AlertCommand(object):
         if '.' not in args.start:
             args.start = args.start.replace('Z', '.000Z')
 
-        try:
-            blackout = {
-                "environment": args.environment,
-                "resource": args.resource,
-                "service": args.service,
-                "event": args.event,
-                "group": args.group,
-                "tags": args.tags,
-                "startTime": args.start,
-                "duration": args.duration
-            }
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
+        blackout = {
+            "environment": args.environment,
+            "resource": args.resource,
+            "service": args.service,
+            "event": args.event,
+            "group": args.group,
+            "tags": args.tags,
+            "startTime": args.start,
+            "duration": args.duration
+        }
 
+        response = self.api.blackout_alerts(blackout)
         try:
-            response = self.api.blackout_alerts(blackout)
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == 'ok':
-            try:
-                print(response['blackout']['id'])
-            except:
-                print(response['blackout'])
-        else:
-            LOG.error(response['message'])
-            sys.exit(1)
+            print(response['blackout']['id'])
+        except Exception:
+            print(response['blackout'])  # legacy format
 
     def blackouts(self, args):
 
@@ -724,11 +625,7 @@ class AlertCommand(object):
             LOG.error(e)
             sys.exit(1)
 
-        if response['status'] == 'ok':
-            print(response['key'])
-        else:
-            LOG.error(response['message'])
-            sys.exit(1)
+        print(response['key'])
 
     def keys(self, args):
 
@@ -760,13 +657,8 @@ class AlertCommand(object):
 
     def revoke(self, args):
 
-        response = self.api.revoke_key(args.api_key)
-
-        if response['status'] == 'ok':
-            print("OK")
-        else:
-            LOG.error(response['message'])
-            sys.exit(1)
+        self.api.revoke_key(args.api_key)
+        print("OK")
 
     @staticmethod
     def _build(filters, from_date=None, to_date=None):
@@ -788,69 +680,21 @@ class AlertCommand(object):
         return query
 
     def _alerts(self, filters, from_date=None, to_date=None):
-
         query = self._build(filters, from_date, to_date)
-
-        try:
-            response = self.api.get_alerts(query)
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == "error":
-            LOG.error(response['message'])
-            sys.exit(1)
-
-        return response
+        return self.api.get_alerts(query)
 
     def _counts(self, filters, from_date=None, to_date=None):
-
         query = self._build(filters, from_date, to_date)
-
-        try:
-            response = self.api.get_counts(query)
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == "error":
-            LOG.error(response['message'])
-            sys.exit(1)
-
-        return response
+        return self.api.get_counts(query)
 
     def _history(self, filters, from_date=None, to_date=None):
-
         query = self._build(filters, from_date, to_date)
-
-        try:
-            response = self.api.get_history(query)
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == "error":
-            LOG.error(response['message'])
-            sys.exit(1)
-
-        return response
+        return self.api.get_history(query)
 
     def _heartbeats(self):
-
-        try:
-            response = self.api.get_heartbeats()
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == "error":
-            LOG.error(response['message'])
-            sys.exit(1)
-
-        return response
+        return self.api.get_heartbeats()
 
     def _users(self, id=None, login=None, name=None):
-
         query = list()
         if id:
             query.append(('id', id))
@@ -859,44 +703,15 @@ class AlertCommand(object):
         if name:
             query.append(('name', name))
 
-        try:
-            response = self.api.get_users(query)
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == "error":
-            LOG.error(response['message'])
-            sys.exit(1)
-
-        return response
+        return self.api.get_users(query)
 
     def _keys(self):
-
-        try:
-            response = self.api.get_keys()
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        if response['status'] == "error":
-            LOG.error(response['message'])
-            sys.exit(1)
-
-        return response
+        return self.api.get_keys()
 
     def _status(self):
-
-        try:
-            response = self.api.get_status()
-        except Exception as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        return response
+        return self.api.get_status()
 
     def help(self, args):
-
         pass
 
     def uptime(self, args):
