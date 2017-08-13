@@ -329,7 +329,7 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            self.api.ack_alert(alert['id'])
+            self.api.ack_alert(alert['id'], text=args.text)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -348,7 +348,7 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            self.api.unack_alert(alert['id'])
+            self.api.unack_alert(alert['id'], text=args.text)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -367,7 +367,7 @@ class AlertCommand(object):
             sys.stdout.write("%3d%% (%d/%d)" % (pct, i, total))
             sys.stdout.flush()
             sys.stdout.write("\b" * (8 + len(str(i)) + len(str(total))))
-            self.api.close_alert(alert['id'])
+            self.api.close_alert(alert['id'], text=args.text)
 
         sys.stdout.write("100%% (%d/%d), done.\n" % (total, total))
 
@@ -1121,6 +1121,12 @@ class AlertaShell(object):
             default=list(),
             help='KEY=VALUE eg. serverity=warning resource=web'
         )
+        parser_ack.add_argument(
+            '-t',
+            '--text',
+            default='',
+            help='text'
+        )
         parser_ack.set_defaults(func=cli.ack)
 
         parser_unack = subparsers.add_parser(
@@ -1140,6 +1146,12 @@ class AlertaShell(object):
             nargs='+',
             default=list(),
             help='KEY=VALUE eg. serverity=warning resource=web'
+        )
+        parser_unack.add_argument(
+            '-t',
+            '--text',
+            default='',
+            help='text'
         )
         parser_unack.set_defaults(func=cli.unack)
 
@@ -1161,6 +1173,12 @@ class AlertaShell(object):
             nargs='+',
             default=list(),
             help='KEY=VALUE eg. serverity=warning resource=web'
+        )
+        parser_close.add_argument(
+            '-t',
+            '--text',
+            default='',
+            help='text'
         )
         parser_close.set_defaults(func=cli.close)
 
