@@ -1,5 +1,6 @@
 
 import os
+import sys
 import json
 import requests
 import logging
@@ -182,7 +183,7 @@ class ApiClient(object):
         LOG.debug('Response Headers: %s', response.headers)
         LOG.debug('Response Body: %s', response.text)
 
-        return response.json()
+        return self._handle_error(response)
 
     def _post(self, path, data=None):
 
@@ -197,7 +198,7 @@ class ApiClient(object):
         LOG.debug('Response Headers: %s', response.headers)
         LOG.debug('Response Body: %s', response.text)
 
-        return response.json()
+        return self._handle_error(response)
 
     def _put(self, path, data=None):
 
@@ -212,7 +213,7 @@ class ApiClient(object):
         LOG.debug('Response Headers: %s', response.headers)
         LOG.debug('Response Body: %s', response.text)
 
-        return response.json()
+        return self._handle_error(response)
 
     def _delete(self, path):
 
@@ -224,4 +225,16 @@ class ApiClient(object):
         LOG.debug('Response Headers: %s', response.headers)
         LOG.debug('Response Body: %s', response.text)
 
-        return response.json()
+        return self._handle_error(response)
+
+    @staticmethod
+    def _handle_error(response):
+        resp = response.json()
+        status = resp.get('status', None)
+        if status == 'ok':
+            return resp
+        if status == 'error':
+            print()
+            LOG.error(resp.get('message', 'Unhandled API error response'))
+            sys.exit(1)
+        return resp
