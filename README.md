@@ -32,6 +32,7 @@ Profiles can be used to easily switch between different configuration settings.
 | key        | key         | ``ALERTA_API_KEY``         | n/a                             | None                      |
 | timezone   | timezone    | n/a                        | n/a                             | Europe/London             |
 | SSL verify | sslverify   | ``REQUESTS_CA_BUNDLE``     | n/a                             | verify SSL certificates   |
+| timeout    | timeout     | n/a                        | n/a                             | 5s TCP connection timeout |
 | output     | output      | n/a                        | ``--output OUTPUT``, ``--json`` | text                      |
 | color      | color       | ``CLICOLOR``               | ``--color``, ``--no-color``     | color on                  |
 | debug      | debug       | ``DEBUG``                  | ``--debug``                     | no debug                  |
@@ -53,6 +54,7 @@ Configuration file ``~/.alerta.conf``::
     [profile development]
     endpoint = https://localhost:8443
     sslverify = off
+    timeout = 10.0
     debug = yes
 
 Environment Variables
@@ -72,14 +74,14 @@ And to switch to development configuration settings when required use the ``--pr
 Usage
 -----
 
-    $ alerta help
+    $ alerta --help
     usage: alerta [OPTIONS] COMMAND [FILTERS]
 
     Alerta client unified command-line tool
 
     optional arguments:
       -h, --help          show this help message and exit
-      --profile PROFILE   Profile to apply from /Users/nsatterl/.alerta.conf
+      --profile PROFILE   Profile to apply from ~/.alerta.conf
       --endpoint-url URL  API endpoint URL
       --output OUTPUT     Output format of "text" or "json"
       --json, -j          Output in JSON format. Shortcut for "--output json"
@@ -105,6 +107,10 @@ Usage
         heartbeat         Send heartbeat to server
         heartbeats        List all heartbeats
         user              Manage user details (Basic Auth only).
+        users             List all users
+        key               Create API key
+        keys              List all API keys
+        revoke            Revoke API key
         status            Show status and metrics
         uptime            Show server uptime
         version           Show alerta version info
@@ -135,26 +141,29 @@ Example
     >>> api = ApiClient(endpoint='http://api.alerta.io', key='tiPMW41QA+cVy05E7fQA/roxAAwHqZq/jznh8MOk')
     >>> alert = Alert(resource='foo', event='bar')
     >>> alert
-    Alert(id='6e625266-fb7c-4c11-bf95-27a6a0be432b', environment='', resource='foo', event='bar', severity='normal', status='unknown')
+    Alert(id='b34410b0-884f-49f9-9685-f54c2f0a449c', environment='', resource='foo', event='bar', severity='normal', status='unknown', customer=None)
     >>> api.send(alert)
-    {u'status': u'ok', u'id': u'5fdb224b-9378-422d-807e-fdf8610416d2'}
+    {u'status': u'error', u'message': u'[POLICY] Alert environment must be one of Production, Development'}
+    >>> alert = Alert(environment='Development', resource='foo', event='bar', service=['Web'])
+    >>> api.send(alert)['id']
+    u'5fdb224b-9378-422d-807e-fdf8610416d2'
 
     >>> api.get_alert('5fdb224b-9378-422d-807e-fdf8610416d2')['alert']['severity']
     u'normal'
     >>>
-    >>> api.get_alerts(resource='foo')['alerts'][0]['id']
+    >>> api.get_alerts(query=[('resource','foo')])['alerts'][0]['id']
     u'5fdb224b-9378-422d-807e-fdf8610416d2'
 
     >>> from alertaclient.heartbeat import Heartbeat
     >>> hb = Heartbeat(origin='baz')
     >>> hb
-    Heartbeat(id='21d586a6-9bd5-4b18-b0bb-4fb876db4851', origin='baz', create_time=datetime.datetime(2014, 6, 14, 20, 2, 33, 55118), timeout=300)
-    >>> api.send(hb)
-    {u'status': u'ok', u'id': u'6bf11e97-9664-4fa3-b830-8e6d0d84b4cc'}
+    Heartbeat(id='83ecb3d6-c6cf-44eb-bdf6-1e8990b82050', origin='baz', create_time=datetime.datetime(2017, 8, 17, 21, 45, 25, 914369), timeout=300, customer=None)
+    >>> api.send(hb)['status']
+    u'ok'
     >>>
 
 License
 -------
 
-Copyright (c) 2014-2016 Nick Satterly. Available under the MIT License.
+Copyright (c) 2014-2017 Nick Satterly. Available under the MIT License.
 
