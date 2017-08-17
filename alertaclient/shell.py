@@ -39,6 +39,7 @@ OPTIONS = {
     'endpoint':    'http://localhost:8080',
     'key':         '',
     'timezone':    'Europe/London',
+    'timeout':     5.0,
     'sslverify':   True,
     'output':      'text',
     'color':       True,
@@ -71,11 +72,11 @@ class AlertCommand(object):
 
     def __init__(self):
 
-        self.api = ApiClient()
+        self.api = None
 
-    def set(self, endpoint, key, ssl_verify=True):
+    def set(self, endpoint, key, timeout, ssl_verify=True):
 
-        self.api = ApiClient(endpoint=endpoint, key=key, ssl_verify=ssl_verify)
+        self.api = ApiClient(endpoint=endpoint, key=key, timeout=timeout, ssl_verify=ssl_verify)
 
     def send(self, args):
 
@@ -94,7 +95,7 @@ class AlertCommand(object):
             attributes=dict([attrib.split('=') for attrib in args.attributes]),
             origin=args.origin,
             event_type=args.event_type,
-            timeout=args.timeout,
+            timeout=args.expires,
             raw_data=args.raw_data
         )
 
@@ -113,7 +114,7 @@ class AlertCommand(object):
         heartbeat = Heartbeat(
             origin=args.origin,
             tags=args.tags,
-            timeout=args.timeout
+            timeout=args.expires
         )
 
         response = self.api.send(heartbeat)
@@ -934,6 +935,7 @@ class AlertaShell(object):
         )
         parser_send.add_argument(
             '--timeout',
+            dest='expires',
             default=DEFAULT_TIMEOUT,
             help='Timeout in seconds before an "open" alert will be automatically "expired" or "deleted"',
             type=int
@@ -1292,6 +1294,7 @@ class AlertaShell(object):
         )
         parser_heartbeat.add_argument(
             '--timeout',
+            dest='expires',
             default=None,
             help='Timeout in seconds before a heartbeat will be considered stale',
             type=int
@@ -1460,7 +1463,7 @@ class AlertaShell(object):
             args.filters += ['id='+i for i in args.ids]
         args.output = 'json' if args.json else args.output
 
-        cli.set(endpoint=args.endpoint, key=args.key, ssl_verify=args.sslverify)
+        cli.set(endpoint=args.endpoint, key=args.key, timeout=args.timeout, ssl_verify=args.sslverify)
 
         if hasattr(args, 'func'):
             args.func(args)
