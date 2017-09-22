@@ -571,7 +571,7 @@ class AlertCommand(object):
             sys.exit(1)
 
         if args.password:
-            response = self.api.update_user(user=user['id'], data={'password': args.password})
+            response = self.api.update_user(user=user['id'], data={'password': args.password, 'provider': 'basic'})
             if response['status'] == 'ok':
                 print('Password reset OK.')
             else:
