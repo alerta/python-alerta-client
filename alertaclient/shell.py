@@ -595,8 +595,8 @@ class AlertCommand(object):
             print(u'{} {:<24} {:<30} {:<5} {:<19} {:<8} {}'.format(
                 user['id'],
                 user['name'],
-                user['login'],
-                user.get('role', 'n/a'),
+                user.get('email', None) or user.get('login', 'n/a'),
+                ','.join(user['roles']) if 'roles' in user else user.get('role', 'n/a'),
                 create_time.replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S'),
                 user['provider'],
                 user['text']
