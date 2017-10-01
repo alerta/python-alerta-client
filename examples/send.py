@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from alertaclient.api import ApiClient
-from alertaclient.alert import Alert
+from alertaclient.api import AlertaClient
+from alertaclient.models.alert import Alert
 
-api = ApiClient()
+client = AlertaClient()
 
 alert = Alert(
     resource='web-server-01',
@@ -18,9 +18,9 @@ alert = Alert(
     tags=['web', 'dc1', 'london'],
     attributes={'customer': 'The Guardian'}
 )
-print alert
+print(alert)
 
 try:
-    print api.send(alert)
+    print(client.send(alert))
 except Exception as e:
-    print e
+    print(e)

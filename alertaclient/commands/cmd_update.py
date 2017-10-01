@@ -1,0 +1,23 @@
+import click
+
+from alertaclient.utils import build_query
+
+
+@click.command('update', short_help='update alert attributes')
+@click.option('--ids', '-i', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
+@click.option('--attributes', '-A', multiple=True, metavar='KEY=VALUE', help='list of attributes eg. priority=high')
+@click.pass_obj
+def cli(obj, ids, filters, attributes):
+    """Update alert attributes."""
+    client = obj['client']
+    if ids:
+        total = len(ids)
+    else:
+        query = build_query(filters)
+        total, _, _ = client.get_count(query)
+        ids = [a.id for a in client.get_alerts(query)]
+
+    with click.progressbar(ids, label='Updating {} alerts'.format(total)) as bar:
+        for id in bar:
+            client.update_attributes(id, dict(a.split('=') for a in attributes))

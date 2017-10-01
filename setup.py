@@ -19,13 +19,15 @@ setuptools.setup(
     url="http://github.com/alerta/python-alerta",
     packages=['alertaclient'],
     install_requires=[
-        'argparse',
+        'Click',
         'requests',
-        'pytz'
+        'tabulate',
+        'pytz',
+        'six'
     ],
     entry_points={
         'console_scripts': [
-            'alerta = alertaclient.shell:main'
+            'alerta = alertaclient.cli:cli'
         ]
     },
     keywords="alerta client unified command line tool sdk",

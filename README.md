@@ -33,7 +33,7 @@ Profiles can be used to easily switch between different configuration settings.
 | timezone   | timezone    | n/a                        | n/a                             | Europe/London             |
 | SSL verify | sslverify   | ``REQUESTS_CA_BUNDLE``     | n/a                             | verify SSL certificates   |
 | timeout    | timeout     | n/a                        | n/a                             | 5s TCP connection timeout |
-| output     | output      | n/a                        | ``--output OUTPUT``, ``--json`` | text                      |
+| output     | output      | n/a                        | ``--output OUTPUT``             | simple                    |
 | color      | color       | ``CLICOLOR``               | ``--color``, ``--no-color``     | color on                  |
 | debug      | debug       | ``DEBUG``                  | ``--debug``                     | no debug                  |
 
@@ -44,7 +44,7 @@ Configuration file ``~/.alerta.conf``::
 
     [DEFAULT]
     timezone = Australia/Sydney
-    # output = json
+    # output = psql
     profile = production
 
     [profile production]
@@ -74,58 +74,52 @@ And to switch to development configuration settings when required use the ``--pr
 Usage
 -----
 
-    $ alerta --help
-    usage: alerta [OPTIONS] COMMAND [FILTERS]
-
-    Alerta client unified command-line tool
-
-    optional arguments:
-      -h, --help          show this help message and exit
-      --profile PROFILE   Profile to apply from ~/.alerta.conf
-      --endpoint-url URL  API endpoint URL
-      --output OUTPUT     Output format of "text" or "json"
-      --json, -j          Output in JSON format. Shortcut for "--output json"
-      --color, --colour   Color-coded output based on severity
-      --debug             Print debug output
-
+    $ alerta help
+    Usage: alerta [OPTIONS] COMMAND [ARGS]...
+    
+      Alerta client unified command-line tool.
+    
+    Options:
+      --config-file <FILE>      Configuration file.
+      --profile <PROFILE>       Configuration profile.
+      --endpoint-url <URL>      API endpoint URL.
+      --output-format <FORMAT>  Output format. eg. simple, grid, psql, presto, rst
+      --color / --no-color      Color-coded output based on severity.
+      --debug                   Debug mode.
+      --help                    Show this message and exit.
+    
     Commands:
-      COMMAND
-        send              Send alert to server
-        query             List alerts based on query filter
-        watch             Watch alerts based on query filter
-        top               Show top offenders and stats
-        raw               Show alert raw data
-        history           Show alert history
-        tag               Tag alerts
-        untag             Remove tags from alerts
-        ack               Acknowledge alerts
-        unack             Unacknowledge alerts
-        close             Close alerts
-        delete            Delete alerts
-        blackout          Blackout alerts based on attributes
-        blackouts         List all blackout periods
-        heartbeat         Send heartbeat to server
-        heartbeats        List all heartbeats
-        user              Manage user details (Basic Auth only).
-        users             List all users
-        key               Create API key
-        keys              List all API keys
-        revoke            Revoke API key
-        status            Show status and metrics
-        uptime            Show server uptime
-        version           Show alerta version info
-        help              Show this help
-
-    Filters:
-        Query parameters can be used to filter alerts by any valid alert attribute
-
-        resource=web01     Show alerts with resource equal to "web01"
-        resource!=web01    Show all alerts except those with resource of "web01"
-        event=~down        Show alerts that include "down" in event name
-        event!=~down       Show all alerts that don't have "down" in event name
-
-        Special query parameters include "limit", "sort-by", "from-date" and "q" (a
-        json-compliant mongo query).
+      ack         acknowledge alert
+      blackout    suppress alerts
+      blackouts   list alert suppressions
+      close       close alert
+      customer    add customer lookup
+      customers   list customer lookups
+      delete      delete alert
+      heartbeat   send a heartbeat
+      heartbeats  list heartbeats
+      help        show this help
+      history     show alert history
+      key         create API key
+      keys        list API keys
+      login       login with user credentials
+      logout      clear local login credentials
+      perm        add role-permission lookup
+      perms       list role-permission lookups
+      query       search for alerts
+      raw         show alert raw data
+      revoke      revoke API key
+      send        send an alert
+      status      display status and metrics
+      tag         tag alert
+      token       display current auth token
+      unack       un-acknowledge alert
+      untag       untag alert
+      uptime      display server uptime
+      user        update user
+      users       list users
+      version     display version info
+      whoami      disply current logged in user
 
 Python SDK
 ==========
@@ -135,35 +129,19 @@ The alerta client python package can also be used as a Python SDK.
 Example
 -------
 
-    >>> from alertaclient.api import ApiClient
-    >>> from alertaclient.alert import Alert
-    >>>
-    >>> api = ApiClient(endpoint='http://api.alerta.io', key='tiPMW41QA+cVy05E7fQA/roxAAwHqZq/jznh8MOk')
-    >>> alert = Alert(resource='foo', event='bar')
-    >>> alert
-    Alert(id='b34410b0-884f-49f9-9685-f54c2f0a449c', environment='', resource='foo', event='bar', severity='normal', status='unknown', customer=None)
-    >>> api.send(alert)
-    {u'status': u'error', u'message': u'[POLICY] Alert environment must be one of Production, Development'}
-    >>> alert = Alert(environment='Development', resource='foo', event='bar', service=['Web'])
-    >>> api.send(alert)['id']
-    u'5fdb224b-9378-422d-807e-fdf8610416d2'
+    >>> from alertaclient.api import Client
 
-    >>> api.get_alert('5fdb224b-9378-422d-807e-fdf8610416d2')['alert']['severity']
-    u'normal'
-    >>>
-    >>> api.get_alerts(query=[('resource','foo')])['alerts'][0]['id']
-    u'5fdb224b-9378-422d-807e-fdf8610416d2'
+    >>> client = Client(key='NGLxwf3f4-8LlYN4qLjVEagUPsysn0kb9fAkAs1l')
+    >>> client.send_alert(environment='Production', service=['Web', 'Application'], resource='web01', event='HttpServerError', value='501', text='Web server unavailable.')
+    Alert(id='42254ef8-7258-4300-aaec-a9ad7d3a84ff', environment='Production', resource='web01', event='HttpServerError', severity='normal', status='closed', customer=None)
 
-    >>> from alertaclient.heartbeat import Heartbeat
-    >>> hb = Heartbeat(origin='baz')
-    >>> hb
-    Heartbeat(id='83ecb3d6-c6cf-44eb-bdf6-1e8990b82050', origin='baz', create_time=datetime.datetime(2017, 8, 17, 21, 45, 25, 914369), timeout=300, customer=None)
-    >>> api.send(hb)['status']
-    u'ok'
-    >>>
+    >>> [a.id for a in client.search([('resource','~we.*01'), ('environment!', 'Development')])]
+    ['42254ef8-7258-4300-aaec-a9ad7d3a84ff']
+    
+    >>> client.heartbeat().serialize()['status']
+    'ok'
 
 License
 -------
 
 Copyright (c) 2014-2017 Nick Satterly. Available under the MIT License.
-

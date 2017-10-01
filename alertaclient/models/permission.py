@@ -1,0 +1,30 @@
+
+
+class Permission(object):
+
+    def __init__(self, match, scopes, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.match = match
+        self.scopes = scopes or list()
+
+    @classmethod
+    def parse(cls, json):
+        if not isinstance(json.get('scopes', []), list):
+            raise ValueError('scopes must be a list')
+
+        return Permission(
+            id=json.get('id', None),
+            match=json.get('match', None),
+            scopes=json.get('scopes', list())
+        )
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'match': self.match,
+            'scopes': ','.join(self.scopes)
+        }
+
+    def __repr__(self):
+        return 'Perm(id=%r, match=%r, scopes=%r)' % (
+            self.id, self.match, self.scopes)

@@ -1,3 +1,6 @@
-argparse
+click
 requests
+requests_mock
+tabulate
 pytz
+six
