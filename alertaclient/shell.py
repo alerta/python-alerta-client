@@ -1230,6 +1230,7 @@ class AlertaShell(object):
             '-S',
             '--service',
             action='append',
+            default=list(),
             help='service affected eg. the application name, "Web", "Network", "Storage", "Database", "Security"'
         )
         parser_blackout.add_argument(
