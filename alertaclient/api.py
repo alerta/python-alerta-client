@@ -105,14 +105,14 @@ class Client(object):
         return counts['services']
 
     # Blackouts
-    def create_blackout(self, environment, service, resource, event, group, tag, start, duration):
+    def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, start=None, duration=None):
         data = {
             'environment': environment,
             'service': service,
             'resource': resource,
             'event': event,
             'group': group,
-            'tags': tag,
+            'tags': tags,
             'startTime': start,
             'duration': duration
         }
