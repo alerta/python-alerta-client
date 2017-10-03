@@ -1,26 +1,23 @@
 #!/usr/bin/env python
 
-from alertaclient.api import ApiClient
-from alertaclient.alert import Alert
+from alertaclient.api import Client
 
-api = ApiClient()
-
-alert = Alert(
-    resource='web-server-01',
-    event='HttpError',
-    correlate=['HttpOK'],
-    group='Web',
-    environment='Production',
-    service=['theguardian.com'],
-    severity='major',
-    value='Bad Gateway (502)',
-    text='Web server error.',
-    tags=['web', 'dc1', 'london'],
-    attributes={'customer': 'The Guardian'}
-)
-print alert
+client = Client()
 
 try:
-    print api.send(alert)
+    alert = client.send_alert(
+        resource='web-server-01',
+        event='HttpError',
+        correlate=['HttpOK'],
+        group='Web',
+        environment='Production',
+        service=['theguardian.com'],
+        severity='major',
+        value='Bad Gateway (502)',
+        text='Web server error.',
+        tags=['web', 'dc1', 'london'],
+        attributes={'customer': 'The Guardian'}
+    )
+    print(alert)
 except Exception as e:
-    print e
+    print(e)

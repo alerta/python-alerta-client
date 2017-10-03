@@ -1,260 +1,308 @@
 
-import os
-import sys
 import json
-import requests
 import logging
+import os
 
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
-
+import requests
 from requests.auth import AuthBase
 
-LOG = logging.getLogger(__name__)
+from alertaclient.exceptions import AuthError, UnknownError
+from alertaclient.models.alert import Alert
+from alertaclient.models.blackout import Blackout
+from alertaclient.models.customer import Customer
+from alertaclient.models.heartbeat import Heartbeat
+from alertaclient.models.history import RichHistory
+from alertaclient.models.key import ApiKey
+from alertaclient.models.permission import Permission
+from alertaclient.models.user import User
+from alertaclient.utils import DateTime
 
-DEFAULT_TIMEOUT = 86400
+try:
+    from urllib.parse import urlparse, urlencode
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlencode
+
+logger = logging.getLogger('alerta.client')
+
+
+class Client(object):
+
+    DEFAULT_ENDPOINT = 'http://localhost:8080'
+
+    def __init__(self, endpoint=None, key=None, token=None, timeout=5.0, ssl_verify=True, debug=False):
+        self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', self.DEFAULT_ENDPOINT)
+
+        if debug:
+            try:  # for Python 3
+                from http.client import HTTPConnection
+            except ImportError:
+                from httplib import HTTPConnection
+            HTTPConnection.debuglevel = 1
+
+        key = key or os.environ.get('ALERTA_API_KEY', '')
+        self.client = HTTPClient(self.endpoint, key, token, timeout, ssl_verify, debug)
+
+    # Alerts
+    def send_alert(self, **kwargs):
+        r = self.client.post('/alert', kwargs)
+        return Alert.parse(r['alert'])
+
+    def get_alert(self, id):
+        return Alert.parse(self.client.get('/alert/%s' % id)['alert'])
+
+    def set_status(self, id, status, text):
+        data = {
+            'status': status,
+            'text': text
+        }
+        return self.client.put('/alert/%s/status' % id, data)
+
+    def tag_alert(self, id, tags):
+        return self.client.put('/alert/%s/tag' % id, {"tags": tags})
+
+    def untag_alert(self, id, tags):
+        return self.client.put('/alert/%s/untag' % id, {"tags": tags})
+
+    def update_attributes(self, id, attributes):
+        data = {
+            'attributes': attributes
+        }
+        return self.client.put('/alert/%s/attributes' % id, data)
+
+    def delete_alert(self, id):
+        return self.client.delete('/alert/%s' % id)
+
+    def search(self, query=None):
+        return self.get_alerts(query)
+
+    def get_alerts(self, query=None):
+        r = self.client.get('/alerts', query)
+        return [Alert.parse(a) for a in r['alerts']]
+
+    def get_history(self, query=None):
+        r = self.client.get('/alerts/history', query)
+        return [RichHistory.parse(a) for a in r['history']]
+
+    def get_count(self, query=None):
+        counts = self.client.get('/alerts/count', query)
+        return counts['total'], counts['severityCounts'], counts['statusCounts']
+
+    def get_top10_count(self, query=None):
+        counts = self.client.get('/alerts/top10/count', query)
+        return counts['top10']
+
+    def get_top10_flapping(self, query=None):
+        counts = self.client.get('/alerts/top10/flapping', query)
+        return counts['top10']
+
+    def get_environments(self, query=None):
+        counts = self.client.get('/environments', query)
+        return counts['environments']
+
+    def get_services(self, query=None):
+        counts = self.client.get('/services', query)
+        return counts['services']
+
+    # Blackouts
+    def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, start=None, duration=None):
+        data = {
+            'environment': environment,
+            'service': service,
+            'resource': resource,
+            'event': event,
+            'group': group,
+            'tags': tags,
+            'startTime': start,
+            'duration': duration
+        }
+        r = self.client.post('/blackout', data)
+        return Blackout.parse(r['blackout'])
+
+    def get_blackouts(self, query=None):
+        r = self.client.get('/blackouts', query)
+        return [Blackout.parse(b) for b in r['blackouts']]
+
+    def delete_blackout(self, id):
+        return self.client.delete('/blackout/%s' % id)
+
+    # Customers
+    def create_customer(self, customer, match):
+        data = {
+            'customer': customer,
+            'match': match
+        }
+        r = self.client.post('/customer', data)
+        return Customer.parse(r['customer'])
+
+    def get_customers(self, query=None):
+        r = self.client.get('/customers', query)
+        return [Customer.parse(c) for c in r['customers']]
+
+    def delete_customer(self, id):
+        return self.client.delete('/customer/%s' % id)
+
+    # Heartbeats
+    def heartbeat(self, **kwargs):
+        r = self.client.post('/heartbeat', kwargs)
+        return Heartbeat.parse(r['heartbeat'])
+
+    def get_heartbeat(self, id):
+        return Heartbeat.parse(self.client.get('/heartbeat/%s' % id)['heartbeat'])
+
+    def get_heartbeats(self, query=None):
+        r = self.client.get('/heartbeats', query)
+        return [Heartbeat.parse(hb) for hb in r['heartbeats']]
+
+    def delete_heartbeat(self, id):
+        return self.client.delete('/heartbeat/%s' % id)
+
+    # API Keys
+    def create_key(self, username, scopes=None, expires=None, text=''):
+        data = {
+            'user': username,
+            'scopes': scopes or list(),
+            'text': text
+        }
+        if expires:
+            data['expireTime'] = DateTime.iso8601(expires)
+        r = self.client.post('/key', data)
+        return ApiKey.parse(r['data'])
+
+    def get_keys(self, query=None):
+        r = self.client.get('/keys', query)
+        return [ApiKey.parse(k) for k in r['keys']]
+
+    def delete_key(self, id):
+        return self.client.delete('/key/%s' % id)
+
+    # Permissions
+    def create_perm(self, role, scopes):
+        data = {
+            'match': role,
+            'scopes': scopes
+        }
+        r = self.client.post('/perm', data)
+        return Permission.parse(r['permission'])
+
+    def get_perms(self, query=None):
+        r = self.client.get('/perms', query)
+        return [Permission.parse(p) for p in r['permissions']]
+
+    def delete_perm(self, id):
+        return self.client.delete('/perm/%s' % id)
+
+    # Users
+    def login(self, username, password):
+        data = {
+            'username': username,
+            'password': password
+        }
+        r = self.client.post('/auth/login', data)
+        if 'token' in r:
+            return r['token']
+        else:
+            raise AuthError
+
+    def get_users(self, query=None):
+        r = self.client.get('/users', query)
+        return [User.parse(u) for u in r['users']]
+
+    def update_user(self, id, **kwargs):
+        data = {
+            'name': kwargs.get('name'),
+            'email': kwargs.get('email'),
+            'password': kwargs.get('password'),
+            'status': kwargs.get('status'),
+            'roles': kwargs.get('roles'),
+            'text': kwargs.get('text'),
+            'email_verified': kwargs.get('email_verified')
+        }
+        return self.client.put('/user/{}'.format(id), data)
+
+    def update_user_attributes(self, id, attributes):
+        pass
+
+    def delete_user(self, id):
+        return self.client.delete('/user/%s' % id)
+
+    def userinfo(self):
+        return self.client.get('/userinfo')
+
+    # Management
+    def mgmt_status(self):
+        return self.client.get('/management/status')
 
 
 class ApiAuth(AuthBase):
 
-    def __init__(self, key):
-
-        self.key = key
+    def __init__(self, api_key=None, auth_token=None):
+        self.api_key = api_key
+        self.auth_token = auth_token
 
     def __call__(self, r):
-
-        r.headers['Authorization'] = 'Key %s' % self.key
+        if self.auth_token:
+            r.headers['Authorization'] = 'Bearer {}'.format(self.auth_token)
+        else:
+            r.headers['Authorization'] = 'Key {}'.format(self.api_key)
         return r
 
 
-class ApiClient(object):
+class HTTPClient(object):
 
-    def __init__(self, endpoint=None, key=None, timeout=5.0, ssl_verify=True):
+    def __init__(self, endpoint, key=None, token=None, timeout=30.0, ssl_verify=True, debug=False):
+        self.endpoint = endpoint
+        self.auth = ApiAuth(api_key=key, auth_token=token)
 
-        self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', "http://localhost:8080")
-        self.key = key or os.environ.get('ALERTA_API_KEY', '')
-
+        self.timeout = timeout
         self.session = requests.Session()
         self.session.verify = ssl_verify  # or use REQUESTS_CA_BUNDLE env var
 
-        self.timeout = float(timeout)
+        self.debug = debug
 
-    def __repr__(self):
-
-        return 'ApiClient(endpoint=%r, key=%r)' % (self.endpoint, self.key)
-
-    def get_alerts(self, query=None):
-
-        return self._get('/alerts', query)
-
-    def get_counts(self, query=None):
-
-        return self._get('/alerts/count', query)
-
-    def get_history(self, query=None):
-
-        return self._get('/alerts/history', query)
-
-    def send_alert(self, alert):
-
-        return self._post('/alert', data=str(alert))
-
-    def send(self, msg):
-
-        if msg.event_type == 'Heartbeat':
-            return self.send_heartbeat(msg)
-        else:
-            return self.send_alert(msg)
-
-    def get_alert(self, alertid):
-
-        return self._get('/alert/%s' % alertid)
-
-    def tag_alert(self, alertid, tags):
-
-        if not isinstance(tags, list):
-            raise
-
-        return self._put('/alert/%s/tag' % alertid, data=json.dumps({"tags": tags}))
-
-    def untag_alert(self, alertid, tags):
-
-        if not isinstance(tags, list):
-            raise
-
-        return self._put('/alert/%s/untag' % alertid, data=json.dumps({"tags": tags}))
-
-    def open_alert(self, alertid, text=''):
-
-        self.update_status(alertid, 'open', text)
-
-    def ack_alert(self, alertid, text=''):
-
-        self.update_status(alertid, 'ack', text)
-
-    def unack_alert(self, alertid, text=''):
-
-        self.open_alert(alertid, text)
-
-    def assign_alert(self, alertid, text=''):
-
-        self.update_status(alertid, 'assigned', text)
-
-    def close_alert(self, alertid, text=''):
-
-        self.update_status(alertid, 'closed', text)
-
-    def update_status(self, alertid, status, text):
-
-        return self._put('/alert/%s/status' % alertid, data=json.dumps({"status": status, "text": text}))
-
-    def delete_alert(self, alertid):
-
-        return self._delete('/alert/%s' % alertid)
-
-    def send_heartbeat(self, heartbeat):
-        """
-        Send a heartbeat
-        """
-        return self._post('/heartbeat', data=str(heartbeat))
-
-    def get_heartbeats(self):
-        """
-        Get list of heartbeats
-        """
-        return self._get('/heartbeats')
-
-    def delete_heartbeat(self, heartbeatid):
-
-        return self._delete('/heartbeat/%s' % heartbeatid)
-
-    def get_top10(self, group='event'):
-
-        return self._get('/alerts/top10', {'group-by': group})
-
-    def blackout_alerts(self, blackout):
-        """
-        Define a blackout period
-        """
-        return self._post('/blackout', data=json.dumps(blackout))
-
-    def get_blackouts(self):
-        """
-        Get list of blackouts
-        """
-        return self._get('/blackouts')
-
-    def delete_blackout(self, blackoutid):
-
-        return self._delete('/blackout/%s' % blackoutid)
-
-    def get_users(self, query=None):
-
-        return self._get('/users', query)
-
-    def update_user(self, user, data):
-
-        return self._put('/user/%s' % user, data=json.dumps(data))
-
-    def create_key(self, key):
-
-        return self._post('/key', data=json.dumps(key))
-
-    def get_keys(self):
-
-        return self._get('/keys')
-
-    def revoke_key(self, key):
-
-        return self._delete('/key/%s' % key)
-
-    def get_status(self):
-
-        return self._get('/management/status')
-
-    def _get(self, path, query=None):
-
+    def get(self, path, query=None):
         query = query or tuple()
-
         url = self.endpoint + path + '?' + urlencode(query, doseq=True)
-
         try:
-            response = self.session.get(url, auth=ApiAuth(self.key), timeout=self.timeout)
-        except requests.exceptions.RequestException as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        LOG.debug('Request Headers: %s', response.request.headers)
-
-        LOG.debug('Response Headers: %s', response.headers)
-        LOG.debug('Response Body: %s', response.text)
-
+            response = self.session.get(url, auth=self.auth, timeout=self.timeout)
+        except requests.exceptions.RequestException:
+            raise
         return self._handle_error(response)
 
-    def _post(self, path, data=None):
-
+    def post(self, path, data=None):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
-
         try:
-            response = self.session.post(url, data=data, headers=headers, auth=ApiAuth(self.key), timeout=self.timeout)
-        except requests.exceptions.RequestException as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        LOG.debug('Request Headers: %s', response.request.headers)
-        LOG.debug('Request Body: %s', data)
-
-        LOG.debug('Response Headers: %s', response.headers)
-        LOG.debug('Response Body: %s', response.text)
-
+            response = self.session.post(url, data=json.dumps(data), headers=headers, auth=self.auth, timeout=self.timeout)
+        except requests.exceptions.RequestException:
+            raise
         return self._handle_error(response)
 
-    def _put(self, path, data=None):
-
+    def put(self, path, data=None):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
-
         try:
-            response = self.session.put(url, data=data, headers=headers, auth=ApiAuth(self.key), timeout=self.timeout)
-        except requests.exceptions.RequestException as e:
-            LOG.error(e)
-            sys.exit(1)
-        LOG.debug('Request Headers: %s', response.request.headers)
-        LOG.debug('Request Body: %s', data)
-
-        LOG.debug('Response Headers: %s', response.headers)
-        LOG.debug('Response Body: %s', response.text)
-
+            response = self.session.put(url, data=json.dumps(data), headers=headers, auth=self.auth, timeout=self.timeout)
+        except requests.exceptions.RequestException:
+            raise
         return self._handle_error(response)
 
-    def _delete(self, path):
-
+    def delete(self, path):
         url = self.endpoint + path
 
         try:
-            response = self.session.delete(url, auth=ApiAuth(self.key), timeout=self.timeout)
-        except requests.exceptions.RequestException as e:
-            LOG.error(e)
-            sys.exit(1)
-
-        LOG.debug('Request Headers: %s', response.request.headers)
-
-        LOG.debug('Response Headers: %s', response.headers)
-        LOG.debug('Response Body: %s', response.text)
-
+            response = self.session.delete(url, auth=self.auth, timeout=self.timeout)
+        except requests.exceptions.RequestException:
+            raise
         return self._handle_error(response)
 
-    @staticmethod
-    def _handle_error(response):
+    def _handle_error(self, response):
+        if self.debug:
+            print('\nbody: {}'.format(response.text))
         resp = response.json()
         status = resp.get('status', None)
         if status == 'ok':
             return resp
         if status == 'error':
-            print()
-            LOG.error(resp.get('message', 'Unhandled API error response'))
-            sys.exit(1)
+            raise UnknownError(resp['message'])
         return resp
