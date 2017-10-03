@@ -3,8 +3,8 @@ import click
 from alertaclient.utils import build_query
 
 
-@click.command('unack', short_help='un-acknowledge alert')
-@click.option('--ids', '-i', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.command('unack', short_help='Un-acknowledge alerts')
+@click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
 @click.option('--text')
 @click.pass_obj

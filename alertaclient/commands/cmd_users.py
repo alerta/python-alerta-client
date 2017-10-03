@@ -5,7 +5,7 @@ import click
 from tabulate import tabulate
 
 
-@click.command('users', short_help='list users')
+@click.command('users', short_help='List users')
 @click.pass_obj
 @click.pass_context
 def cli(ctx, obj):

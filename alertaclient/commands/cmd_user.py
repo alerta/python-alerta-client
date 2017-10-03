@@ -3,8 +3,8 @@ import sys
 import click
 
 
-@click.command('user', short_help='update user')
-@click.option('--id')
+@click.command('user', short_help='Update user')
+@click.option('--id', '-i', metavar='UUID',  required=True, help='User ID')
 @click.option('--name')
 @click.option('--email')
 @click.option('--password')
@@ -12,7 +12,7 @@ import click
 @click.option('--role', 'roles', multiple=True)
 @click.option('--text')
 @click.option('--email-verified/--email-not-verified')
-@click.option('--delete', '-D', metavar='ID', help='delete user')
+@click.option('--delete', '-D', metavar='UUID', help='delete user')
 @click.pass_obj
 def cli(obj, id, name, email, password, status, roles, text, email_verified, delete):
     """Update user details, including password reset."""

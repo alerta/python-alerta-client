@@ -3,7 +3,8 @@ import click
 
 from tabulate import tabulate
 
-@click.command('customers', short_help='list API keys')
+
+@click.command('customers', short_help='List API keys')
 @click.pass_obj
 @click.pass_context
 def cli(ctx, obj):

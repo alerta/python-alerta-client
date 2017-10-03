@@ -4,7 +4,7 @@ import click
 from tabulate import tabulate
 
 
-@click.command('status', short_help='display status and metrics')
+@click.command('status', short_help='Display status and metrics')
 @click.pass_obj
 @click.pass_context
 def cli(ctx, obj):

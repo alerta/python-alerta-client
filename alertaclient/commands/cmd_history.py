@@ -5,13 +5,12 @@ from tabulate import tabulate
 from alertaclient.utils import build_query
 
 
-@click.command('history', short_help='show alert history')
-@click.option('--ids', '-i', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.command('history', short_help='Show alert history')
+@click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
-@click.option('--compact', is_flag=True, help='show alert details')
 @click.pass_obj
 @click.pass_context
-def cli(ctx, obj, ids, filters, compact):
+def cli(ctx, obj, ids, filters):
     """Show status and severity changes for alerts."""
     client = obj['client']
     timezone = obj['timezone']

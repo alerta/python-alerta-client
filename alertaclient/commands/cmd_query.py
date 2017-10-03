@@ -14,10 +14,10 @@ COLOR_MAP = {
 }
 
 
-@click.command('query', short_help='search for alerts')
-@click.option('--ids', '-i', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.command('query', short_help='Search for alerts')
+@click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
-@click.option('--compact/--no-compact', help='show alert details')
+@click.option('--compact/--no-compact', help='Show alert details')
 @click.pass_obj
 @click.pass_context
 def cli(ctx, obj, ids, filters, compact):

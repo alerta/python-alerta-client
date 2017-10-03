@@ -7,7 +7,7 @@ import click
 prog = os.path.basename(sys.argv[0])
 
 
-@click.command('heartbeat', short_help='send a heartbeat')
+@click.command('heartbeat', short_help='Send a heartbeat')
 @click.option('--origin', default='{}/{}'.format(prog, platform.uname()[1]))
 @click.option('--tag', '-T', 'tags', multiple=True)
 @click.option('--timeout', metavar='EXPIRES', help='seconds before heartbeat is stale')

@@ -5,8 +5,8 @@ import click
 from tabulate import tabulate
 
 
-@click.command('blackouts', short_help='list alert suppressions')
-@click.option('--purge', is_flag=True)
+@click.command('blackouts', short_help='List alert suppressions')
+@click.option('--purge', is_flag=True, help='Delete all expired blackouts')
 @click.pass_obj
 @click.pass_context
 def cli(ctx, obj, purge):

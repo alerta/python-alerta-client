@@ -74,7 +74,7 @@ And to switch to development configuration settings when required use the ``--pr
 Usage
 -----
 
-    $ alerta help
+    $ alerta
     Usage: alerta [OPTIONS] COMMAND [ARGS]...
     
       Alerta client unified command-line tool.
@@ -115,6 +115,7 @@ Usage
       token       display current auth token
       unack       un-acknowledge alert
       untag       untag alert
+      update      update alert attributes
       uptime      display server uptime
       user        update user
       users       list users

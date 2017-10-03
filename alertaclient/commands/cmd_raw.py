@@ -5,13 +5,12 @@ from tabulate import tabulate
 from alertaclient.utils import build_query
 
 
-@click.command('raw', short_help='show alert raw data')
-@click.option('--ids', '-i', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.command('raw', short_help='Show alert raw data')
+@click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
-@click.option('--compact', is_flag=True, help='show alert details')
 @click.pass_obj
 @click.pass_context
-def cli(ctx, obj, ids, filters, compact):
+def cli(ctx, obj, ids, filters):
     client = obj['client']
     """Show raw data for alerts."""
     if ids:

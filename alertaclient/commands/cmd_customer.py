@@ -3,7 +3,7 @@ import sys
 import click
 
 
-@click.command('customer', short_help='add customer lookup')
+@click.command('customer', short_help='Add customer lookup')
 @click.option('--customer', help='customer name')
 @click.option('--org', '--group', '--domain', '--role', 'match', help='used to lookup customer')
 @click.option('--delete', '-D', metavar='ID', help='delete customer')

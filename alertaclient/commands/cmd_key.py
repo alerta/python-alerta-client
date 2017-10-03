@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import click
 
 
-@click.command('key', short_help='create API key')
+@click.command('key', short_help='Create API key')
 @click.option('--username', '-u')
 @click.option('--scope', 'scopes', multiple=True)
 @click.option('--duration', type=int)

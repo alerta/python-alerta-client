@@ -4,7 +4,7 @@ import click
 from datetime import datetime, timedelta
 
 
-@click.command('uptime', short_help='display server uptime')
+@click.command('uptime', short_help='Display server uptime')
 @click.pass_obj
 def cli(obj):
     """Display API server uptime in days, hours."""

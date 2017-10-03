@@ -4,7 +4,7 @@ import sys
 import click
 
 
-@click.command('send', short_help='send an alert')
+@click.command('send', short_help='Send an alert')
 @click.option('--resource', '-r', metavar='RESOURCE', required=True, help='resource under alarm')
 @click.option('--event', '-e', metavar='EVENT', required=True, help='event name')
 @click.option('--environment', '-E', metavar='ENVIRONMENT', help='environment eg. Production, Development')

@@ -1,5 +1,6 @@
 
 import os
+import click
 
 from netrc import netrc
 
@@ -33,9 +34,12 @@ def save_token(endpoint, username, token):
 
 def clear_token(endpoint):
     info = netrc(NETRC_FILE)
-    del info.hosts[machine(endpoint)]
-    with open(NETRC_FILE, 'w') as f:
-        f.write(dump_netrc(info))
+    try:
+        del info.hosts[machine(endpoint)]
+        with open(NETRC_FILE, 'w') as f:
+            f.write(dump_netrc(info))
+    except KeyError as e:
+        raise click.UsageError('No credentials for user found.')
 
 
 # See https://bugs.python.org/issue30806

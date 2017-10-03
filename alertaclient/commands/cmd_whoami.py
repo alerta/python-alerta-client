@@ -2,7 +2,7 @@
 import click
 
 
-@click.command('whoami', short_help='disply current logged in user')
+@click.command('whoami', short_help='Display current logged in user')
 @click.pass_obj
 def cli(obj):
     """Login using username/password."""

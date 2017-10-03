@@ -5,7 +5,7 @@ from alertaclient.version import __version__ as client_version
 from requests import __version__ as requests_version
 
 
-@click.command('version', short_help='display version info')
+@click.command('version', short_help='Display version info')
 @click.pass_obj
 @click.pass_context
 def cli(ctx, obj):

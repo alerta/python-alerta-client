@@ -3,16 +3,16 @@ import sys
 import click
 
 
-@click.command('blackout', short_help='suppress alerts')
-@click.option('--environment', '-E')
-@click.option('--service', '-S', multiple=True)
-@click.option('--resource', '-r')
-@click.option('--event', '-e')
-@click.option('--group', '-g')
-@click.option('--tag', '-T', 'tags', multiple=True)
-@click.option('--start')
-@click.option('--duration', default=86400)  # TODO ??
-@click.option('--delete', '-D', help='delete blackout using ID')
+@click.command('blackout', short_help='Suppress alerts')
+@click.option('--environment', '-E', metavar='ENVIRONMENT')
+@click.option('--service', '-S', metavar='SERVICE', multiple=True)
+@click.option('--resource', '-r', metavar='RESOURCE')
+@click.option('--event', '-e', metavar='EVENT')
+@click.option('--group', '-g', metavar='GROUP')
+@click.option('--tag', '-T', 'tags', metavar='TAG', multiple=True)
+@click.option('--start', metavar='DATETIME')
+@click.option('--duration', metavar='EXPIRES')
+@click.option('--delete', '-D', help='Delete blackout using ID')
 @click.pass_obj
 def cli(obj, environment, service, resource, event, group, tags, start, duration, delete):
     """Suppress alerts for specified duration based on alert attributes."""

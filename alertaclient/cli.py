@@ -55,10 +55,12 @@ def cli(ctx, config_file, profile, endpoint_url, output_format, color, debug):
     ctx.obj = dict()
     ctx.obj['timezone'] = config.options['timezone']
 
+    endpoint = endpoint_url or config.options['endpoint']
+
     ctx.obj['client'] = Client(
-        endpoint=endpoint_url or config.options['endpoint'],
+        endpoint=endpoint,
         key=config.options['key'],
-        token=get_token(endpoint_url),
+        token=get_token(endpoint),
         timeout=config.options['timeout'],
         ssl_verify=config.options['sslverify'],
         debug=debug or config.options['debug']

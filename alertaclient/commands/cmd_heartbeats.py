@@ -4,7 +4,7 @@ import click
 from tabulate import tabulate
 
 
-@click.command('heartbeats', short_help='list heartbeats')
+@click.command('heartbeats', short_help='List heartbeats')
 @click.option('--purge', is_flag=True)
 @click.pass_obj
 @click.pass_context
