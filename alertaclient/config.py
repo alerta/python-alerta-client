@@ -23,15 +23,13 @@ default_config = {
 class Config(object):
 
     def __init__(self, config_file):
-        self.parser = configparser.RawConfigParser(defaults=default_config)
         self.options = default_config
+        self.parser = configparser.RawConfigParser(defaults=self.options)
         config_file = config_file or os.environ.get('ALERTA_CONF_FILE') or self.options['config_file']
         self.parser.read(os.path.expanduser(config_file))
 
     def get_config_for_profle(self, profile=None):
-        want_profile = (profile or
-                        os.environ.get('ALERTA_DEFAULT_PROFILE') or
-                        self.parser.defaults().get('profile'))
+        want_profile = profile or os.environ.get('ALERTA_DEFAULT_PROFILE') or self.parser.defaults().get('profile')
 
         if want_profile and self.parser.has_section('profile %s' % want_profile):
             for opt in self.options:
