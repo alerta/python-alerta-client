@@ -8,8 +8,7 @@ from tabulate import tabulate
 @click.command('blackouts', short_help='List alert suppressions')
 @click.option('--purge', is_flag=True, help='Delete all expired blackouts')
 @click.pass_obj
-@click.pass_context
-def cli(ctx, obj, purge):
+def cli(obj, purge):
     """List alert suppressions."""
     client = obj['client']
     timezone = obj['timezone']
@@ -19,7 +18,7 @@ def cli(ctx, obj, purge):
         'duration': 'DURATION', 'status': 'STATUS', 'remaining': 'REMAINING', 'customer': 'CUSTOMER'
     }
     blackouts = client.get_blackouts()
-    click.echo(tabulate([b.serialize(timezone) for b in blackouts], headers=headers, tablefmt=ctx.parent.params['output_format']))
+    click.echo(tabulate([b.serialize(timezone) for b in blackouts], headers=headers, tablefmt=obj['output']))
 
     expired = [b for b in blackouts if b.status == 'expired']
     if purge:

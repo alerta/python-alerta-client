@@ -33,7 +33,7 @@ Profiles can be used to easily switch between different configuration settings.
 | timezone   | timezone    | n/a                        | n/a                             | Europe/London             |
 | SSL verify | sslverify   | ``REQUESTS_CA_BUNDLE``     | n/a                             | verify SSL certificates   |
 | timeout    | timeout     | n/a                        | n/a                             | 5s TCP connection timeout |
-| output     | output      | n/a                        | ``--output OUTPUT``             | simple                    |
+| output     | output      | n/a                        | ``--output-format OUTPUT``      | simple                    |
 | color      | color       | ``CLICOLOR``               | ``--color``, ``--no-color``     | color on                  |
 | debug      | debug       | ``DEBUG``                  | ``--debug``                     | no debug                  |
 

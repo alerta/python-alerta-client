@@ -19,8 +19,7 @@ COLOR_MAP = {
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
 @click.option('--compact/--no-compact', help='Show alert details')
 @click.pass_obj
-@click.pass_context
-def cli(ctx, obj, ids, filters, compact):
+def cli(obj, ids, filters, compact):
     """Query for alerts based on search filter criteria."""
     client = obj['client']
     timezone = obj['timezone']
@@ -35,7 +34,7 @@ def cli(ctx, obj, ids, filters, compact):
         headers = {'id': 'ID', 'lastReceiveTime': 'LAST RECEIVED', 'severity': 'SEVERITY', 'duplicateCount': 'DUPL',
                    'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE', 'resource': 'RESOURCE',
                    'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE'}
-        click.echo(tabulate([a.serialize('summary', timezone) for a in alerts], headers=headers, tablefmt=ctx.parent.params['output_format']))
+        click.echo(tabulate([a.serialize('summary', timezone) for a in alerts], headers=headers, tablefmt=obj['output']))
     else:
         for alert in alerts:
             color = COLOR_MAP.get(alert.severity, {'fg': 'white'})
