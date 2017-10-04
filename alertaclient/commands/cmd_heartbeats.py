@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 
 @click.command('heartbeats', short_help='List heartbeats')
-@click.option('--purge', is_flag=True)
+@click.option('--purge', is_flag=True, help='Delete stale heartbeats')
 @click.pass_obj
 @click.pass_context
 def cli(ctx, obj, purge):
