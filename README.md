@@ -33,7 +33,7 @@ Profiles can be used to easily switch between different configuration settings.
 | timezone   | timezone    | n/a                        | n/a                             | Europe/London             |
 | SSL verify | sslverify   | ``REQUESTS_CA_BUNDLE``     | n/a                             | verify SSL certificates   |
 | timeout    | timeout     | n/a                        | n/a                             | 5s TCP connection timeout |
-| output     | output      | n/a                        | ``--output OUTPUT``             | simple                    |
+| output     | output      | n/a                        | ``--output-format OUTPUT``      | simple                    |
 | color      | color       | ``CLICOLOR``               | ``--color``, ``--no-color``     | color on                  |
 | debug      | debug       | ``DEBUG``                  | ``--debug``                     | no debug                  |
 
@@ -89,38 +89,38 @@ Usage
       --help                    Show this message and exit.
     
     Commands:
-      ack         acknowledge alert
-      blackout    suppress alerts
-      blackouts   list alert suppressions
-      close       close alert
-      customer    add customer lookup
-      customers   list customer lookups
-      delete      delete alert
-      heartbeat   send a heartbeat
-      heartbeats  list heartbeats
-      help        show this help
-      history     show alert history
-      key         create API key
-      keys        list API keys
-      login       login with user credentials
-      logout      clear local login credentials
-      perm        add role-permission lookup
-      perms       list role-permission lookups
-      query       search for alerts
-      raw         show alert raw data
-      revoke      revoke API key
-      send        send an alert
-      status      display status and metrics
-      tag         tag alert
-      token       display current auth token
-      unack       un-acknowledge alert
-      untag       untag alert
-      update      update alert attributes
-      uptime      display server uptime
-      user        update user
-      users       list users
-      version     display version info
-      whoami      disply current logged in user
+      ack         Acknowledge alerts
+      blackout    Suppress alerts
+      blackouts   List alert suppressions
+      close       Close alerts
+      customer    Add customer lookup
+      customers   List customer lookups
+      delete      Delete alerts
+      heartbeat   Send a heartbeat
+      heartbeats  List heartbeats
+      help        Show this help
+      history     Show alert history
+      key         Create API key
+      keys        List API keys
+      login       Login with user credentials
+      logout      Clear login credentials
+      perm        Add role-permission lookup
+      perms       List role-permission lookups
+      query       Search for alerts
+      raw         Show alert raw data
+      revoke      Revoke API key
+      send        Send an alert
+      status      Display status and metrics
+      tag         Tag alerts
+      token       Display current auth token
+      unack       Un-acknowledge alerts
+      untag       Untag alerts
+      update      Update alert attributes
+      uptime      Display server uptime
+      user        Update user
+      users       List users
+      version     Display version info
+      whoami      Display current logged in user
 
 Python SDK
 ==========

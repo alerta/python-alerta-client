@@ -5,8 +5,8 @@ import click
 
 @click.command('customer', short_help='Add customer lookup')
 @click.option('--customer', help='customer name')
-@click.option('--org', '--group', '--domain', '--role', 'match', help='used to lookup customer')
-@click.option('--delete', '-D', metavar='ID', help='delete customer')
+@click.option('--org', '--group', '--domain', '--role', 'match', help='Used to lookup customer')
+@click.option('--delete', '-D', metavar='ID', help='Delete customer lookup')
 @click.pass_obj
 def cli(obj, customer, match, delete):
     """Add group/org/domain/role-to-customer or delete lookup entry."""

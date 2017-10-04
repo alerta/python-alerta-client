@@ -41,11 +41,11 @@ class AlertaCLI(click.MultiCommand):
 @click.option('--config-file', metavar='<FILE>', help='Configuration file.')
 @click.option('--profile', metavar='<PROFILE>', help='Configuration profile.')
 @click.option('--endpoint-url', metavar='<URL>', help='API endpoint URL.')
-@click.option('--output-format', metavar='<FORMAT>', default='psql', help='Output format. eg. simple, grid, psql, presto, rst')
+@click.option('--output', 'output', metavar='<FORMAT>', help='Output format. eg. simple, grid, psql, presto, rst')
 @click.option('--color/--no-color', help='Color-coded output based on severity.')
 @click.option('--debug', is_flag=True, help='Debug mode.')
 @click.pass_context
-def cli(ctx, config_file, profile, endpoint_url, output_format, color, debug):
+def cli(ctx, config_file, profile, endpoint_url, output, color, debug):
     """
     Alerta client unified command-line tool.
     """
@@ -54,6 +54,8 @@ def cli(ctx, config_file, profile, endpoint_url, output_format, color, debug):
 
     ctx.obj = dict()
     ctx.obj['timezone'] = config.options['timezone']
+    ctx.obj['output'] = output or config.options['output']
+    ctx.obj['color'] = color or config.options['color']
 
     endpoint = endpoint_url or config.options['endpoint']
 
@@ -61,7 +63,7 @@ def cli(ctx, config_file, profile, endpoint_url, output_format, color, debug):
         endpoint=endpoint,
         key=config.options['key'],
         token=get_token(endpoint),
-        timeout=config.options['timeout'],
+        timeout=float(config.options['timeout']),
         ssl_verify=config.options['sslverify'],
         debug=debug or config.options['debug']
     )

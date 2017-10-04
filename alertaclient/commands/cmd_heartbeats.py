@@ -5,10 +5,9 @@ from tabulate import tabulate
 
 
 @click.command('heartbeats', short_help='List heartbeats')
-@click.option('--purge', is_flag=True)
+@click.option('--purge', is_flag=True, help='Delete stale heartbeats')
 @click.pass_obj
-@click.pass_context
-def cli(ctx, obj, purge):
+def cli(obj, purge):
     """List heartbeats."""
     client = obj['client']
     timezone = obj['timezone']
@@ -17,7 +16,7 @@ def cli(ctx, obj, purge):
         'receiveTime': 'RECEIVED', 'latency': 'LATENCY', 'timeout': 'TIMEOUT', 'since': 'SINCE', 'status': 'STATUS'
     }
     heartbeats = client.get_heartbeats()
-    click.echo(tabulate([h.serialize(timezone) for h in heartbeats], headers=headers, tablefmt=ctx.parent.params['output_format']))
+    click.echo(tabulate([h.serialize(timezone) for h in heartbeats], headers=headers, tablefmt=obj['output']))
 
     expired = [hb for hb in heartbeats if hb.status == 'expired']
     if purge:

@@ -6,10 +6,10 @@ import click
 
 @click.command('key', short_help='Create API key')
 @click.option('--username', '-u')
-@click.option('--scope', 'scopes', multiple=True)
+@click.option('--scope', 'scopes', multiple=True, help='List of permissions eg. admin:keys, write:alerts')
 @click.option('--duration', type=int)
 @click.option('--text')
-@click.option('--delete', '-D', metavar='ID', help='delete API key')
+@click.option('--delete', '-D', metavar='ID', help='Delete API key')
 @click.pass_obj
 def cli(obj, username, scopes, duration, text, delete):
     """Create or delete an API key."""
