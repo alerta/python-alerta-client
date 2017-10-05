@@ -20,4 +20,4 @@ def cli(obj, ids, filters, text):
 
     with click.progressbar(ids, label='Un-acking {} alerts'.format(total)) as bar:
         for id in bar:
-            client.set_status(id, status='unack', text=text or 'status changed using CLI')
+            client.set_status(id, status='open', text=text or 'status changed using CLI')
