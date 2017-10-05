@@ -18,7 +18,7 @@ import click
 @click.option('--attributes', '-A', multiple=True, metavar='KEY=VALUE', help='List of attributes eg. priority=high')
 @click.option('--origin', '-O', metavar='ORIGIN', help='Origin of alert in form app/host')
 @click.option('--type', metavar='EVENT_TYPE', help='Event type eg. exceptionAlert, performanceAlert, nagiosAlert')
-@click.option('--timeout', metavar='EXPIRES', help='Seconds before an open alert will be expired')
+@click.option('--timeout', metavar='EXPIRES', type=int, help='Seconds before an open alert will be expired')
 @click.option('--raw-data', metavar='STRING', help='Raw data of orignal alert eg. SNMP trap PDU')
 @click.pass_obj
 def cli(obj, resource, event, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data):
