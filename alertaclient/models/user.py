@@ -31,9 +31,9 @@ class User(object):
         return User(
             id=json.get('id'),
             name=json.get('name'),
-            email=json.get('email'),
+            email=json.get('email', None) or json.get('login'),
             status=json.get('status'),
-            roles=json.get('roles', list()),
+            roles=json.get('roles', None) or [json['role']] if 'role' in json else list(),
             attributes=json.get('attributes', dict()),
             create_time=DateTime.parse(json.get('createTime')),
             last_login=DateTime.parse(json.get('lastLogin')),
