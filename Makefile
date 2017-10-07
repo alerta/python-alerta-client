@@ -1,6 +1,6 @@
 
 PYTHON=python
-VERSION=`cut -d "'" -f 2 alerta/version.py`
+VERSION=`cut -d "'" -f 2 alertaclient/version.py`
 
 all:	help
 
@@ -23,7 +23,7 @@ init:
 
 pylint:
 	@pip -q install pylint
-	pylint --rcfile pylintrc alerta
+	pylint --rcfile pylintrc alertaclient
 
 clean:
 	find . -name "*.pyc" -exec rm {} \;
@@ -32,8 +32,12 @@ clean:
 test:
 	nosetests tests
 
+run:
+	alerta top
+
 tag:
-	git tag -a v$(VERSION) -m "version $(VERSION)"
+	git tag -a v$(VERSION) -m v$(VERSION)
 
 upload:
 	$(PYTHON) setup.py sdist bdist_wheel upload
+
