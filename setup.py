@@ -13,11 +13,11 @@ setuptools.setup(
     version=version,
     description="Alerta unified command-line tool and SDK",
     long_description=readme,
+    url="http://github.com/alerta/python-alerta",
     license="MIT",
     author="Nick Satterly",
     author_email="nick.satterly@theguardian.com",
-    url="http://github.com/alerta/python-alerta",
-    packages=['alertaclient'],
+    packages=setuptools.find_packages(exclude=['tests']),
     install_requires=[
         'Click',
         'requests',
@@ -25,6 +25,8 @@ setuptools.setup(
         'pytz',
         'six'
     ],
+    include_package_data=True,
+    zip_safe=False,
     entry_points={
         'console_scripts': [
             'alerta = alertaclient.cli:cli'
@@ -33,8 +35,10 @@ setuptools.setup(
     keywords="alerta client unified command line tool sdk",
     classifiers=[
         'Development Status :: 5 - Production/Stable',
-        'License :: OSI Approved :: MIT License',
+        'Intended Audience :: Information Technology',
         'Intended Audience :: System Administrators',
+        'Intended Audience :: Telecommunications Industry',
+        'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 2.7',

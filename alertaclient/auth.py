@@ -5,9 +5,9 @@ import click
 from netrc import netrc
 
 try:
-    from urllib.parse import urlencode, urlparse
+    from urllib.parse import urlparse
 except ImportError:
-    from urllib import urlencode, urlparse
+    from urlparse import urlparse
 
 NETRC_FILE = os.path.join(os.environ['HOME'], ".netrc")
 
