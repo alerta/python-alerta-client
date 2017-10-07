@@ -19,7 +19,7 @@ class Alert(object):
         self.resource = resource
         self.event = event
         self.environment = kwargs.get('environment', None) or ""
-        self.severity = kwargs.get('severity', None) #or current_app.config['DEFAULT_NORMAL_SEVERITY']
+        self.severity = kwargs.get('severity', None)
         self.correlate = kwargs.get('correlate', None) or list()
         if self.correlate and event not in self.correlate:
             self.correlate.append(event)
@@ -30,10 +30,10 @@ class Alert(object):
         self.text = kwargs.get('text', None) or ""
         self.tags = kwargs.get('tags', None) or list()
         self.attributes = kwargs.get('attributes', None) or dict()
-        self.origin = kwargs.get('origin', None) #or '%s/%s' % (os.path.basename(sys.argv[0]), platform.uname()[1])
+        self.origin = kwargs.get('origin', None)
         self.event_type = kwargs.get('event_type', kwargs.get('type', None)) or "exceptionAlert"
         self.create_time = kwargs.get('create_time', None) or datetime.utcnow()
-        self.timeout = kwargs.get('timeout', None) # or current_app.config['ALERT_TIMEOUT']
+        self.timeout = kwargs.get('timeout', None)
         self.raw_data = str(kwargs.get('raw_data', kwargs.get('rawData', "")))
         self.customer = kwargs.get('customer', None)
 
