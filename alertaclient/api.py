@@ -41,67 +41,67 @@ class Client(object):
             HTTPConnection.debuglevel = 1
 
         key = key or os.environ.get('ALERTA_API_KEY', '')
-        self.client = HTTPClient(self.endpoint, key, token, timeout, ssl_verify, debug)
+        self.http = HTTPClient(self.endpoint, key, token, timeout, ssl_verify, debug)
 
     # Alerts
     def send_alert(self, **kwargs):
-        r = self.client.post('/alert', kwargs)
+        r = self.http.post('/alert', kwargs)
         return Alert.parse(r['alert'])
 
     def get_alert(self, id):
-        return Alert.parse(self.client.get('/alert/%s' % id)['alert'])
+        return Alert.parse(self.http.get('/alert/%s' % id)['alert'])
 
     def set_status(self, id, status, text):
         data = {
             'status': status,
             'text': text
         }
-        return self.client.put('/alert/%s/status' % id, data)
+        return self.http.put('/alert/%s/status' % id, data)
 
     def tag_alert(self, id, tags):
-        return self.client.put('/alert/%s/tag' % id, {"tags": tags})
+        return self.http.put('/alert/%s/tag' % id, {"tags": tags})
 
     def untag_alert(self, id, tags):
-        return self.client.put('/alert/%s/untag' % id, {"tags": tags})
+        return self.http.put('/alert/%s/untag' % id, {"tags": tags})
 
     def update_attributes(self, id, attributes):
         data = {
             'attributes': attributes
         }
-        return self.client.put('/alert/%s/attributes' % id, data)
+        return self.http.put('/alert/%s/attributes' % id, data)
 
     def delete_alert(self, id):
-        return self.client.delete('/alert/%s' % id)
+        return self.http.delete('/alert/%s' % id)
 
     def search(self, query=None):
         return self.get_alerts(query)
 
     def get_alerts(self, query=None):
-        r = self.client.get('/alerts', query)
+        r = self.http.get('/alerts', query)
         return [Alert.parse(a) for a in r['alerts']]
 
     def get_history(self, query=None):
-        r = self.client.get('/alerts/history', query)
+        r = self.http.get('/alerts/history', query)
         return [RichHistory.parse(a) for a in r['history']]
 
     def get_count(self, query=None):
-        counts = self.client.get('/alerts/count', query)
+        counts = self.http.get('/alerts/count', query)
         return counts['total'], counts['severityCounts'], counts['statusCounts']
 
     def get_top10_count(self, query=None):
-        counts = self.client.get('/alerts/top10/count', query)
+        counts = self.http.get('/alerts/top10/count', query)
         return counts['top10']
 
     def get_top10_flapping(self, query=None):
-        counts = self.client.get('/alerts/top10/flapping', query)
+        counts = self.http.get('/alerts/top10/flapping', query)
         return counts['top10']
 
     def get_environments(self, query=None):
-        counts = self.client.get('/environments', query)
+        counts = self.http.get('/environments', query)
         return counts['environments']
 
     def get_services(self, query=None):
-        counts = self.client.get('/services', query)
+        counts = self.http.get('/services', query)
         return counts['services']
 
     # Blackouts
@@ -116,15 +116,15 @@ class Client(object):
             'startTime': start,
             'duration': duration
         }
-        r = self.client.post('/blackout', data)
+        r = self.http.post('/blackout', data)
         return Blackout.parse(r['blackout'])
 
     def get_blackouts(self, query=None):
-        r = self.client.get('/blackouts', query)
+        r = self.http.get('/blackouts', query)
         return [Blackout.parse(b) for b in r['blackouts']]
 
     def delete_blackout(self, id):
-        return self.client.delete('/blackout/%s' % id)
+        return self.http.delete('/blackout/%s' % id)
 
     # Customers
     def create_customer(self, customer, match):
@@ -132,30 +132,30 @@ class Client(object):
             'customer': customer,
             'match': match
         }
-        r = self.client.post('/customer', data)
+        r = self.http.post('/customer', data)
         return Customer.parse(r['customer'])
 
     def get_customers(self, query=None):
-        r = self.client.get('/customers', query)
+        r = self.http.get('/customers', query)
         return [Customer.parse(c) for c in r['customers']]
 
     def delete_customer(self, id):
-        return self.client.delete('/customer/%s' % id)
+        return self.http.delete('/customer/%s' % id)
 
     # Heartbeats
     def heartbeat(self, **kwargs):
-        r = self.client.post('/heartbeat', kwargs)
+        r = self.http.post('/heartbeat', kwargs)
         return Heartbeat.parse(r['heartbeat'])
 
     def get_heartbeat(self, id):
-        return Heartbeat.parse(self.client.get('/heartbeat/%s' % id)['heartbeat'])
+        return Heartbeat.parse(self.http.get('/heartbeat/%s' % id)['heartbeat'])
 
     def get_heartbeats(self, query=None):
-        r = self.client.get('/heartbeats', query)
+        r = self.http.get('/heartbeats', query)
         return [Heartbeat.parse(hb) for hb in r['heartbeats']]
 
     def delete_heartbeat(self, id):
-        return self.client.delete('/heartbeat/%s' % id)
+        return self.http.delete('/heartbeat/%s' % id)
 
     # API Keys
     def create_key(self, username, scopes=None, expires=None, text=''):
@@ -166,15 +166,15 @@ class Client(object):
         }
         if expires:
             data['expireTime'] = DateTime.iso8601(expires)
-        r = self.client.post('/key', data)
+        r = self.http.post('/key', data)
         return ApiKey.parse(r['data'])
 
     def get_keys(self, query=None):
-        r = self.client.get('/keys', query)
+        r = self.http.get('/keys', query)
         return [ApiKey.parse(k) for k in r['keys']]
 
     def delete_key(self, id):
-        return self.client.delete('/key/%s' % id)
+        return self.http.delete('/key/%s' % id)
 
     # Permissions
     def create_perm(self, role, scopes):
@@ -182,15 +182,15 @@ class Client(object):
             'match': role,
             'scopes': scopes
         }
-        r = self.client.post('/perm', data)
+        r = self.http.post('/perm', data)
         return Permission.parse(r['permission'])
 
     def get_perms(self, query=None):
-        r = self.client.get('/perms', query)
+        r = self.http.get('/perms', query)
         return [Permission.parse(p) for p in r['permissions']]
 
     def delete_perm(self, id):
-        return self.client.delete('/perm/%s' % id)
+        return self.http.delete('/perm/%s' % id)
 
     # Users
     def login(self, username, password):
@@ -198,14 +198,14 @@ class Client(object):
             'username': username,
             'password': password
         }
-        r = self.client.post('/auth/login', data)
+        r = self.http.post('/auth/login', data)
         if 'token' in r:
             return r['token']
         else:
             raise AuthError
 
     def get_users(self, query=None):
-        r = self.client.get('/users', query)
+        r = self.http.get('/users', query)
         return [User.parse(u) for u in r['users']]
 
     def update_user(self, id, **kwargs):
@@ -218,20 +218,20 @@ class Client(object):
             'text': kwargs.get('text'),
             'email_verified': kwargs.get('email_verified')
         }
-        return self.client.put('/user/{}'.format(id), data)
+        return self.http.put('/user/{}'.format(id), data)
 
     def update_user_attributes(self, id, attributes):
         pass
 
     def delete_user(self, id):
-        return self.client.delete('/user/%s' % id)
+        return self.http.delete('/user/%s' % id)
 
     def userinfo(self):
-        return self.client.get('/userinfo')
+        return self.http.get('/userinfo')
 
     # Management
     def mgmt_status(self):
-        return self.client.get('/management/status')
+        return self.http.get('/management/status')
 
 
 class ApiAuth(AuthBase):
