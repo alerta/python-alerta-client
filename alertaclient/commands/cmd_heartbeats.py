@@ -16,7 +16,7 @@ def cli(obj, purge):
         'receiveTime': 'RECEIVED', 'latency': 'LATENCY', 'timeout': 'TIMEOUT', 'since': 'SINCE', 'status': 'STATUS'
     }
     heartbeats = client.get_heartbeats()
-    click.echo(tabulate([h.serialize(timezone) for h in heartbeats], headers=headers, tablefmt=obj['output']))
+    click.echo(tabulate([h.tabular(timezone) for h in heartbeats], headers=headers, tablefmt=obj['output']))
 
     expired = [hb for hb in heartbeats if hb.status == 'expired']
     if purge:

@@ -23,4 +23,4 @@ def cli(obj, ids, filters):
                'type': 'TYPE', 'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE',
                'resource': 'RESOURCE', 'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE', 'text': 'TEXT'}
     click.echo(
-        tabulate([a.serialize(timezone) for a in alerts], headers=headers, tablefmt=obj['output']))
+        tabulate([a.tabular(timezone) for a in alerts], headers=headers, tablefmt=obj['output']))

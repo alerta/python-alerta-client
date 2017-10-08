@@ -7,6 +7,10 @@ class Permission(object):
         self.match = match
         self.scopes = scopes or list()
 
+    def __repr__(self):
+        return 'Perm(id=%r, match=%r, scopes=%r)' % (
+            self.id, self.match, self.scopes)
+
     @classmethod
     def parse(cls, json):
         if not isinstance(json.get('scopes', []), list):
@@ -18,13 +22,9 @@ class Permission(object):
             scopes=json.get('scopes', list())
         )
 
-    def serialize(self):
+    def tabular(self):
         return {
             'id': self.id,
             'match': self.match,
             'scopes': ','.join(self.scopes)
         }
-
-    def __repr__(self):
-        return 'Perm(id=%r, match=%r, scopes=%r)' % (
-            self.id, self.match, self.scopes)

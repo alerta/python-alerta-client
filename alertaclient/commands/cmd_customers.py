@@ -11,4 +11,4 @@ def cli(obj):
     """List customer lookups."""
     client = obj['client']
     headers = {'id': 'ID', 'customer': 'CUSTOMER', 'match': 'GROUP'}
-    click.echo(tabulate([c.serialize() for c in client.get_customers()], headers=headers, tablefmt=obj['output']))
+    click.echo(tabulate([c.tabular() for c in client.get_customers()], headers=headers, tablefmt=obj['output']))

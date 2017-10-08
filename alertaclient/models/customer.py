@@ -6,6 +6,10 @@ class Customer(object):
         self.match = match
         self.customer = customer
 
+    def __repr__(self):
+        return 'Customer(id=%r, match=%r, customer=%r)' % (
+            self.id, self.match, self.customer)
+
     @classmethod
     def parse(cls, json):
         return Customer(
@@ -14,13 +18,9 @@ class Customer(object):
             customer=json.get('customer', None)
         )
 
-    def serialize(self):
+    def tabular(self):
         return {
             'id': self.id,
             'match': self.match,
             'customer': self.customer
         }
-
-    def __repr__(self):
-        return 'Customer(id=%r, match=%r, customer=%r)' % (
-            self.id, self.match, self.customer)

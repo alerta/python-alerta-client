@@ -36,6 +36,10 @@ class Heartbeat(object):
         else:
             return 'ok'
 
+    def __repr__(self):
+        return 'Heartbeat(id=%r, origin=%r, create_time=%r, timeout=%r, customer=%r)' % (
+            self.id, self.origin, self.create_time, self.timeout, self.customer)
+
     @classmethod
     def parse(cls, json):
         if not isinstance(json.get('tags', []), list):
@@ -54,7 +58,7 @@ class Heartbeat(object):
             customer=json.get('customer', None)
         )
 
-    def serialize(self, timezone='Europe/London'):
+    def tabular(self, timezone='Europe/London'):
         return {
             'id': self.id,
             'origin': self.origin,
@@ -67,7 +71,3 @@ class Heartbeat(object):
             'since': self.since,
             'status': self.status
         }
-
-    def __repr__(self):
-        return 'Heartbeat(id=%r, origin=%r, create_time=%r, timeout=%r, customer=%r)' % (
-            self.id, self.origin, self.create_time, self.timeout, self.customer)

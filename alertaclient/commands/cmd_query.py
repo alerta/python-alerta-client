@@ -34,7 +34,7 @@ def cli(obj, ids, filters, compact):
         headers = {'id': 'ID', 'lastReceiveTime': 'LAST RECEIVED', 'severity': 'SEVERITY', 'duplicateCount': 'DUPL',
                    'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE', 'resource': 'RESOURCE',
                    'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE'}
-        click.echo(tabulate([a.serialize('summary', timezone) for a in alerts], headers=headers, tablefmt=obj['output']))
+        click.echo(tabulate([a.tabular('summary', timezone) for a in alerts], headers=headers, tablefmt=obj['output']))
     else:
         for alert in alerts:
             color = COLOR_MAP.get(alert.severity, {'fg': 'white'})

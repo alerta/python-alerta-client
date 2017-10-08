@@ -13,4 +13,4 @@ def cli(obj):
     timezone = obj['timezone']
     headers = {'id': 'ID', 'name': 'USER', 'email': 'EMAIL', 'roles': 'ROLES', 'status': 'STATUS', 'text': 'TEXT',
                'createTime': 'CREATED', 'updateTime': 'LAST UPDATED', 'lastLogin': 'LAST LOGIN', 'email_verified': 'VERIFIED'}
-    click.echo(tabulate([u.serialize(timezone) for u in client.get_users()], headers=headers, tablefmt=obj['output']))
+    click.echo(tabulate([u.tabular(timezone) for u in client.get_users()], headers=headers, tablefmt=obj['output']))
