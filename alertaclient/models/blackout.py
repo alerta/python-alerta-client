@@ -56,45 +56,6 @@ class Blackout(object):
             self.status = "expired"
             self.remaining = 0
 
-    @classmethod
-    def parse(cls, json):
-        if not isinstance(json.get('service', []), list):
-            raise ValueError('service must be a list')
-        if not isinstance(json.get('tags', []), list):
-            raise ValueError('tags must be a list')
-
-        return Blackout(
-            id=json.get('id'),
-            environment=json.get('environment'),
-            service=json.get('service', list()),
-            resource=json.get('resource', None),
-            event=json.get('event', None),
-            group=json.get('group', None),
-            tags=json.get('tags', list()),
-            customer=json.get('customer', None),
-            start_time=DateTime.parse(json.get('startTime')),
-            end_time=DateTime.parse(json.get('endTime')),
-            duration=json.get('duration', None)
-        )
-
-    def serialize(self, timezone='Europe/London'):
-        return {
-            'id': self.id,
-            'priority': self.priority,
-            'environment': self.environment,
-            'service': ','.join(self.service),
-            'resource': self.resource,
-            'event': self.event,
-            'group': self.group,
-            'tags': ','.join(self.tags),
-            'customer': self.customer,
-            'startTime': DateTime.localtime(self.start_time, timezone),
-            'endTime': DateTime.localtime(self.end_time, timezone),
-            'duration': '{}s'.format(self.duration),
-            'status': self.status,
-            'remaining': '{}s'.format(self.remaining)
-        }
-
     def __repr__(self):
         more = ''
         if self.service:
@@ -120,3 +81,42 @@ class Blackout(object):
             self.end_time,
             self.remaining
         )
+
+    @classmethod
+    def parse(cls, json):
+        if not isinstance(json.get('service', []), list):
+            raise ValueError('service must be a list')
+        if not isinstance(json.get('tags', []), list):
+            raise ValueError('tags must be a list')
+
+        return Blackout(
+            id=json.get('id'),
+            environment=json.get('environment'),
+            service=json.get('service', list()),
+            resource=json.get('resource', None),
+            event=json.get('event', None),
+            group=json.get('group', None),
+            tags=json.get('tags', list()),
+            customer=json.get('customer', None),
+            start_time=DateTime.parse(json.get('startTime')),
+            end_time=DateTime.parse(json.get('endTime')),
+            duration=json.get('duration', None)
+        )
+
+    def tabular(self, timezone='Europe/London'):
+        return {
+            'id': self.id,
+            'priority': self.priority,
+            'environment': self.environment,
+            'service': ','.join(self.service),
+            'resource': self.resource,
+            'event': self.event,
+            'group': self.group,
+            'tags': ','.join(self.tags),
+            'customer': self.customer,
+            'startTime': DateTime.localtime(self.start_time, timezone),
+            'endTime': DateTime.localtime(self.end_time, timezone),
+            'duration': '{}s'.format(self.duration),
+            'status': self.status,
+            'remaining': '{}s'.format(self.remaining)
+        }

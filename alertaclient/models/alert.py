@@ -46,6 +46,10 @@ class Alert(object):
         self.last_receive_time = kwargs.get('last_receive_time', None)
         self.history = kwargs.get('history', None) or list()
 
+    def __repr__(self):
+        return 'Alert(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r, customer=%r)' % (
+            self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)
+
     @classmethod
     def parse(cls, json):
         if not isinstance(json.get('correlate', []), list):
@@ -91,7 +95,7 @@ class Alert(object):
     def get_id(self, short=False):
         return self.id[:8] if short else self.id
 
-    def serialize(self, fields='all', timezone='Europe/London'):
+    def tabular(self, fields='all', timezone='Europe/London'):
         if fields == 'summary':
             return {
                 'id': self.get_id(short=True),
@@ -147,7 +151,3 @@ class Alert(object):
                 'lastReceiveTime': DateTime.localtime(self.last_receive_time, timezone),
                 'history': [h.serialize(timezone) for h in self.history]
             }
-
-    def __repr__(self):
-        return 'Alert(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r, customer=%r)' % (
-            self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)

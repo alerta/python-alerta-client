@@ -42,6 +42,10 @@ class RichHistory(object):
         self.event_type = kwargs.get('event_type', kwargs.get('type', None))
         self.customer = kwargs.get('customer', None)
 
+    def __repr__(self):
+        return 'RichHistory(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r, customer=%r)' % (
+            self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)
+
     @classmethod
     def parse(cls, json):
         if not isinstance(json.get('service', []), list):
@@ -68,7 +72,7 @@ class RichHistory(object):
             customer=json.get('customer', None)
         )
 
-    def serialize(self, timezone='Europe/London'):
+    def tabular(self, timezone='Europe/London'):
         data = {
             'id': self.id,
             'resource': self.resource,
@@ -93,7 +97,3 @@ class RichHistory(object):
             data['status'] = self.status
 
         return data
-
-    def __repr__(self):
-        return 'RichHistory(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r, customer=%r)' % (
-            self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)

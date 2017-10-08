@@ -19,6 +19,10 @@ class ApiKey(object):
     def type(self):
         return self.scopes_to_type(self.scopes)
 
+    def __repr__(self):
+        return 'ApiKey(key=%r, user=%r, scopes=%r, expireTime=%r, customer=%r)' % (
+            self.key, self.user, self.scopes, self.expire_time, self.customer)
+
     @classmethod
     def parse(cls, json):
         if not isinstance(json.get('scopes', []), list):
@@ -42,7 +46,7 @@ class ApiKey(object):
                 return 'read-write'
         return 'read-only'
 
-    def serialize(self, timezone='Europe/London'):
+    def tabular(self, timezone='Europe/London'):
         return {
             'id': self.id,
             'key': self.key,
@@ -54,7 +58,3 @@ class ApiKey(object):
             'lastUsedTime': DateTime.localtime(self.last_used_time, timezone),
             'customer': self.customer
         }
-
-    def __repr__(self):
-        return 'ApiKey(key=%r, user=%r, scopes=%r, expireTime=%r, customer=%r)' % (
-            self.key, self.user, self.scopes, self.expire_time, self.customer)

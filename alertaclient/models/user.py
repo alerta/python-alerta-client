@@ -26,6 +26,11 @@ class User(object):
     def domain(self):
         return self.email.split('@')[1] if '@' in self.email else None
 
+    def __repr__(self):
+        return 'User(id=%r, name=%r, email=%r, status=%r, roles=%r, email_verified=%r)' % (
+            self.id, self.name, self.email, self.status, ','.join(self.roles), self.email_verified
+        )
+
     @classmethod
     def parse(cls, json):
         return User(
@@ -42,7 +47,7 @@ class User(object):
             email_verified=json.get('email_verified', None)
         )
 
-    def serialize(self, timezone='Europe/London'):
+    def tabular(self, timezone='Europe/London'):
         return {
             'id': self.id,
             'name': self.name,
@@ -56,8 +61,3 @@ class User(object):
             'updateTime': DateTime.localtime(self.update_time, timezone),
             'email_verified': 'yes' if self.email_verified else 'no'
         }
-
-    def __repr__(self):
-        return 'User(id=%r, name=%r, email=%r, status=%r, roles=%r, email_verified=%r)' % (
-            self.id, self.name, self.email, self.status, ','.join(self.roles), self.email_verified
-        )
