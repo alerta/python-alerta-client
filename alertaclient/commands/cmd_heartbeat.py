@@ -10,7 +10,7 @@ prog = os.path.basename(sys.argv[0])
 @click.command('heartbeat', short_help='Send a heartbeat')
 @click.option('--origin', default='{}/{}'.format(prog, platform.uname()[1]))
 @click.option('--tag', '-T', 'tags', multiple=True)
-@click.option('--timeout', metavar='EXPIRES', help='Seconds before heartbeat is stale')
+@click.option('--timeout', metavar='EXPIRES', type=int, help='Seconds before heartbeat is stale')
 @click.option('--delete', '-D', metavar='ID', help='Delete hearbeat')
 @click.pass_obj
 def cli(obj, origin, tags, timeout, delete):
