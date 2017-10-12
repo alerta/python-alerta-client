@@ -2,6 +2,7 @@
 import click
 from tabulate import tabulate
 
+from alertaclient.models.alert import Alert
 from alertaclient.utils import build_query, DateTime
 
 COLOR_MAP = {
@@ -17,9 +18,9 @@ COLOR_MAP = {
 @click.command('query', short_help='Search for alerts')
 @click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
-@click.option('--compact/--no-compact', help='Show alert details')
+@click.option('--compact/--no-compact', default=True, help='Show alert details')
 @click.pass_obj
-def cli(obj, ids, filters, compact):
+def cli(obj, ids, filters, compact, from_date=None):
     """Query for alerts based on search filter criteria."""
     client = obj['client']
     timezone = obj['timezone']
@@ -27,8 +28,13 @@ def cli(obj, ids, filters, compact):
         query = [('id', x) for x in ids]
     else:
         query = build_query(filters)
-        print(query)
-    alerts = client.search(query)
+    if from_date:
+        query.append(('from-date', from_date))
+
+    r = client.http.get('/alerts', query)
+    alerts = [Alert.parse(a) for a in r['alerts']]
+    last_time = r['lastTime']
+    auto_refresh = r['autoRefresh']
 
     if not compact:
         headers = {'id': 'ID', 'lastReceiveTime': 'LAST RECEIVED', 'severity': 'SEVERITY', 'duplicateCount': 'DUPL',
@@ -84,4 +90,4 @@ def cli(obj, ids, filters, compact):
                 click.secho('            origin       | {}'.format(alert.origin), fg=color['fg'])
                 click.secho('            correlate    | {}'.format(','.join(alert.correlate)), fg=color['fg'])
 
-        # return response.get('lastTime', '')
+    return auto_refresh, last_time
