@@ -1,8 +1,8 @@
 
 import datetime
 
-import six
 import pytz
+import six
 
 
 class DateTime(object):

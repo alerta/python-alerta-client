@@ -1,5 +1,3 @@
-
-import sys
 import click
 
 from .cmd_key import cli as revoke
