@@ -14,11 +14,14 @@ NETRC_FILE = os.path.join(os.environ['HOME'], ".netrc")
 
 def machine(endpoint):
     u = urlparse(endpoint)
-    return '{}:{}'.format(u.hostname, u.port)
+    return '{}:{}'.format(u.hostname, u.port or '80')
 
 
 def get_token(endpoint):
-    info = netrc(NETRC_FILE)
+    try:
+        info = netrc(NETRC_FILE)
+    except OSError:
+        return
     auth = info.authenticators(machine(endpoint))
     if auth is not None:
         _, _, password = auth
@@ -26,20 +29,28 @@ def get_token(endpoint):
 
 
 def save_token(endpoint, username, token):
-    info = netrc(NETRC_FILE)
+    with open(NETRC_FILE, 'a'):  # touch file
+        pass
+    try:
+        info = netrc(NETRC_FILE)
+    except OSError:
+        raise click.UsageError('Could not write to {}'.format(NETRC_FILE))
     info.hosts[machine(endpoint)] = (username, None, token)
     with open(NETRC_FILE, 'w') as f:
         f.write(dump_netrc(info))
 
 
 def clear_token(endpoint):
-    info = netrc(NETRC_FILE)
+    try:
+        info = netrc(NETRC_FILE)
+    except OSError:
+        raise click.UsageError('No {} file.'.format(NETRC_FILE))
     try:
         del info.hosts[machine(endpoint)]
         with open(NETRC_FILE, 'w') as f:
             f.write(dump_netrc(info))
     except KeyError as e:
-        raise click.UsageError('No credentials for user found.')
+        raise click.UsageError('User not logged in.')
 
 
 # See https://bugs.python.org/issue30806
