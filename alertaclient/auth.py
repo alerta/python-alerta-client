@@ -20,7 +20,7 @@ def machine(endpoint):
 def get_token(endpoint):
     try:
         info = netrc(NETRC_FILE)
-    except OSError:
+    except Exception:
         return
     auth = info.authenticators(machine(endpoint))
     if auth is not None:
@@ -33,8 +33,8 @@ def save_token(endpoint, username, token):
         pass
     try:
         info = netrc(NETRC_FILE)
-    except OSError:
-        raise click.UsageError('Could not write to {}'.format(NETRC_FILE))
+    except Exception as e:
+        raise click.UsageError('{}'.format(e))
     info.hosts[machine(endpoint)] = (username, None, token)
     with open(NETRC_FILE, 'w') as f:
         f.write(dump_netrc(info))
@@ -43,14 +43,14 @@ def save_token(endpoint, username, token):
 def clear_token(endpoint):
     try:
         info = netrc(NETRC_FILE)
-    except OSError:
-        raise click.UsageError('No {} file.'.format(NETRC_FILE))
+    except Exception as e:
+        raise click.UsageError('{}'.format(e))
     try:
         del info.hosts[machine(endpoint)]
         with open(NETRC_FILE, 'w') as f:
             f.write(dump_netrc(info))
     except KeyError as e:
-        raise click.UsageError('User not logged in.')
+        raise click.UsageError('No credentials stored for {}'.format(e))
 
 
 # See https://bugs.python.org/issue30806
