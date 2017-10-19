@@ -42,7 +42,7 @@ def cli(obj, ids, filters, compact, from_date=None):
                    'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE'}
         click.echo(tabulate([a.tabular('summary', timezone) for a in alerts], headers=headers, tablefmt=obj['output']))
     else:
-        for alert in alerts:
+        for alert in reversed(alerts):
             color = COLOR_MAP.get(alert.severity, {'fg': 'white'})
             click.secho('{0}|{1}|{2}|{3:5d}|{4}|{5:<5s}|{6:<10s}|{7:<18s}|{8:12s}|{9:16s}|{10:12s}'.format(
                 alert.id[0:8],
@@ -55,7 +55,7 @@ def cli(obj, ids, filters, compact, from_date=None):
                 alert.resource,
                 alert.group,
                 alert.event,
-                alert.value), fg=color['fg'])
+                alert.value or "n/a"), fg=color['fg'])
             click.secho('   |{}'.format(alert.text), fg=color['fg'])
 
             if True: # args.details:

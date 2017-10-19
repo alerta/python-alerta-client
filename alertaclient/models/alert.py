@@ -26,7 +26,7 @@ class Alert(object):
         self.status = kwargs.get('status', None) or "unknown"
         self.service = kwargs.get('service', None) or list()
         self.group = kwargs.get('group', None) or "Misc"
-        self.value = str(kwargs.get('value', "n/a"))
+        self.value = str(kwargs['value']) if kwargs.get('value', None) is not None else None
         self.text = kwargs.get('text', None) or ""
         self.tags = kwargs.get('tags', None) or list()
         self.attributes = kwargs.get('attributes', None) or dict()
@@ -34,7 +34,7 @@ class Alert(object):
         self.event_type = kwargs.get('event_type', kwargs.get('type', None)) or "exceptionAlert"
         self.create_time = kwargs.get('create_time', None) or datetime.utcnow()
         self.timeout = kwargs.get('timeout', None)
-        self.raw_data = str(kwargs.get('raw_data', kwargs.get('rawData', "")))
+        self.raw_data = str(kwargs['raw_data']) if kwargs.get('raw_data', None) is not None else None
         self.customer = kwargs.get('customer', None)
 
         self.duplicate_count = kwargs.get('duplicate_count', None)
@@ -58,7 +58,9 @@ class Alert(object):
             raise ValueError('service must be a list')
         if not isinstance(json.get('tags', []), list):
             raise ValueError('tags must be a list')
-        if not isinstance(json.get('timeout', 0), int):
+        if not isinstance(json.get('attributes', {}), dict):
+            raise ValueError('attributes must be a JSON object')
+        if not isinstance(json.get('timeout') if json.get('timeout', None) is not None else 0, int):
             raise ValueError('timeout must be an integer')
 
         return Alert(
