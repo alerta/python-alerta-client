@@ -3,6 +3,17 @@ import datetime
 
 import pytz
 import six
+import json
+
+
+class CustomJsonEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, (datetime.date, datetime.datetime)):
+            return o.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + ".%03dZ" % (o.microsecond // 1000)
+        elif isinstance(o, datetime.timedelta):
+            return int(o.total_seconds())
+        else:
+            return json.JSONEncoder.default(self, o)
 
 
 class DateTime(object):
