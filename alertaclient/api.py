@@ -5,6 +5,7 @@ import os
 
 import requests
 from requests.auth import AuthBase
+from datetime import datetime
 
 from alertaclient.exceptions import AuthError, UnknownError
 from alertaclient.models.alert import Alert
@@ -15,7 +16,7 @@ from alertaclient.models.history import RichHistory
 from alertaclient.models.key import ApiKey
 from alertaclient.models.permission import Permission
 from alertaclient.models.user import User
-from alertaclient.utils import DateTime
+from alertaclient.utils import DateTime, CustomJsonEncoder
 
 try:
     from urllib.parse import urlparse, urlencode
@@ -44,8 +45,26 @@ class Client(object):
         self.http = HTTPClient(self.endpoint, key, token, timeout, ssl_verify, debug)
 
     # Alerts
-    def send_alert(self, **kwargs):
-        r = self.http.post('/alert', kwargs)
+    def send_alert(self, resource, event, **kwargs):
+        data = {
+            'resource': resource,
+            'event': event,
+            'environment': kwargs.get('environment'),
+            'severity': kwargs.get('severity'),
+            'correlate': kwargs.get('correlate'),
+            'service': kwargs.get('service'),
+            'group': kwargs.get('group'),
+            'value': kwargs.get('value'),
+            'text': kwargs.get('text'),
+            'tags': kwargs.get('tags'),
+            'attributes': kwargs.get('attributes'),
+            'origin': kwargs.get('origin'),
+            'type': kwargs.get('type'),
+            'createTime': datetime.utcnow(),
+            'timeout': kwargs.get('timeout'),
+            'rawData': kwargs.get('raw_data')
+        }
+        r = self.http.post('/alert', data)
         return Alert.parse(r['alert'])
 
     def get_alert(self, id):
@@ -143,8 +162,14 @@ class Client(object):
         return self.http.delete('/customer/%s' % id)
 
     # Heartbeats
-    def heartbeat(self, **kwargs):
-        r = self.http.post('/heartbeat', kwargs)
+    def heartbeat(self, origin, tags=None, timeout=None):
+        data = {
+            'origin': origin,
+            'tags': tags or list(),
+            'timeout': timeout,
+            'createTime': datetime.utcnow()
+        }
+        r = self.http.post('/heartbeat', data)
         return Heartbeat.parse(r['heartbeat'])
 
     def get_heartbeat(self, id):
@@ -273,7 +298,7 @@ class HTTPClient(object):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
         try:
-            response = self.session.post(url, data=json.dumps(data), headers=headers, auth=self.auth, timeout=self.timeout)
+            response = self.session.post(url, data=json.dumps(data, cls=CustomJsonEncoder), headers=headers, auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
@@ -282,7 +307,7 @@ class HTTPClient(object):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
         try:
-            response = self.session.put(url, data=json.dumps(data), headers=headers, auth=self.auth, timeout=self.timeout)
+            response = self.session.put(url, data=json.dumps(data, cls=CustomJsonEncoder), headers=headers, auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)

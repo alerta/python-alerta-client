@@ -8,8 +8,8 @@ prog = os.path.basename(sys.argv[0])
 
 
 @click.command('heartbeat', short_help='Send a heartbeat')
-@click.option('--origin', default='{}/{}'.format(prog, platform.uname()[1]))
-@click.option('--tag', '-T', 'tags', multiple=True)
+@click.option('--origin', '-O', metavar='ORIGIN', default='{}/{}'.format(prog, platform.uname()[1]), help='Origin of heartbeat.')
+@click.option('--tag', '-T', 'tags', multiple=True, metavar='TAG', help='List of tags eg. London, os:linux, AWS/EC2')
 @click.option('--timeout', metavar='EXPIRES', type=int, help='Seconds before heartbeat is stale')
 @click.option('--delete', '-D', metavar='ID', help='Delete hearbeat')
 @click.pass_obj
