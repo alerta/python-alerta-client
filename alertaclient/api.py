@@ -51,13 +51,13 @@ class Client(object):
             'event': event,
             'environment': kwargs.get('environment'),
             'severity': kwargs.get('severity'),
-            'correlate': kwargs.get('correlate'),
-            'service': kwargs.get('service'),
+            'correlate': kwargs.get('correlate', None) or list(),
+            'service': kwargs.get('service', None) or list(),
             'group': kwargs.get('group'),
             'value': kwargs.get('value'),
             'text': kwargs.get('text'),
-            'tags': kwargs.get('tags'),
-            'attributes': kwargs.get('attributes'),
+            'tags': kwargs.get('tags', None) or list(),
+            'attributes': kwargs.get('attributes', None) or dict(),
             'origin': kwargs.get('origin'),
             'type': kwargs.get('type'),
             'createTime': datetime.utcnow(),
@@ -127,11 +127,11 @@ class Client(object):
     def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, start=None, duration=None):
         data = {
             'environment': environment,
-            'service': service,
+            'service': service or list(),
             'resource': resource,
             'event': event,
             'group': group,
-            'tags': tags,
+            'tags': tags or list(),
             'startTime': start,
             'duration': duration
         }
@@ -202,10 +202,10 @@ class Client(object):
         return self.http.delete('/key/%s' % id)
 
     # Permissions
-    def create_perm(self, role, scopes):
+    def create_perm(self, role, scopes=None):
         data = {
             'match': role,
-            'scopes': scopes
+            'scopes': scopes or list()
         }
         r = self.http.post('/perm', data)
         return Permission.parse(r['permission'])
@@ -239,7 +239,8 @@ class Client(object):
             'email': kwargs.get('email'),
             'password': kwargs.get('password'),
             'status': kwargs.get('status'),
-            'roles': kwargs.get('roles'),
+            'roles': kwargs.get('roles', None) or list(),
+            'attributes': kwargs.get('attributes', None) or dict(),
             'text': kwargs.get('text'),
             'email_verified': kwargs.get('email_verified')
         }
