@@ -247,7 +247,10 @@ class Client(object):
         return self.http.put('/user/{}'.format(id), data)
 
     def update_user_attributes(self, id, attributes):
-        pass
+        data = {
+            'attributes': attributes
+        }
+        return self.http.put('/user/%s/attributes' % id, data)
 
     def delete_user(self, id):
         return self.http.delete('/user/%s' % id)
