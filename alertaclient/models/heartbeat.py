@@ -31,7 +31,7 @@ class Heartbeat(object):
     def status(self):
         if self.latency > MAX_LATENCY:
             return 'slow'
-        elif self.since.seconds > self.timeout:
+        elif self.since.total_seconds() > self.timeout:
             return 'expired'  # aka 'stale'
         else:
             return 'ok'
