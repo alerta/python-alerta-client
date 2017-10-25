@@ -46,7 +46,7 @@ class ApiKey(object):
                 return 'read-write'
         return 'read-only'
 
-    def tabular(self, timezone='Europe/London'):
+    def tabular(self, timezone=None):
         return {
             'id': self.id,
             'key': self.key,
