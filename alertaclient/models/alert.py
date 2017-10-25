@@ -97,7 +97,7 @@ class Alert(object):
     def get_id(self, short=False):
         return self.id[:8] if short else self.id
 
-    def tabular(self, fields='all', timezone='Europe/London'):
+    def tabular(self, fields='all', timezone=None):
         if fields == 'summary':
             return {
                 'id': self.get_id(short=True),

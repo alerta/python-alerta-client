@@ -47,7 +47,7 @@ class User(object):
             email_verified=json.get('email_verified', None)
         )
 
-    def tabular(self, timezone='Europe/London'):
+    def tabular(self, timezone=None):
         return {
             'id': self.id,
             'name': self.name,

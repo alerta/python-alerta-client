@@ -58,7 +58,7 @@ class Heartbeat(object):
             customer=json.get('customer', None)
         )
 
-    def tabular(self, timezone='Europe/London'):
+    def tabular(self, timezone=None):
         return {
             'id': self.id,
             'origin': self.origin,

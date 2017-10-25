@@ -103,7 +103,7 @@ class Blackout(object):
             duration=json.get('duration', None)
         )
 
-    def tabular(self, timezone='Europe/London'):
+    def tabular(self, timezone=None):
         return {
             'id': self.id,
             'priority': self.priority,

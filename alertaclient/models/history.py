@@ -72,7 +72,7 @@ class RichHistory(object):
             customer=json.get('customer', None)
         )
 
-    def tabular(self, timezone='Europe/London'):
+    def tabular(self, timezone=None):
         data = {
             'id': self.id,
             'resource': self.resource,
