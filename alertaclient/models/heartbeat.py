@@ -20,7 +20,7 @@ class Heartbeat(object):
 
     @property
     def latency(self):
-        return (self.receive_time - self.create_time).microseconds / 1000
+        return int((self.receive_time - self.create_time).total_seconds() * 1000)
 
     @property
     def since(self):
