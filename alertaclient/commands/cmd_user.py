@@ -11,7 +11,7 @@ import click
 @click.option('--status')
 @click.option('--role', 'roles', multiple=True)
 @click.option('--text')
-@click.option('--email-verified/--email-not-verified')
+@click.option('--email-verified/--email-not-verified', default=None)
 @click.option('--delete', '-D', metavar='UUID', help='delete user')
 @click.pass_obj
 def cli(obj, id, name, email, password, status, roles, text, email_verified, delete):
