@@ -4,7 +4,7 @@ import click
 
 
 @click.command('user', short_help='Update user')
-@click.option('--id', '-i', metavar='UUID',  required=True, help='User ID')
+@click.option('--id', '-i', metavar='UUID', help='User ID')
 @click.option('--name')
 @click.option('--email')
 @click.option('--password')
