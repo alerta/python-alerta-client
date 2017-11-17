@@ -12,10 +12,9 @@ def cli(obj):
     metrics = client.mgmt_status()['metrics']
     headers = {'title': 'METRIC', 'type': 'TYPE', 'name': 'NAME', 'value': 'VALUE', 'average': 'AVERAGE'}
     click.echo(tabulate([{
-            'title': m['title'],
-            'type': m['type'],
-            'name': '{}.{}'.format(m['group'], m['name']),
-            'value': m.get('value', None) or m.get('count', 0),
-            'average': int(m['totalTime']) * 1.0 / int(m['count']) if m['type'] == 'timer' else None
-        } for m in metrics], headers=headers, tablefmt=obj['output']
-    ))
+        'title': m['title'],
+        'type': m['type'],
+        'name': '{}.{}'.format(m['group'], m['name']),
+        'value': m.get('value', None) or m.get('count', 0),
+        'average': int(m['totalTime']) * 1.0 / int(m['count']) if m['type'] == 'timer' else None
+    } for m in metrics], headers=headers, tablefmt=obj['output']))
