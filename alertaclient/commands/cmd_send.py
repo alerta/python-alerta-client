@@ -25,7 +25,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
     """Send an alert."""
     client = obj['client']
     try:
-        alert = client.send_alert(
+        id, alert, message = client.send_alert(
             resource=resource,
             event=event,
             environment=environment,
@@ -45,7 +45,10 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
     except Exception as e:
         click.echo('ERROR: {}'.format(e))
         sys.exit(1)
-    if alert.repeat:
-        click.echo('{} ({} duplicates)'.format(alert.id, alert.duplicate_count))
-    else:
-        click.echo('{} {} -> {}'.format(alert.id, alert.previous_severity, alert.severity))
+
+    if alert:
+        if alert.repeat:
+            message = '{} duplicates'.format(alert.duplicate_count)
+        else:
+            message = '{} -> {}'.format(alert.previous_severity, alert.severity)
+    click.echo('{} ({})'.format(id, message))
