@@ -2,10 +2,10 @@
 import json
 import logging
 import os
+from datetime import datetime
 
 import requests
 from requests.auth import AuthBase
-from datetime import datetime
 
 from alertaclient.exceptions import AuthError, UnknownError
 from alertaclient.models.alert import Alert
