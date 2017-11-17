@@ -60,7 +60,7 @@ class AlertTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_alert(self, m):
         m.post('http://localhost:8080/alert', text=self.alert)
-        alert = self.client.send_alert(
+        id, alert, message = self.client.send_alert(
             environment='Production', resource='web01', event='node_down', correlated=['node_up', 'node_down'],
             service=['Web', 'App'], severity='critical', tags=["london", "linux"], value=4
         )
