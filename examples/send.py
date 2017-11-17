@@ -5,7 +5,7 @@ from alertaclient.api import Client
 client = Client()
 
 try:
-    alert = client.send_alert(
+    id, alert, message = client.send_alert(
         resource='web-server-01',
         event='HttpError',
         correlate=['HttpOK'],

@@ -65,7 +65,8 @@ class Client(object):
             'rawData': kwargs.get('raw_data')
         }
         r = self.http.post('/alert', data)
-        return Alert.parse(r['alert'])
+        alert = Alert.parse(r['alert']) if 'alert' in r else None
+        return r.get('id', '-'), alert, r.get('message', None)
 
     def get_alert(self, id):
         return Alert.parse(self.http.get('/alert/%s' % id)['alert'])
