@@ -62,7 +62,8 @@ class Client(object):
             'type': kwargs.get('type'),
             'createTime': datetime.utcnow(),
             'timeout': kwargs.get('timeout'),
-            'rawData': kwargs.get('raw_data')
+            'rawData': kwargs.get('raw_data'),
+            'customer': kwargs.get('customer'),
         }
         r = self.http.post('/alert', data)
         alert = Alert.parse(r['alert']) if 'alert' in r else None
