@@ -20,8 +20,9 @@ import click
 @click.option('--type', metavar='EVENT_TYPE', help='Event type eg. exceptionAlert, performanceAlert, nagiosAlert')
 @click.option('--timeout', metavar='EXPIRES', type=int, help='Seconds before an open alert will be expired')
 @click.option('--raw-data', metavar='STRING', help='Raw data of orignal alert eg. SNMP trap PDU')
+@click.option('--customer', metavar='STRING', help='Customer (Admin only)')
 @click.pass_obj
-def cli(obj, resource, event, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data):
+def cli(obj, resource, event, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data, customer):
     """Send an alert."""
     client = obj['client']
     try:
@@ -40,7 +41,8 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
             origin=origin,
             type=type,
             timeout=timeout,
-            raw_data=raw_data
+            raw_data=raw_data,
+            customer=customer
         )
     except Exception as e:
         click.echo('ERROR: {}'.format(e))

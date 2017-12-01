@@ -62,7 +62,8 @@ class Client(object):
             'type': kwargs.get('type'),
             'createTime': datetime.utcnow(),
             'timeout': kwargs.get('timeout'),
-            'rawData': kwargs.get('raw_data')
+            'rawData': kwargs.get('raw_data'),
+            'customer': kwargs.get('customer')
         }
         r = self.http.post('/alert', data)
         alert = Alert.parse(r['alert']) if 'alert' in r else None
@@ -163,12 +164,13 @@ class Client(object):
         return self.http.delete('/customer/%s' % id)
 
     # Heartbeats
-    def heartbeat(self, origin, tags=None, timeout=None):
+    def heartbeat(self, origin, tags=None, timeout=None, customer=None):
         data = {
             'origin': origin,
             'tags': tags or list(),
             'timeout': timeout,
-            'createTime': datetime.utcnow()
+            'createTime': datetime.utcnow(),
+            'customer': customer
         }
         r = self.http.post('/heartbeat', data)
         return Heartbeat.parse(r['heartbeat'])
