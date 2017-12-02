@@ -19,12 +19,21 @@ import click
 @click.option('--origin', '-O', metavar='ORIGIN', help='Origin of alert in form app/host')
 @click.option('--type', metavar='EVENT_TYPE', help='Event type eg. exceptionAlert, performanceAlert, nagiosAlert')
 @click.option('--timeout', metavar='EXPIRES', type=int, help='Seconds before an open alert will be expired')
-@click.option('--raw-data', metavar='STRING', help='Raw data of orignal alert eg. SNMP trap PDU')
+@click.option('--raw-data', metavar='STRING', help='Raw data of orignal alert eg. SNMP trap PDU. \'@\' to read from file, \'-\' to read from stdin')
 @click.option('--customer', metavar='STRING', help='Customer (Admin only)')
 @click.pass_obj
 def cli(obj, resource, event, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data, customer):
     """Send an alert."""
     client = obj['client']
+
+    # read raw data from file or stdin
+    if raw_data.startswith('@'):
+        raw_data_file = raw_data.lstrip('@')
+        with open(raw_data_file, 'r') as f:
+            raw_data = f.read()
+    elif raw_data == '-':
+        raw_data = sys.stdin.read()
+
     try:
         id, alert, message = client.send_alert(
             resource=resource,
