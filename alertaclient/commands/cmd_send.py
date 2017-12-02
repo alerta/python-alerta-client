@@ -27,12 +27,10 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
     client = obj['client']
 
     # read raw data from file or stdin
-    if raw_data and raw_data.startswith('@'):
+    if raw_data and raw_data.startswith('@') or raw_data == '-':
         raw_data_file = raw_data.lstrip('@')
-        with open(raw_data_file, 'r') as f:
+        with click.open_file(raw_data_file, 'r') as f:
             raw_data = f.read()
-    elif raw_data == '-':
-        raw_data = sys.stdin.read()
 
     try:
         id, alert, message = client.send_alert(
