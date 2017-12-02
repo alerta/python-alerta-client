@@ -27,7 +27,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
     client = obj['client']
 
     # read raw data from file or stdin
-    if raw_data.startswith('@'):
+    if raw_data and raw_data.startswith('@'):
         raw_data_file = raw_data.lstrip('@')
         with open(raw_data_file, 'r') as f:
             raw_data = f.read()
