@@ -11,8 +11,7 @@ CONTEXT_SETTINGS = dict(
     auto_envvar_prefix='ALERTA',
     default_map={'query': {'compact': True}}
 )
-cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                          'commands'))
+cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
 
 
 class AlertaCLI(click.MultiCommand):
@@ -30,8 +29,7 @@ class AlertaCLI(click.MultiCommand):
         try:
             if sys.version_info[0] == 2:
                 name = name.encode('ascii', 'replace')
-            mod = __import__('alertaclient.commands.cmd_' + name,
-                             None, None, ['cli'])
+            mod = __import__('alertaclient.commands.cmd_' + name, None, None, ['cli'])
         except ImportError:
             return
         return mod.cli
