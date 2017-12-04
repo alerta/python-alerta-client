@@ -18,9 +18,11 @@ COLOR_MAP = {
 @click.command('query', short_help='Search for alerts')
 @click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
-@click.option('--compact/--no-compact', default=True, help='Show alert details')
+@click.option('--tabular', 'display', flag_value='tabular', default=True, help='Tabular output')
+@click.option('--compact', 'display', flag_value='compact', help='Compact output')
+@click.option('--details', 'display', flag_value='details', help='Compact output with details')
 @click.pass_obj
-def cli(obj, ids, filters, compact, from_date=None):
+def cli(obj, ids, filters, display, from_date=None):
     """Query for alerts based on search filter criteria."""
     client = obj['client']
     timezone = obj['timezone']
@@ -36,12 +38,12 @@ def cli(obj, ids, filters, compact, from_date=None):
     last_time = r['lastTime']
     auto_refresh = r['autoRefresh']
 
-    if not compact:
+    if display == 'tabular':
         headers = {'id': 'ID', 'lastReceiveTime': 'LAST RECEIVED', 'severity': 'SEVERITY', 'duplicateCount': 'DUPL',
                    'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE', 'resource': 'RESOURCE',
                    'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE'}
         click.echo(tabulate([a.tabular('summary', timezone) for a in alerts], headers=headers, tablefmt=obj['output']))
-    else:
+    elif display in ['compact', 'details']:
         for alert in reversed(alerts):
             color = COLOR_MAP.get(alert.severity, {'fg': 'white'})
             click.secho('{0}|{1}|{2}|{3:5d}|{4}|{5:<5s}|{6:<10s}|{7:<18s}|{8:12s}|{9:16s}|{10:12s}'.format(
@@ -58,7 +60,7 @@ def cli(obj, ids, filters, compact, from_date=None):
                 alert.value or "n/a"), fg=color['fg'])
             click.secho('   |{}'.format(alert.text), fg=color['fg'])
 
-            if True: # args.details:
+            if display == 'details':
                 click.secho('    severity   | {} -> {}'.format(alert.previous_severity, alert.severity), fg=color['fg'])
                 click.secho('    trend      | {}'.format(alert.trend_indication), fg=color['fg'])
                 click.secho('    status     | {}'.format(alert.status), fg=color['fg'])
