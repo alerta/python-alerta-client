@@ -53,8 +53,7 @@ def cli(ctx, config_file, profile, endpoint_url, output, color, debug):
     ctx.obj = dict()
     ctx.obj['timezone'] = config.options['timezone']
     ctx.obj['output'] = output or config.options['output']
-    ctx.obj['color'] = color or config.options['color']
-
+    ctx.obj['color'] = color or os.environ.get('CLICOLOR', None) or config.options['color']
     endpoint = endpoint_url or config.options['endpoint']
 
     ctx.obj['client'] = Client(
