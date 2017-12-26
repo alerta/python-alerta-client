@@ -1,4 +1,6 @@
 
+import sys
+import json
 import click
 from tabulate import tabulate
 
@@ -34,6 +36,11 @@ def cli(obj, ids, filters, display, from_date=None):
         query.append(('from-date', from_date))
 
     r = client.http.get('/alerts', query)
+
+    if obj['output'] == 'json':
+        print(json.dumps(r['alerts']))
+        sys.exit(0)
+
     alerts = [Alert.parse(a) for a in r['alerts']]
     last_time = r['lastTime']
     auto_refresh = r['autoRefresh']

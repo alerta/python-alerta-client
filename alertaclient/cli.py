@@ -40,6 +40,7 @@ class AlertaCLI(click.MultiCommand):
 @click.option('--profile', metavar='<PROFILE>', help='Configuration profile.')
 @click.option('--endpoint-url', metavar='<URL>', help='API endpoint URL.')
 @click.option('--output', 'output', metavar='<FORMAT>', help='Output format. eg. simple, grid, psql, presto, rst')
+@click.option('--json', 'output', flag_value='json', help='Output in JSON format. Shortcut for "--output json"')
 @click.option('--color/--no-color', help='Color-coded output based on severity.')
 @click.option('--debug', is_flag=True, help='Debug mode.')
 @click.pass_context
