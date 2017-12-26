@@ -1,5 +1,8 @@
 
+import sys
 import click
+import json
+
 from tabulate import tabulate
 
 from alertaclient.utils import build_query
@@ -12,6 +15,12 @@ from alertaclient.utils import build_query
 def cli(obj, ids, filters):
     """Show status and severity changes for alerts."""
     client = obj['client']
+
+    if obj['output'] == 'json':
+        r = client.http.get('/alerts/history')
+        click.echo(json.dumps(r['history'], sort_keys=True, indent=4, ensure_ascii=False))
+        sys.exit(0)
+
     timezone = obj['timezone']
     if ids:
         query = [('id', x) for x in ids]

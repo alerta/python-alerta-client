@@ -1,6 +1,7 @@
 
-
+import sys
 import click
+import json
 
 from tabulate import tabulate
 
@@ -11,6 +12,12 @@ from tabulate import tabulate
 def cli(obj, purge):
     """List alert suppressions."""
     client = obj['client']
+
+    if obj['output'] == 'json':
+        r = client.http.get('/blackouts')
+        click.echo(json.dumps(r['blackouts'], sort_keys=True, indent=4, ensure_ascii=False))
+        sys.exit(0)
+
     timezone = obj['timezone']
     headers = {
         'id': 'ID', 'priority': 'P', 'environment': 'ENVIRONMENT', 'service': 'SERVICE', 'resource': 'RESOURCE',

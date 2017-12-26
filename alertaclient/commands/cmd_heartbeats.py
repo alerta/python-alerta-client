@@ -1,5 +1,7 @@
 
+import sys
 import click
+import json
 
 from tabulate import tabulate
 from alertaclient.models.heartbeat import MAX_LATENCY
@@ -13,6 +15,12 @@ from alertaclient.models.heartbeat import MAX_LATENCY
 def cli(obj, alert, severity, purge):
     """List heartbeats."""
     client = obj['client']
+
+    if obj['output'] == 'json':
+        r = client.http.get('/heartbeats')
+        click.echo(json.dumps(r['heartbeats'], sort_keys=True, indent=4, ensure_ascii=False))
+        sys.exit(0)
+
     timezone = obj['timezone']
     headers = {
         'id': 'ID', 'origin': 'ORIGIN', 'customer': 'CUSTOMER', 'tags': 'TAGS', 'createTime': 'CREATED',
