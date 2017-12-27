@@ -37,7 +37,7 @@ def cli(obj, ids, filters, display, from_date=None):
     r = client.http.get('/alerts', query)
 
     if obj['output'] == 'json':
-        print(json.dumps(r['alerts']))
+        click.echo(json.dumps(r['alerts'], sort_keys=True, indent=4, ensure_ascii=False))
     else:
         alerts = [Alert.parse(a) for a in r['alerts']]
         last_time = r['lastTime']
