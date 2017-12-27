@@ -1,5 +1,4 @@
 
-import sys
 import click
 import json
 
@@ -19,17 +18,16 @@ def cli(obj, ids, filters):
     if obj['output'] == 'json':
         r = client.http.get('/alerts/history')
         click.echo(json.dumps(r['history'], sort_keys=True, indent=4, ensure_ascii=False))
-        sys.exit(0)
-
-    timezone = obj['timezone']
-    if ids:
-        query = [('id', x) for x in ids]
     else:
-        query = build_query(filters)
-    alerts = client.get_history(query)
+        timezone = obj['timezone']
+        if ids:
+            query = [('id', x) for x in ids]
+        else:
+            query = build_query(filters)
+        alerts = client.get_history(query)
 
-    headers = {'id': 'ID', 'updateTime': 'LAST UPDATED', 'severity': 'SEVERITY', 'status': 'STATUS',
-               'type': 'TYPE', 'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE',
-               'resource': 'RESOURCE', 'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE', 'text': 'TEXT'}
-    click.echo(
-        tabulate([a.tabular(timezone) for a in alerts], headers=headers, tablefmt=obj['output']))
+        headers = {'id': 'ID', 'updateTime': 'LAST UPDATED', 'severity': 'SEVERITY', 'status': 'STATUS',
+                   'type': 'TYPE', 'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE',
+                   'resource': 'RESOURCE', 'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE', 'text': 'TEXT'}
+        click.echo(
+            tabulate([a.tabular(timezone) for a in alerts], headers=headers, tablefmt=obj['output']))

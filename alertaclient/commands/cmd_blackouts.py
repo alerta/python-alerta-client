@@ -1,5 +1,4 @@
 
-import sys
 import click
 import json
 
@@ -16,19 +15,18 @@ def cli(obj, purge):
     if obj['output'] == 'json':
         r = client.http.get('/blackouts')
         click.echo(json.dumps(r['blackouts'], sort_keys=True, indent=4, ensure_ascii=False))
-        sys.exit(0)
+    else:
+        timezone = obj['timezone']
+        headers = {
+            'id': 'ID', 'priority': 'P', 'environment': 'ENVIRONMENT', 'service': 'SERVICE', 'resource': 'RESOURCE',
+            'event': 'EVENT', 'group': 'GROUP', 'tags': 'TAGS', 'startTime': 'START', 'endTime': 'END',
+            'duration': 'DURATION', 'status': 'STATUS', 'remaining': 'REMAINING', 'customer': 'CUSTOMER'
+        }
+        blackouts = client.get_blackouts()
+        click.echo(tabulate([b.tabular(timezone) for b in blackouts], headers=headers, tablefmt=obj['output']))
 
-    timezone = obj['timezone']
-    headers = {
-        'id': 'ID', 'priority': 'P', 'environment': 'ENVIRONMENT', 'service': 'SERVICE', 'resource': 'RESOURCE',
-        'event': 'EVENT', 'group': 'GROUP', 'tags': 'TAGS', 'startTime': 'START', 'endTime': 'END',
-        'duration': 'DURATION', 'status': 'STATUS', 'remaining': 'REMAINING', 'customer': 'CUSTOMER'
-    }
-    blackouts = client.get_blackouts()
-    click.echo(tabulate([b.tabular(timezone) for b in blackouts], headers=headers, tablefmt=obj['output']))
-
-    expired = [b for b in blackouts if b.status == 'expired']
-    if purge:
-        with click.progressbar(expired, label='Purging {} blackouts'.format(len(expired))) as bar:
-            for b in bar:
-                client.delete_blackout(b.id)
+        expired = [b for b in blackouts if b.status == 'expired']
+        if purge:
+            with click.progressbar(expired, label='Purging {} blackouts'.format(len(expired))) as bar:
+                for b in bar:
+                    client.delete_blackout(b.id)
