@@ -44,9 +44,9 @@ def cli(obj, ids, filters, display, from_date=None):
         auto_refresh = r['autoRefresh']
 
         if display == 'tabular':
-            headers = {'id': 'ID', 'lastReceiveTime': 'LAST RECEIVED', 'severity': 'SEVERITY', 'duplicateCount': 'DUPL',
-                       'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE', 'resource': 'RESOURCE',
-                       'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE'}
+            headers = {'id': 'ID', 'lastReceiveTime': 'LAST RECEIVED', 'severity': 'SEVERITY', 'status': 'STATUS',
+                       'duplicateCount': 'DUPL', 'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE',
+                       'resource': 'RESOURCE', 'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE', 'text': 'TEXT'}
             click.echo(tabulate([a.tabular('summary', timezone) for a in alerts], headers=headers, tablefmt=obj['output']))
         elif display in ['compact', 'details']:
             for alert in reversed(alerts):

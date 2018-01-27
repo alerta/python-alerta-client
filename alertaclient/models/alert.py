@@ -103,6 +103,7 @@ class Alert(object):
                 'id': self.get_id(short=True),
                 'lastReceiveTime': DateTime.localtime(self.last_receive_time, timezone),
                 'severity': self.severity,
+                'status': self.status,
                 'duplicateCount': self.duplicate_count,
                 'customer': self.customer,
                 'environment': self.environment,
@@ -110,7 +111,8 @@ class Alert(object):
                 'resource': self.resource,
                 'group': self.group,
                 'event': self.event,
-                'value': self.value
+                'value': self.value,
+                'text': self.text
             }
         elif fields == 'details':
             return {
