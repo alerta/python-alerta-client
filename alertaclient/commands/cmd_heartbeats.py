@@ -7,9 +7,9 @@ from alertaclient.models.heartbeat import MAX_LATENCY
 
 
 @click.command('heartbeats', short_help='List heartbeats')
-@click.option('--alert', is_flag=True, help='Send alerts on stale or slow heartbeats')
-@click.option('--severity', '-s', metavar='SEVERITY', default='major', help='Set the severity for stale heartbeat alerts')
-@click.option('--purge', is_flag=True, help='Delete stale heartbeats')
+@click.option('--alert', is_flag=True, help='Alert on stale or slow heartbeats')
+@click.option('--severity', '-s', metavar='SEVERITY', default='major', help='Severity for stale heartbeat alerts')
+@click.option('--purge', is_flag=True, help='Delete all stale heartbeats')
 @click.pass_obj
 def cli(obj, alert, severity, purge):
     """List heartbeats."""

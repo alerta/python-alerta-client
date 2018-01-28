@@ -5,18 +5,16 @@ import click
 
 
 @click.command('key', short_help='Create API key')
-@click.option('--username', '-u')
+@click.option('--username', '-u', help='User (Admin only)')
 @click.option('--scope', 'scopes', multiple=True, help='List of permissions eg. admin:keys, write:alerts')
-@click.option('--duration', type=int)
-@click.option('--text')
-@click.option('--delete', '-D', metavar='ID', help='Delete API key')
+@click.option('--duration', metavar='SECONDS', type=int, help='Duration API key is valid')
+@click.option('--text', help='Description of API key use')
+@click.option('--delete', '-D', metavar='ID', help='Delete API key using ID or KEY')
 @click.pass_obj
 def cli(obj, username, scopes, duration, text, delete):
     """Create or delete an API key."""
     client = obj['client']
     if delete:
-        if username or scopes or duration or text:
-            raise click.UsageError('Option "--delete" is mutually exclusive.')
         client.delete_key(delete)
     else:
         try:

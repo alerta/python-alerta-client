@@ -6,14 +6,12 @@ import click
 @click.command('customer', short_help='Add customer lookup')
 @click.option('--customer', help='customer name')
 @click.option('--org', '--group', '--domain', '--role', 'match', help='Used to lookup customer')
-@click.option('--delete', '-D', metavar='ID', help='Delete customer lookup')
+@click.option('--delete', '-D', metavar='ID', help='Delete customer lookup using ID')
 @click.pass_obj
 def cli(obj, customer, match, delete):
     """Add group/org/domain/role-to-customer or delete lookup entry."""
     client = obj['client']
     if delete:
-        if customer or match:
-            raise click.UsageError('Option "--delete" is mutually exclusive.')
         client.delete_customer(delete)
     else:
         if not customer:

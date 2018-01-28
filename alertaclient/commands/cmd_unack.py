@@ -6,7 +6,7 @@ from alertaclient.utils import build_query
 @click.command('unack', short_help='Un-acknowledge alerts')
 @click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
-@click.option('--text')
+@click.option('--text', help='Message associated with status change')
 @click.pass_obj
 def cli(obj, ids, filters, text):
     """Set alert status to 'open'."""

@@ -4,16 +4,14 @@ import click
 
 
 @click.command('perm', short_help='Add role-permission lookup')
-@click.option('--role', help='role name')
+@click.option('--role', help='Role name')
 @click.option('--scope', 'scopes', multiple=True, help='List of permissions eg. admin:keys, write:alerts')
-@click.option('--delete', '-D', metavar='ID', help='Delete role')
+@click.option('--delete', '-D', metavar='ID', help='Delete role using ID')
 @click.pass_obj
 def cli(obj, role, scopes, delete):
     """Add or delete role-to-permission lookup entry."""
     client = obj['client']
     if delete:
-        if role or scopes:
-            raise click.UsageError('Option "--delete" is mutually exclusive.')
         client.delete_perm(delete)
     else:
         if not role:

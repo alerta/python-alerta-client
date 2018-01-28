@@ -5,7 +5,7 @@ import json
 from tabulate import tabulate
 
 
-@click.command('customers', short_help='List API keys')
+@click.command('keys', short_help='List API keys')
 @click.pass_obj
 def cli(obj):
     """List API keys."""

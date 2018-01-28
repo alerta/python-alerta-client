@@ -7,7 +7,7 @@ from datetime import datetime
 import requests
 from requests.auth import AuthBase
 
-from alertaclient.exceptions import AuthError, UnknownError
+from alertaclient.exceptions import UnknownError
 from alertaclient.models.alert import Alert
 from alertaclient.models.blackout import Blackout
 from alertaclient.models.customer import Customer
@@ -126,7 +126,7 @@ class Client(object):
         return counts['services']
 
     # Blackouts
-    def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, start=None, duration=None):
+    def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, customer=None, start=None, duration=None):
         data = {
             'environment': environment,
             'service': service or list(),
@@ -134,6 +134,7 @@ class Client(object):
             'event': event,
             'group': group,
             'tags': tags or list(),
+            'customer': customer,
             'startTime': start,
             'duration': duration
         }
@@ -221,16 +222,25 @@ class Client(object):
         return self.http.delete('/perm/%s' % id)
 
     # Users
+    def create_user(self, name, email, password, status, roles=None, attributes=None, text='', email_verified=False):
+        data = {
+            'name': name,
+            'email': email,
+            'password': password,
+            'status': status,
+            'roles': roles or list(),
+            'attributes': attributes or dict(),
+            'text': text,
+            'email_verified': email_verified
+        }
+        return self.http.post('/auth/signup', data)
+
     def login(self, username, password):
         data = {
             'username': username,
             'password': password
         }
-        r = self.http.post('/auth/login', data)
-        if 'token' in r:
-            return r['token']
-        else:
-            raise AuthError
+        return self.http.post('/auth/login', data)
 
     def get_users(self, query=None):
         r = self.http.get('/users', query)
