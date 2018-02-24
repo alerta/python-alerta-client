@@ -14,9 +14,11 @@ class Screen(object):
     ALIGN_RIGHT = 'R'
     ALIGN_CENTRE = 'C'
 
-    def __init__(self, client):
+    def __init__(self, client, timezone):
         self.client = client
+        self.timezone = timezone
 
+        self.screen = None
         self.lines = None
         self.cols = None
 
@@ -45,6 +47,7 @@ class Screen(object):
         COLOR_BLACK = curses.color_pair(7)
 
         self.SEVERITY_MAP = {
+            'security': ["Sec", COLOR_BLACK],
             'critical': ["Crit", COLOR_RED],
             'major': ["Majr", COLOR_MAGENTA],
             'minor': ["Minr", COLOR_YELLOW],
@@ -52,10 +55,10 @@ class Screen(object):
             'indeterminate': ["Ind ", COLOR_CYAN],
             'cleared': ["Clr", COLOR_GREEN],
             'normal': ["Norm", COLOR_GREEN],
-            'inform': ["Info", COLOR_GREEN],
             'ok': ["Ok", COLOR_GREEN],
+            'informational': ["Info", COLOR_GREEN],
             'debug': ["Dbug", COLOR_BLACK],
-            'auth': ["Sec", COLOR_BLACK],
+            'trace': ["Trce", COLOR_BLACK],
             'unknown': ["Unkn", COLOR_BLACK]
         }
 
@@ -85,31 +88,47 @@ class Screen(object):
         self._addstr(0, 'C', 'alerta {}'.format(version), curses.A_BOLD)
         self._addstr(0, 'R', '{}'.format(now.strftime('%H:%M:%S %d/%m/%y')), curses.A_BOLD)
 
-        # draw bars
+        # TODO - draw bars
 
         # draw alerts
-        self._addstr(2, 1, 'Sev. Time     Dupl. Env.         Service      Resource     Event        Value ', curses.A_UNDERLINE)
+        text_width = self.cols - 95
+        self._addstr(2, 1, 'Sev. Time     Dupl. Customer Env.         Service      Resource     Group Event' +
+                           '        Value Text' + ' ' * (text_width - 4), curses.A_UNDERLINE)
 
         def short_sev(severity):
-            return self.SEVERITY_MAP[severity][0]
+            return self.SEVERITY_MAP.get(severity, self.SEVERITY_MAP['unknown'])[0]
 
         def color(severity):
-            return self.SEVERITY_MAP[severity][1]
+            return self.SEVERITY_MAP.get(severity, self.SEVERITY_MAP['unknown'])[1]
 
         r = self.client.http.get('/alerts')
         alerts = [Alert.parse(a) for a in r['alerts']]
         last_time = DateTime.parse(r['lastTime'])
+
         for i, alert in enumerate(alerts):
-            self._addstr(i+3, 1, '{0:<4} {1} {2:5d} {3:<12} {4:<12} {5:<12.12} {6:<12.12} {7:<6.6}'.format(
+            row = i + 3
+            if row >= self.lines - 2:  # leave room for footer
+                break
+
+            text = u'{:<4} {} {:5d} {:8.8} {:<12} {:<12} {:<12.12} {:5.5} {:<12.12} {:<5.5} {:.{width}}'.format(
                 short_sev(alert.severity),
-                alert.last_receive_time.strftime('%H:%M:%S'),
+                DateTime.localtime(alert.last_receive_time, self.timezone, fmt='%H:%M:%S'),
                 alert.duplicate_count,
+                alert.customer or "-",
                 alert.environment,
                 ','.join(alert.service),
                 alert.resource,
+                alert.group,
                 alert.event,
-                alert.value
-            ), color(alert.severity))
+                alert.value or "n/a",
+                alert.text,
+                width=text_width
+            )
+            # XXX - needed to support python2 and python3
+            if not isinstance(text, str):
+                text = text.encode('ascii', errors='replace')
+
+            self._addstr(row, 1, text, color(alert.severity))
 
         # draw footer
         self._addstr(self.lines - 1, 0, 'Last Update: {}'.format(last_time.strftime('%H:%M:%S')), curses.A_BOLD)
@@ -118,13 +137,13 @@ class Screen(object):
 
         self.screen.refresh()
 
-    def _addstr(self, y, x, str, attr=0):
+    def _addstr(self, y, x, line, attr=0):
         if x == self.ALIGN_RIGHT:
-            x = self.cols - len(str) - 1
+            x = self.cols - len(line) - 1
         if x == self.ALIGN_CENTRE:
-            x = int((self.cols / 2) - len(str) / 2)
+            x = int((self.cols / 2) - len(line) / 2)
 
-        self.screen.addstr(y, x, str, attr)
+        self.screen.addstr(y, x, line, attr)
 
     def _key_press(self, key):
         if key in 'qQ':

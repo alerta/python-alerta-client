@@ -31,10 +31,10 @@ class DateTime(object):
         return dt.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + ".%03dZ" % (dt.microsecond // 1000)
 
     @staticmethod
-    def localtime(dt, timezone=None):
+    def localtime(dt, timezone=None, fmt='%Y/%m/%d %H:%M:%S'):
         tz = pytz.timezone(timezone)
         try:
-            return dt.replace(tzinfo=pytz.UTC).astimezone(tz).strftime('%Y/%m/%d %H:%M:%S')
+            return dt.replace(tzinfo=pytz.UTC).astimezone(tz).strftime(fmt)
         except AttributeError:
             return
 

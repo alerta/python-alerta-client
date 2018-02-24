@@ -9,6 +9,7 @@ from alertaclient.top import Screen
 def cli(obj):
     """Display alerts like unix "top" command."""
     client = obj['client']
+    timezone = obj['timezone']
 
-    screen = Screen(client)
+    screen = Screen(client, timezone)
     screen.run()
