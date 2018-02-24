@@ -8,7 +8,7 @@ from alertaclient.exceptions import AuthError
 @click.command('user', short_help='Update user')
 @click.option('--id', '-i', metavar='UUID', help='User ID')
 @click.option('--name', help='Name of user')
-@click.option('--email', help='Email address')
+@click.option('--email', help='Email address (login username)')
 @click.option('--password', help='Password')
 @click.option('--status', help='Status eg. active, inactive')
 @click.option('--role', 'roles', multiple=True, help='List of roles')
