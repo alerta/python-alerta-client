@@ -1,7 +1,7 @@
 
-import click
-
 from datetime import datetime, timedelta
+
+import click
 
 
 @click.command('uptime', short_help='Display server uptime')

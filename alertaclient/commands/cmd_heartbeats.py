@@ -1,8 +1,9 @@
 
-import click
 import json
 
+import click
 from tabulate import tabulate
+
 from alertaclient.models.heartbeat import MAX_LATENCY
 
 

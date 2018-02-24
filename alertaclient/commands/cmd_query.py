@@ -1,5 +1,6 @@
 
 import json
+
 import click
 from tabulate import tabulate
 

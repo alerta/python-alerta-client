@@ -1,8 +1,8 @@
 
 import click
+from requests import __version__ as requests_version
 
 from alertaclient.version import __version__ as client_version
-from requests import __version__ as requests_version
 
 
 @click.command('version', short_help='Display version info')

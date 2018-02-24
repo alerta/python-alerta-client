@@ -1,7 +1,7 @@
 
-import click
 import json
 
+import click
 from tabulate import tabulate
 
 from alertaclient.utils import build_query
