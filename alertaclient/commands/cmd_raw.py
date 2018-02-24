@@ -10,8 +10,8 @@ from alertaclient.utils import build_query
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
 @click.pass_obj
 def cli(obj, ids, filters):
-    client = obj['client']
     """Show raw data for alerts."""
+    client = obj['client']
     if ids:
         query = [('id', x) for x in ids]
     else:

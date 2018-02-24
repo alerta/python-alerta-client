@@ -1,8 +1,8 @@
 
 import os
-import click
-
 from netrc import netrc
+
+import click
 
 try:
     from urllib.parse import urlparse

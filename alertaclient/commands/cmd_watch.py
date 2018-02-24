@@ -1,6 +1,7 @@
 
 import sys
 import time
+
 import click
 
 from .cmd_query import cli as query
