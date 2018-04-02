@@ -39,6 +39,9 @@ def cli(obj, ids, filters, display, from_date=None):
 
     if obj['output'] == 'json':
         click.echo(json.dumps(r['alerts'], sort_keys=True, indent=4, ensure_ascii=False))
+    elif obj['output'] in ['json_lines', 'jsonl', 'ndjson']:
+        for alert in r['alerts']:
+            click.echo(json.dumps(alert, ensure_ascii=False))
     else:
         alerts = [Alert.parse(a) for a in r['alerts']]
         last_time = r['lastTime']
