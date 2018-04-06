@@ -1,12 +1,13 @@
 
+import json
 import sys
 
 import click
 
 
 @click.command('send', short_help='Send an alert')
-@click.option('--resource', '-r', metavar='RESOURCE', required=True, help='Resource under alarm')
-@click.option('--event', '-e', metavar='EVENT', required=True, help='Event name')
+@click.option('--resource', '-r', metavar='RESOURCE', required=False, help='Resource under alarm')
+@click.option('--event', '-e', metavar='EVENT', required=False, help='Event name')
 @click.option('--environment', '-E', metavar='ENVIRONMENT', help='Environment eg. Production, Development')
 @click.option('--severity', '-s', metavar='SEVERITY', help='Severity eg. critical, major, minor, warning')
 @click.option('--correlate', '-C', metavar='EVENT', multiple=True, help='List of related events eg. node_up, node_down')
@@ -26,38 +27,83 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
     """Send an alert."""
     client = obj['client']
 
+    def send_alert(resource, event, **kwargs):
+        try:
+            id, alert, message = client.send_alert(
+                resource=resource,
+                event=event,
+                environment=kwargs.get('environment'),
+                severity=kwargs.get('severity'),
+                correlate=kwargs.get('correlate', None) or list(),
+                service=kwargs.get('service', None) or list(),
+                group=kwargs.get('group'),
+                value=kwargs.get('value'),
+                text=kwargs.get('text'),
+                tags=kwargs.get('tags', None) or list(),
+                attributes=kwargs.get('attributes', None) or dict(),
+                origin=kwargs.get('origin'),
+                type=kwargs.get('type'),
+                timeout=kwargs.get('timeout'),
+                raw_data=kwargs.get('raw_data'),
+                customer=kwargs.get('customer')
+            )
+        except Exception as e:
+            click.echo('ERROR: {}'.format(e))
+            sys.exit(1)
+
+        if alert:
+            if alert.repeat:
+                message = '{} duplicates'.format(alert.duplicate_count)
+            else:
+                message = '{} -> {}'.format(alert.previous_severity, alert.severity)
+        click.echo('{} ({})'.format(id, message))
+
+    # read entire alert object from stdin
+    if not sys.stdin.isatty():
+        with click.get_text_stream('stdin') as stdin:
+            for line in stdin.readlines():
+                payload = json.loads(line)
+                send_alert(
+                    resource=payload['resource'],
+                    event=payload['event'],
+                    environment=payload['environment'],
+                    severity=payload['severity'],
+                    correlate=payload['correlate'],
+                    service=payload['service'],
+                    group=payload['group'],
+                    value=payload['value'],
+                    text=payload['text'],
+                    tags=payload['tags'],
+                    attributes=payload['attributes'],
+                    origin=payload['origin'],
+                    type=payload['type'],
+                    timeout=payload['timeout'],
+                    raw_data=payload['rawData'],
+                    customer=payload['customer']
+                )
+            sys.exit(1)
+
     # read raw data from file or stdin
     if raw_data and raw_data.startswith('@') or raw_data == '-':
         raw_data_file = raw_data.lstrip('@')
         with click.open_file(raw_data_file, 'r') as f:
             raw_data = f.read()
 
-    try:
-        id, alert, message = client.send_alert(
-            resource=resource,
-            event=event,
-            environment=environment,
-            severity=severity,
-            correlate=correlate,
-            service=service,
-            group=group,
-            value=value,
-            text=text,
-            tags=tags,
-            attributes=dict(a.split('=') for a in attributes),
-            origin=origin,
-            type=type,
-            timeout=timeout,
-            raw_data=raw_data,
-            customer=customer
-        )
-    except Exception as e:
-        click.echo('ERROR: {}'.format(e))
-        sys.exit(1)
-
-    if alert:
-        if alert.repeat:
-            message = '{} duplicates'.format(alert.duplicate_count)
-        else:
-            message = '{} -> {}'.format(alert.previous_severity, alert.severity)
-    click.echo('{} ({})'.format(id, message))
+    send_alert(
+        resource=resource,
+        event=event,
+        environment=environment,
+        severity=severity,
+        correlate=correlate,
+        service=service,
+        group=group,
+        value=value,
+        text=text,
+        tags=tags,
+        attributes=dict(a.split('=') for a in attributes),
+        origin=origin,
+        type=type,
+        timeout=timeout,
+        raw_data=raw_data,
+        customer=customer
+    )
