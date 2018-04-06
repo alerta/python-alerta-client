@@ -65,4 +65,5 @@ class AlertTestCase(unittest.TestCase):
             service=['Web', 'App'], severity='critical', tags=["london", "linux"], value=4
         )
         self.assertEqual(alert.value, "4")  # values cast to string
+        self.assertEqual(alert.timeout, 86400)  # timeout returned as int
         self.assertIn("london", alert.tags)
