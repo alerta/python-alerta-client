@@ -275,10 +275,15 @@ class Client(object):
     def mgmt_status(self):
         return self.http.get('/management/status')
 
-    def housekeeping(self):
+    def housekeeping(self, expired_delete_hours=None, info_delete_hours=None):
         # This endpoint isn't currently JSON-encoded.
         url = self.http.endpoint + "/management/housekeeping"
-        response = self.http.session.get(url, auth=self.http.auth, timeout=self.http.timeout)
+        params = dict()
+        if expired_delete_hours is not None:
+            params["expired"] = expired_delete_hours
+        if info_delete_hours is not None:
+            params["info"] = info_delete_hours
+        response = self.http.session.get(url, auth=self.http.auth, timeout=self.http.timeout, params=params)
         if response.status_code != 200:
             raise UnknownError(response.text)
 
