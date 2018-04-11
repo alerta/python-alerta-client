@@ -1,7 +1,7 @@
 
 import click
 
-from alertaclient.auth import get_token
+from alertaclient.auth.utils import get_token
 
 
 @click.command('token', short_help='Display current auth token')

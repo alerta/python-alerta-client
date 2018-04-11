@@ -11,6 +11,8 @@ default_config = {
     'profile':     None,
     'endpoint':    'http://localhost:8080',
     'key':         '',
+    'provider':    'basic',
+    'client_id':   None,
     'timezone':    'Europe/London',
     'timeout':     5.0,
     'sslverify':   True,

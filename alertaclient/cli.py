@@ -4,7 +4,7 @@ import sys
 import click
 
 from alertaclient.api import Client
-from alertaclient.auth import get_token
+from alertaclient.auth.utils import get_token
 from alertaclient.config import Config
 
 CONTEXT_SETTINGS = dict(
@@ -56,6 +56,8 @@ def cli(ctx, config_file, profile, endpoint_url, output, color, debug):
     ctx.obj['output'] = output or config.options['output']
     ctx.obj['color'] = color or os.environ.get('CLICOLOR', None) or config.options['color']
     endpoint = endpoint_url or config.options['endpoint']
+    ctx.obj['provider'] = config.options['provider']
+    ctx.obj['client_id'] = config.options['client_id']
 
     ctx.obj['client'] = Client(
         endpoint=endpoint,
