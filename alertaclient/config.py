@@ -13,6 +13,8 @@ default_config = {
     'key':         '',
     'provider':    'basic',
     'client_id':   None,
+    'github_url':   "https://github.com",
+    'gitlab_url':   "https://gitlab.com",
     'timezone':    'Europe/London',
     'timeout':     5.0,
     'sslverify':   True,

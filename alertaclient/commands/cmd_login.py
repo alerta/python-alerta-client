@@ -19,9 +19,9 @@ def cli(obj):
 
     try:
         if provider == 'github':
-            token = github.login(client.endpoint, client_id)['token']
+            token = github.login(obj['github_url'], client.endpoint, client_id)['token']
         elif provider == 'gitlab':
-            token = gitlab.login(client.endpoint, client_id)['token']
+            token = gitlab.login(obj['gitlab_url'], client.endpoint, client_id)['token']
         elif provider == 'google':
             username = click.prompt('Email')
             token = google.login(client.endpoint, username, client_id)['token']

@@ -58,6 +58,8 @@ def cli(ctx, config_file, profile, endpoint_url, output, color, debug):
     endpoint = endpoint_url or config.options['endpoint']
     ctx.obj['provider'] = config.options['provider']
     ctx.obj['client_id'] = config.options['client_id']
+    ctx.obj['github_url'] = config.options['github_url']
+    ctx.obj['gitlab_url'] = config.options['gitlab_url']
 
     ctx.obj['client'] = Client(
         endpoint=endpoint,

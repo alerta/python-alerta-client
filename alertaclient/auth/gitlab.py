@@ -7,17 +7,18 @@ from uuid import uuid4
 from alertaclient.auth.token import TokenHandler
 
 
-def login(endpoint, client_id):
+def login(gitlab_url, endpoint, client_id):
     xsrf_token = str(uuid4())
     redirect_uri = 'http://127.0.0.1:9004'
     url = (
-        'https://gitlab.com/oauth/authorize?'
+        '{gitlab_url}/oauth/authorize?'
         'response_type=code&'
         'client_id={client_id}&'
         'redirect_uri={redirect_uri}&'
         'scope=openid%20api&'
         'state={state}'
     ).format(
+        gitlab_url=gitlab_url,
         client_id=client_id,
         redirect_uri=redirect_uri,
         state=xsrf_token
