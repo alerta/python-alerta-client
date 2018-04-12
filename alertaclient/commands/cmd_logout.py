@@ -1,7 +1,7 @@
 
 import click
 
-from alertaclient.auth import clear_token
+from alertaclient.auth.utils import clear_token
 
 
 @click.command('logout', short_help='Clear login credentials')
