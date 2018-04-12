@@ -2,19 +2,17 @@
 import base64
 import json
 
-import click
+from six import text_type
 
 try:
-    from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
-except:
-    from HTTPServer import HTTPServer, BaseHTTPRequestHandler
-
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+except ImportError:
+    from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 
 try:
     from urllib.parse import urlparse, parse_qs
 except ImportError:
-    from urlparse import urlparse
-    from urllib import parse_qs
+    from urlparse import urlparse, parse_qs
 
 from alertaclient.exceptions import AuthError
 
@@ -39,7 +37,7 @@ class HTTPServerHandler(BaseHTTPRequestHandler):
     def __init__(self, request, address, server, xsrf_token):
         self.xsrf_token = xsrf_token
         self.access_token = None
-        super().__init__(request, address, server)
+        BaseHTTPRequestHandler.__init__(self, request, address, server)
 
     def do_GET(self):
         try:
@@ -54,16 +52,16 @@ class HTTPServerHandler(BaseHTTPRequestHandler):
         elif 'error' in qp:
             raise AuthError(qp['error'])
 
-        self.send_response(HTTPStatus.OK)
+        self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(bytes(SUCCESS_MESSAGE, 'UTF-8'))
+        self.wfile.write(bytes(SUCCESS_MESSAGE.encode('utf-8')))
 
     def log_message(self, format, *args):
         return
 
 
-class TokenHandler:
+class TokenHandler(object):
 
     def get_access_token(self, xsrf_token):
         server_address = ('', 9004)
@@ -72,10 +70,12 @@ class TokenHandler:
         return httpd.access_token
 
 
-class Jwt:
+class Jwt(object):
 
     def parse(self, jwt):
         payload = jwt.split('.')[1]
-        padding = '=' * (4 - (len(payload) % 4))
+        if isinstance(payload, text_type):
+            payload = payload.encode('ascii')
+        padding = b'=' * (4 - (len(payload) % 4))
         decoded = base64.urlsafe_b64decode(payload + padding)
         return json.loads(decoded.decode('utf-8'))
