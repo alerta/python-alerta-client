@@ -21,7 +21,7 @@ import click
 @click.option('--type', metavar='EVENT_TYPE', help='Event type eg. exceptionAlert, performanceAlert, nagiosAlert')
 @click.option('--timeout', metavar='SECONDS', type=int, help='Seconds before an open alert will be expired')
 @click.option('--raw-data', metavar='STRING', help='Raw data of orignal alert eg. SNMP trap PDU. \'@\' to read from file, \'-\' to read from stdin')
-@click.option('--customer', metavar='STRING', help='Customer (Admin only)')
+@click.option('--customer', metavar='STRING', help='Customer')
 @click.pass_obj
 def cli(obj, resource, event, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data, customer):
     """Send an alert."""

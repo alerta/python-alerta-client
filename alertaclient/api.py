@@ -187,11 +187,12 @@ class Client(object):
         return self.http.delete('/heartbeat/%s' % id)
 
     # API Keys
-    def create_key(self, username, scopes=None, expires=None, text=''):
+    def create_key(self, username, scopes=None, expires=None, text='', customer=None):
         data = {
             'user': username,
             'scopes': scopes or list(),
-            'text': text
+            'text': text,
+            'customer': customer
         }
         if expires:
             data['expireTime'] = DateTime.iso8601(expires)

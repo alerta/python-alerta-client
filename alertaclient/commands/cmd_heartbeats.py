@@ -54,7 +54,8 @@ def cli(obj, alert, severity, purge):
                             value='{}'.format(b.since),
                             text='Heartbeat not received in {} seconds'.format(b.timeout),
                             tags=tags,
-                            type='heartbeatAlert'
+                            type='heartbeatAlert',
+                            customer=b.customer
                         )
                     elif b.status == 'slow':
                         client.send_alert(
@@ -68,7 +69,8 @@ def cli(obj, alert, severity, purge):
                             value='{}ms'.format(b.latency),
                             text='Heartbeat took more than {}ms to be processed'.format(MAX_LATENCY),
                             tags=tags,
-                            type='heartbeatAlert'
+                            type='heartbeatAlert',
+                            customer=b.customer
                         )
                     else:
                         client.send_alert(
@@ -82,5 +84,6 @@ def cli(obj, alert, severity, purge):
                             value='',
                             text='Heartbeat OK',
                             tags=tags,
-                            type='heartbeatAlert'
+                            type='heartbeatAlert',
+                            customer=b.customer
                         )
