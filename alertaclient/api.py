@@ -236,13 +236,6 @@ class Client(object):
         }
         return self.http.post('/auth/signup', data)
 
-    def login(self, username, password):
-        data = {
-            'username': username,
-            'password': password
-        }
-        return self.http.post('/auth/login', data)
-
     def get_users(self, query=None):
         r = self.http.get('/users', query)
         return [User.parse(u) for u in r['users']]
@@ -268,6 +261,21 @@ class Client(object):
 
     def delete_user(self, id):
         return self.http.delete('/user/%s' % id)
+
+    def login(self, username, password):
+        data = {
+            'username': username,
+            'password': password
+        }
+        return self.http.post('/auth/login', data)
+
+    def token(self, provider, data):
+        if provider == 'github':
+            return self.http.post('/auth/github', data)
+        if provider == 'gitlab':
+            return self.http.post('/auth/gitlab', data)
+        if provider == 'google':
+            return self.http.post('/auth/google', data)
 
     def userinfo(self):
         return self.http.get('/userinfo')

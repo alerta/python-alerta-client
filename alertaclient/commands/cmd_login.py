@@ -19,12 +19,12 @@ def cli(obj):
 
     try:
         if provider == 'github':
-            token = github.login(obj['github_url'], client.endpoint, client_id)['token']
+            token = github.login(client, obj['github_url'], client_id)['token']
         elif provider == 'gitlab':
-            token = gitlab.login(obj['gitlab_url'], client.endpoint, client_id)['token']
+            token = gitlab.login(client, obj['gitlab_url'], client_id)['token']
         elif provider == 'google':
             username = click.prompt('Email')
-            token = google.login(client.endpoint, username, client_id)['token']
+            token = google.login(client, username, client_id)['token']
         elif provider == 'basic':
             username = click.prompt('Email')
             password = click.prompt('Password', hide_input=True)

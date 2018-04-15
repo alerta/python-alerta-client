@@ -7,7 +7,7 @@ from uuid import uuid4
 from alertaclient.auth.token import TokenHandler
 
 
-def login(endpoint, username, client_id):
+def login(client, username, client_id):
     xsrf_token = str(uuid4())
     redirect_uri = 'http://127.0.0.1:9004'
     url = (
@@ -34,5 +34,4 @@ def login(endpoint, username, client_id):
         "clientId": client_id,
         "redirectUri": redirect_uri
     }
-    response = requests.post(endpoint+'/auth/google', json=data, headers={'Content-type': 'application/json'})
-    return response.json()
+    return client.token('google', data)
