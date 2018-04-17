@@ -1,5 +1,6 @@
 
 import json
+import os
 import sys
 
 import click
@@ -58,11 +59,15 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
                 message = '{} -> {}'.format(alert.previous_severity, alert.severity)
         click.echo('{} ({})'.format(id, message))
 
-    # read entire alert object from stdin
-    if not sys.stdin.isatty():
+    # read entire alert object from terminal stdin
+    if not sys.stdin.isatty() and (os.environ.get('TERM', None) or os.environ.get('PS1', None)):
         with click.get_text_stream('stdin') as stdin:
             for line in stdin.readlines():
-                payload = json.loads(line)
+                try:
+                    payload = json.loads(line)
+                except Exception as e:
+                    click.echo('ERROR: JSON parse failure - {}'.format(e))
+                    sys.exit(1)
                 send_alert(
                     resource=payload['resource'],
                     event=payload['event'],
@@ -81,7 +86,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
                     raw_data=payload['rawData'],
                     customer=payload['customer']
                 )
-            sys.exit(1)
+            sys.exit(0)
 
     # read raw data from file or stdin
     if raw_data and raw_data.startswith('@') or raw_data == '-':
