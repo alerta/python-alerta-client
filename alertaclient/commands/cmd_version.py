@@ -14,4 +14,5 @@ def cli(ctx, obj):
     click.echo('alerta {}'.format(client.mgmt_status()['version']))
     click.echo('alerta client {}'.format(client_version))
     click.echo('requests {}'.format(requests_version))
+    click.echo('click {}'.format(click.__version__))
     ctx.exit()
