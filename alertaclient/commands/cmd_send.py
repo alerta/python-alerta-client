@@ -68,24 +68,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
                 except Exception as e:
                     click.echo('ERROR: JSON parse failure - {}'.format(e))
                     sys.exit(1)
-                send_alert(
-                    resource=payload['resource'],
-                    event=payload['event'],
-                    environment=payload['environment'],
-                    severity=payload['severity'],
-                    correlate=payload['correlate'],
-                    service=payload['service'],
-                    group=payload['group'],
-                    value=payload['value'],
-                    text=payload['text'],
-                    tags=payload['tags'],
-                    attributes=payload['attributes'],
-                    origin=payload['origin'],
-                    type=payload['type'],
-                    timeout=payload['timeout'],
-                    raw_data=payload['rawData'],
-                    customer=payload['customer']
-                )
+                send_alert(**payload)
             sys.exit(0)
 
     # read raw data from file or stdin
