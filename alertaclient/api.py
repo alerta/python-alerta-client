@@ -79,6 +79,14 @@ class Client(object):
         }
         return self.http.put('/alert/%s/status' % id, data)
 
+    def action(self, id, action, text='', timeout=None):
+        data = {
+            'action': action,
+            'text': text,
+            'timeout': timeout
+        }
+        return self.http.put('/alert/%s/action' % id, data)
+
     def tag_alert(self, id, tags):
         return self.http.put('/alert/%s/tag' % id, {"tags": tags})
 
