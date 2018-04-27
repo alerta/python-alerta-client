@@ -22,6 +22,9 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, del
     if delete:
         client.delete_user(delete)
     elif id:
+        if not any([name, email, password, status, roles, text, email_verified]):
+            click.echo('Nothing to update.')
+            sys.exit(1)
         try:
             r = client.update_user(
                 id, name=name, email=email, password=password, status=status,
@@ -36,9 +39,9 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, del
             click.echo(r['message'])
     else:
         if not email:
-            raise click.UsageError('Missing option "--email".')
+            raise click.UsageError('Need "--email" to create user.')
         if not password:
-            raise click.UsageError('Missing option "--password".')
+            raise click.UsageError('Need "--password" to create user.')
         try:
             r = client.create_user(
                 name=name, email=email, password=password, status=status,
