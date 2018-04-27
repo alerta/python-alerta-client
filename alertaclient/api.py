@@ -231,6 +231,17 @@ class Client(object):
         return self.http.delete('/perm/%s' % id)
 
     # Users
+    def signup(self, name, email, password, status, attributes=None, text=''):
+        data = {
+            'name': name,
+            'email': email,
+            'password': password,
+            'status': status,
+            'attributes': attributes or dict(),
+            'text': text
+        }
+        return self.http.post('/auth/signup', data)
+
     def create_user(self, name, email, password, status, roles=None, attributes=None, text='', email_verified=False):
         data = {
             'name': name,
@@ -242,7 +253,7 @@ class Client(object):
             'text': text,
             'email_verified': email_verified
         }
-        return self.http.post('/auth/signup', data)
+        return self.http.post('/user', data)
 
     def get_users(self, query=None):
         r = self.http.get('/users', query)
@@ -261,11 +272,28 @@ class Client(object):
         }
         return self.http.put('/user/{}'.format(id), data)
 
+    def update_me(self, **kwargs):
+        data = {
+            'name': kwargs.get('name'),
+            'email': kwargs.get('email'),
+            'password': kwargs.get('password'),
+            'status': kwargs.get('status'),
+            'attributes': kwargs.get('attributes', None) or dict(),
+            'text': kwargs.get('text')
+        }
+        return self.http.put('/user/me', data)
+
     def update_user_attributes(self, id, attributes):
         data = {
             'attributes': attributes
         }
         return self.http.put('/user/%s/attributes' % id, data)
+
+    def update_me_attributes(self, attributes):
+        data = {
+            'attributes': attributes
+        }
+        return self.http.put('/user/me/attributes' % data)
 
     def delete_user(self, id):
         return self.http.delete('/user/%s' % id)
@@ -314,7 +342,7 @@ class ApiAuth(AuthBase):
     def __call__(self, r):
         if self.auth_token:
             r.headers['Authorization'] = 'Bearer {}'.format(self.auth_token)
-        else:
+        elif self.api_key:
             r.headers['Authorization'] = 'Key {}'.format(self.api_key)
         return r
 
