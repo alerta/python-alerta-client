@@ -47,6 +47,7 @@ class Client(object):
     # Alerts
     def send_alert(self, resource, event, **kwargs):
         data = {
+            'id': kwargs.get('id'),
             'resource': resource,
             'event': event,
             'environment': kwargs.get('environment'),

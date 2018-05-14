@@ -7,6 +7,7 @@ import click
 
 
 @click.command('send', short_help='Send an alert')
+@click.option('--id', '-i', metavar='UUID', required=False, help='Alert ID (default is random UUID string)')
 @click.option('--resource', '-r', metavar='RESOURCE', required=False, help='Resource under alarm')
 @click.option('--event', '-e', metavar='EVENT', required=False, help='Event name')
 @click.option('--environment', '-E', metavar='ENVIRONMENT', help='Environment eg. Production, Development')
@@ -24,13 +25,14 @@ import click
 @click.option('--raw-data', metavar='STRING', help='Raw data of orignal alert eg. SNMP trap PDU. \'@\' to read from file, \'-\' to read from stdin')
 @click.option('--customer', metavar='STRING', help='Customer')
 @click.pass_obj
-def cli(obj, resource, event, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data, customer):
+def cli(obj, id, resource, event, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data, customer):
     """Send an alert."""
     client = obj['client']
 
     def send_alert(resource, event, **kwargs):
         try:
             id, alert, message = client.send_alert(
+                id=kwargs.get('id'),
                 resource=resource,
                 event=event,
                 environment=kwargs.get('environment'),
@@ -78,6 +80,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
             raw_data = f.read()
 
     send_alert(
+        id=id,
         resource=resource,
         event=event,
         environment=environment,
