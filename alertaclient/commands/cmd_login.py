@@ -9,8 +9,9 @@ from alertaclient.auth.token import Jwt
 
 
 @click.command('login', short_help='Login with user credentials')
+@click.argument('username', required=False)
 @click.pass_obj
-def cli(obj):
+def cli(obj, username):
     """Authenticate using Github, Gitlab, Google OAuth2 or Basic Auth
     username/password instead of using an API key."""
     client = obj['client']
@@ -23,10 +24,12 @@ def cli(obj):
         elif provider == 'gitlab':
             token = gitlab.login(client, obj['gitlab_url'], client_id)['token']
         elif provider == 'google':
-            username = click.prompt('Email')
+            if not username:
+                username = click.prompt('Email')
             token = google.login(client, username, client_id)['token']
         elif provider == 'basic':
-            username = click.prompt('Email')
+            if not username:
+                username = click.prompt('Email')
             password = click.prompt('Password', hide_input=True)
             token = client.login(username, password)['token']
         else:
@@ -36,10 +39,10 @@ def cli(obj):
         raise AuthError(e)
 
     jwt = Jwt()
-    username = jwt.parse(token)['preferred_username']
-    if username:
-        save_token(client.endpoint, username, token)
-        click.echo('Logged in as {}'.format(username))
+    preferred_username = jwt.parse(token)['preferred_username']
+    if preferred_username:
+        save_token(client.endpoint, preferred_username, token)
+        click.echo('Logged in as {}'.format(preferred_username))
     else:
         click.echo('Failed to login.')
         sys.exit(1)

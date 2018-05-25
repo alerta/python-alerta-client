@@ -9,7 +9,8 @@ from alertaclient.config import Config
 
 CONTEXT_SETTINGS = dict(
     auto_envvar_prefix='ALERTA',
-    default_map={'query': {'compact': True}}
+    default_map={'query': {'compact': True}},
+    help_option_names=['-h', '--help'],
 )
 cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
 
