@@ -153,5 +153,5 @@ class Alert(object):
                 'receiveTime': DateTime.localtime(self.receive_time, timezone),
                 'lastReceiveId': self.last_receive_id,
                 'lastReceiveTime': DateTime.localtime(self.last_receive_time, timezone),
-                'history': [h.serialize(timezone) for h in self.history]
+                'history': self.history
             }
