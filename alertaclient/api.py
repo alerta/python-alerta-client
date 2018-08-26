@@ -5,7 +5,9 @@ import os
 from datetime import datetime
 
 import requests
+from http.client import HTTPConnection
 from requests.auth import AuthBase
+from urllib.parse import urlencode
 
 from alertaclient.exceptions import UnknownError
 from alertaclient.models.alert import Alert
@@ -18,12 +20,6 @@ from alertaclient.models.permission import Permission
 from alertaclient.models.user import User
 from alertaclient.utils import DateTime, CustomJsonEncoder
 
-try:
-    from urllib.parse import urlparse, urlencode
-except ImportError:
-    from urlparse import urlparse
-    from urllib import urlencode
-
 logger = logging.getLogger('alerta.client')
 
 
@@ -35,10 +31,6 @@ class Client(object):
         self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', self.DEFAULT_ENDPOINT)
 
         if debug:
-            try:  # for Python 3
-                from http.client import HTTPConnection
-            except ImportError:
-                from httplib import HTTPConnection
             HTTPConnection.debuglevel = 1
 
         key = key or os.environ.get('ALERTA_API_KEY', '')

@@ -2,17 +2,9 @@
 import base64
 import json
 
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from six import text_type
-
-try:
-    from http.server import HTTPServer, BaseHTTPRequestHandler
-except ImportError:
-    from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
-
-try:
-    from urllib.parse import urlparse, parse_qs
-except ImportError:
-    from urlparse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 
 from alertaclient.exceptions import AuthError
 

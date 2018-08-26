@@ -3,11 +3,7 @@ import os
 from netrc import netrc
 
 import click
-
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
+from urllib.parse import urlparse
 
 NETRC_FILE = os.path.join(os.environ['HOME'], ".netrc")
 
