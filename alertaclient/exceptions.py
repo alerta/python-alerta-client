@@ -1,8 +1,8 @@
 
 try:
-    from click import ClickException as ClientException
+    from click import ClickException as ClientException  # type: ignore
 except:
-    class ClientException(Exception):
+    class ClientException(Exception):  # type: ignore
         pass
 
 
