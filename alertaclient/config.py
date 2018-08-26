@@ -1,10 +1,7 @@
 
 import os
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 
 default_config = {
     'config_file': '~/.alerta.conf',
