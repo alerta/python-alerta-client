@@ -126,7 +126,7 @@ class Client(object):
         return counts['services']
 
     # Blackouts
-    def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, customer=None, start=None, duration=None):
+    def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, customer=None, start=None, duration=None, text=None):
         data = {
             'environment': environment,
             'service': service or list(),
@@ -136,7 +136,8 @@ class Client(object):
             'tags': tags or list(),
             'customer': customer,
             'startTime': start,
-            'duration': duration
+            'duration': duration,
+            'text': text
         }
         r = self.http.post('/blackout', data)
         return Blackout.parse(r['blackout'])

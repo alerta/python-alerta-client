@@ -15,7 +15,7 @@ class Blackout(object):
             end_time = kwargs.get('end_time')
             duration = int((end_time - start_time).total_seconds())
         else:
-            duration = kwargs.get('duration', None) #or current_app.config['BLACKOUT_DURATION']
+            duration = kwargs.get('duration', None)
             end_time = start_time + timedelta(seconds=duration)
 
         self.id = kwargs.get('id', None)
@@ -29,6 +29,10 @@ class Blackout(object):
         self.start_time = start_time
         self.end_time = end_time
         self.duration = duration
+
+        self.user = kwargs.get('user', None)
+        self.create_time = kwargs.get('create_time', None)
+        self.text = kwargs.get('text', None)
 
         if self.environment:
             self.priority = 1
@@ -100,7 +104,10 @@ class Blackout(object):
             customer=json.get('customer', None),
             start_time=DateTime.parse(json.get('startTime')),
             end_time=DateTime.parse(json.get('endTime')),
-            duration=json.get('duration', None)
+            duration=json.get('duration', None),
+            user=json.get('user', None),
+            create_time=DateTime.parse(json.get('createTime')),
+            text=json.get('text', None)
         )
 
     def tabular(self, timezone=None):
@@ -118,5 +125,8 @@ class Blackout(object):
             'endTime': DateTime.localtime(self.end_time, timezone),
             'duration': '{}s'.format(self.duration),
             'status': self.status,
-            'remaining': '{}s'.format(self.remaining)
+            'remaining': '{}s'.format(self.remaining),
+            'user': self.user,
+            'createTime': DateTime.localtime(self.create_time, timezone),
+            'text': self.text
         }

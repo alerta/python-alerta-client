@@ -13,9 +13,10 @@ import click
 @click.option('--customer', metavar='STRING', help='Customer (Admin only)')
 @click.option('--start', metavar='DATETIME', help='Start time in ISO8601 eg. 2018-02-01T12:00:00.000Z')
 @click.option('--duration', metavar='SECONDS', type=int, help='Blackout period in seconds')
+@click.option('--text', help='Reason for blackout')
 @click.option('--delete', '-D', help='Delete blackout using ID')
 @click.pass_obj
-def cli(obj, environment, service, resource, event, group, tags, customer, start, duration, delete):
+def cli(obj, environment, service, resource, event, group, tags, customer, start, duration, text, delete):
     """Suppress alerts for specified duration based on alert attributes."""
     client = obj['client']
     if delete:
@@ -33,7 +34,8 @@ def cli(obj, environment, service, resource, event, group, tags, customer, start
                 tags=tags,
                 customer=customer,
                 start=start,
-                duration=duration
+                duration=duration,
+                text=text
             )
         except Exception as e:
             click.echo('ERROR: {}'.format(e))
