@@ -1,16 +1,19 @@
+if: tag IS present OR type = pull_request OR (branch = master AND type = push)   # we only CI the master, tags and PRs
+
 language: python
+cache: pip
+dist: xenial
 python:
-  - "2.7"
-  - "3.4"
   - "3.5"
+  - "3.6"
 
 sudo: false
 
-# command to install dependencies
 install:
-  - "pip install ."
-  - "pip install -r requirements.txt"
+  - pip install .
+  - pip install -r requirements.txt
+  - pip install mypy==0.620
 
-# command to run tests
-script: nosetests tests/*
-
+script:
+  - python -m mypy alertaclient/
+  - nosetests --verbosity=3 tests/*
