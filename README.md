@@ -11,6 +11,13 @@ Related projects can be found on the Alerta Org Repo at <https://github.com/aler
 
 ----
 
+Python 2.7 support is EOL
+-------------------------
+
+Starting with Release 6.0 only Python 3.5+ is supported. Release 5.2 was the
+last to support Python 2.7 and feature enhancements for this release ended on
+August 31, 2018. Only critical bug fixes will be backported to Release 5.2.
+
 Installation
 ------------
 
