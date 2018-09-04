@@ -14,7 +14,7 @@ from .cmd_query import cli as query
 @click.option('--interval', '-n', metavar='SECONDS', type=int, default=2, help='Refresh interval')
 @click.pass_context
 def cli(ctx, ids, filters, details, interval):
-    """Query for alerts based on search filter criteria."""
+    """Watch for new alerts."""
     if details:
         display = 'details'
     else:
