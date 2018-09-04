@@ -64,10 +64,11 @@ class Client(object):
     def get_alert(self, id):
         return Alert.parse(self.http.get('/alert/%s' % id)['alert'])
 
-    def set_status(self, id, status, text):
+    def set_status(self, id, status, text='', timeout=None):
         data = {
             'status': status,
-            'text': text
+            'text': text,
+            'timeout': timeout
         }
         return self.http.put('/alert/%s/status' % id, data)
 
