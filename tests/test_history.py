@@ -55,3 +55,4 @@ class HistoryTestCase(unittest.TestCase):
         self.assertEqual(hist[0].service, ['Web', 'App'])
         self.assertEqual(hist[0].resource, 'web01')
         self.assertIn("london", hist[0].tags)
+        self.assertEqual(hist[0].change_type, 'severity')
