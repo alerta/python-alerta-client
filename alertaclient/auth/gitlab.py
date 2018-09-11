@@ -15,7 +15,7 @@ def login(client, gitlab_url, client_id):
         'response_type=code&'
         'client_id={client_id}&'
         'redirect_uri={redirect_uri}&'
-        'scope=openid%20api&'
+        'scope=openid&'
         'state={state}'
     ).format(
         gitlab_url=gitlab_url,
