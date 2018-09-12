@@ -35,7 +35,7 @@ def cli(obj, ids, filters, display, from_date=None):
     if from_date:
         query.append(('from-date', from_date))
 
-    r = client.http.get('/alerts', query)
+    r = client.http.get('/alerts', query, page=1, page_size=1000)
 
     if obj['output'] == 'json':
         click.echo(json.dumps(r['alerts'], sort_keys=True, indent=4, ensure_ascii=False))

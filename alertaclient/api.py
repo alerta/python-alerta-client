@@ -95,15 +95,15 @@ class Client(object):
     def delete_alert(self, id):
         return self.http.delete('/alert/%s' % id)
 
-    def search(self, query=None):
-        return self.get_alerts(query)
+    def search(self, query=None, page=1, page_size=100):
+        return self.get_alerts(query, page, page_size)
 
-    def get_alerts(self, query=None):
-        r = self.http.get('/alerts', query)
+    def get_alerts(self, query=None, page=1, page_size=100):
+        r = self.http.get('/alerts', query, page=page, page_size=page_size)
         return [Alert.parse(a) for a in r['alerts']]
 
-    def get_history(self, query=None):
-        r = self.http.get('/alerts/history', query)
+    def get_history(self, query=None, page=1, page_size=100):
+        r = self.http.get('/alerts/history', query, page=page, page_size=page_size)
         return [RichHistory.parse(a) for a in r['history']]
 
     def get_count(self, query=None):
@@ -353,8 +353,13 @@ class HTTPClient(object):
 
         self.debug = debug
 
-    def get(self, path, query=None):
-        query = query or tuple()
+    def get(self, path, query=None, **kwargs):
+        query = query or []
+        if 'page' in kwargs:
+            query.append(('page', kwargs['page']))
+        if 'page_size' in kwargs:
+            query.append(('page-size', kwargs['page_size']))
+
         url = self.endpoint + path + '?' + urlencode(query, doseq=True)
         try:
             response = self.session.get(url, auth=self.auth, timeout=self.timeout)
