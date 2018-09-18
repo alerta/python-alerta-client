@@ -310,6 +310,9 @@ class Client(object):
     def userinfo(self):
         return self.http.get('/userinfo')
 
+    def config(self):
+        return self.http.get('/config')
+
     # Management
     def mgmt_status(self):
         return self.http.get('/management/status')
