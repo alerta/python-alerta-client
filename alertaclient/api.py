@@ -6,7 +6,7 @@ from datetime import datetime
 
 import requests
 from http.client import HTTPConnection
-from requests.auth import AuthBase
+from requests.auth import AuthBase, HTTPBasicAuth
 from urllib.parse import urlencode
 
 from alertaclient.exceptions import UnknownError
@@ -27,14 +27,14 @@ class Client(object):
 
     DEFAULT_ENDPOINT = 'http://localhost:8080'
 
-    def __init__(self, endpoint=None, key=None, token=None, timeout=5.0, ssl_verify=True, debug=False):
+    def __init__(self, endpoint=None, key=None, token=None, username=None, password=None, timeout=5.0, ssl_verify=True, debug=False):
         self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', self.DEFAULT_ENDPOINT)
 
         if debug:
             HTTPConnection.debuglevel = 1
 
         key = key or os.environ.get('ALERTA_API_KEY', '')
-        self.http = HTTPClient(self.endpoint, key, token, timeout, ssl_verify, debug)
+        self.http = HTTPClient(self.endpoint, key, token, username, password, timeout, ssl_verify, debug)
 
     # Alerts
     def send_alert(self, resource, event, **kwargs):
@@ -327,25 +327,39 @@ class Client(object):
             raise UnknownError(response.text)
 
 
-class ApiAuth(AuthBase):
+class ApiKeyAuth(AuthBase):
 
     def __init__(self, api_key=None, auth_token=None):
         self.api_key = api_key
         self.auth_token = auth_token
 
     def __call__(self, r):
-        if self.auth_token:
-            r.headers['Authorization'] = 'Bearer {}'.format(self.auth_token)
-        elif self.api_key:
-            r.headers['Authorization'] = 'Key {}'.format(self.api_key)
+        r.headers['Authorization'] = 'Key {}'.format(self.api_key)
+        return r
+
+
+class TokenAuth(AuthBase):
+
+    def __init__(self, auth_token=None):
+        self.auth_token = auth_token
+
+    def __call__(self, r):
+        r.headers['Authorization'] = 'Bearer {}'.format(self.auth_token)
         return r
 
 
 class HTTPClient(object):
 
-    def __init__(self, endpoint, key=None, token=None, timeout=30.0, ssl_verify=True, debug=False):
+    def __init__(self, endpoint, key=None, token=None, username=None, password=None, timeout=30.0, ssl_verify=True, debug=False):
         self.endpoint = endpoint
-        self.auth = ApiAuth(api_key=key, auth_token=token)
+        self.auth = None
+
+        if username:
+            self.auth = HTTPBasicAuth(username, password)
+        elif key:
+            self.auth = ApiKeyAuth(key)
+        elif token:
+            self.auth = TokenAuth(token)
 
         self.timeout = timeout
         self.session = requests.Session()
