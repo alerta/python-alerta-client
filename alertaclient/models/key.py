@@ -2,7 +2,7 @@
 from alertaclient.utils import DateTime
 
 
-class ApiKey(object):
+class ApiKey:
 
     def __init__(self, user, scopes, text='', expire_time=None, customer=None, **kwargs):
         self.id = kwargs.get('id', None)
@@ -20,7 +20,7 @@ class ApiKey(object):
         return self.scopes_to_type(self.scopes)
 
     def __repr__(self):
-        return 'ApiKey(key=%r, user=%r, scopes=%r, expireTime=%r, customer=%r)' % (
+        return 'ApiKey(key={!r}, user={!r}, scopes={!r}, expireTime={!r}, customer={!r})'.format(
             self.key, self.user, self.scopes, self.expire_time, self.customer)
 
     @classmethod

@@ -40,7 +40,8 @@ def cli(obj, alert, severity, purge):
                     params = dict(filter(lambda a: len(a) == 2, map(lambda a: a.split(':'), b.tags)))
                     environment = params.get('environment', 'Production')
                     group = params.get('group', 'System')
-                    tags = list(filter(lambda a: not a.startswith('environment:') and not a.startswith('group:'), b.tags))
+                    tags = list(filter(lambda a: not a.startswith('environment:') and
+                                       not a.startswith('group:'), b.tags))
 
                     if b.status == 'expired':  # aka. "stale"
                         client.send_alert(

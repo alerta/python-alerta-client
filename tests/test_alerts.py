@@ -62,8 +62,8 @@ class AlertTestCase(unittest.TestCase):
         m.post('http://localhost:8080/alert', text=self.alert)
         id, alert, message = self.client.send_alert(
             environment='Production', resource='web01', event='node_down', correlated=['node_up', 'node_down'],
-            service=['Web', 'App'], severity='critical', tags=["london", "linux"], value=4
+            service=['Web', 'App'], severity='critical', tags=['london', 'linux'], value=4
         )
-        self.assertEqual(alert.value, "4")  # values cast to string
+        self.assertEqual(alert.value, '4')  # values cast to string
         self.assertEqual(alert.timeout, 86400)  # timeout returned as int
-        self.assertIn("london", alert.tags)
+        self.assertIn('london', alert.tags)

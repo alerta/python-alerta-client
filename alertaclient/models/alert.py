@@ -4,7 +4,7 @@ from datetime import datetime
 from alertaclient.utils import DateTime
 
 
-class Alert(object):
+class Alert:
 
     def __init__(self, resource, event, **kwargs):
         if not resource:
@@ -18,20 +18,20 @@ class Alert(object):
         self.id = kwargs.get('id', None)
         self.resource = resource
         self.event = event
-        self.environment = kwargs.get('environment', None) or ""
+        self.environment = kwargs.get('environment', None) or ''
         self.severity = kwargs.get('severity', None)
         self.correlate = kwargs.get('correlate', None) or list()
         if self.correlate and event not in self.correlate:
             self.correlate.append(event)
-        self.status = kwargs.get('status', None) or "unknown"
+        self.status = kwargs.get('status', None) or 'unknown'
         self.service = kwargs.get('service', None) or list()
-        self.group = kwargs.get('group', None) or "Misc"
+        self.group = kwargs.get('group', None) or 'Misc'
         self.value = kwargs.get('value', None)
-        self.text = kwargs.get('text', None) or ""
+        self.text = kwargs.get('text', None) or ''
         self.tags = kwargs.get('tags', None) or list()
         self.attributes = kwargs.get('attributes', None) or dict()
         self.origin = kwargs.get('origin', None)
-        self.event_type = kwargs.get('event_type', kwargs.get('type', None)) or "exceptionAlert"
+        self.event_type = kwargs.get('event_type', kwargs.get('type', None)) or 'exceptionAlert'
         self.create_time = kwargs.get('create_time', None) or datetime.utcnow()
         self.timeout = kwargs.get('timeout', None)
         self.raw_data = kwargs.get('raw_data', None)
@@ -47,7 +47,7 @@ class Alert(object):
         self.history = kwargs.get('history', None) or list()
 
     def __repr__(self):
-        return 'Alert(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r, customer=%r)' % (
+        return 'Alert(id={!r}, environment={!r}, resource={!r}, event={!r}, severity={!r}, status={!r}, customer={!r})'.format(
             self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)
 
     @classmethod

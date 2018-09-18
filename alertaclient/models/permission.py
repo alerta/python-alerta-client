@@ -1,6 +1,6 @@
 
 
-class Permission(object):
+class Permission:
 
     def __init__(self, match, scopes, **kwargs):
         self.id = kwargs.get('id', None)
@@ -8,7 +8,7 @@ class Permission(object):
         self.scopes = scopes or list()
 
     def __repr__(self):
-        return 'Perm(id=%r, match=%r, scopes=%r)' % (
+        return 'Perm(id={!r}, match={!r}, scopes={!r})'.format(
             self.id, self.match, self.scopes)
 
     @classmethod

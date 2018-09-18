@@ -37,6 +37,7 @@ class ApiKeyTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_key(self, m):
         m.post('http://localhost:8080/key', text=self.key)
-        api_key = self.client.create_key(username='johndoe@example.com', scopes=['write:alerts', 'admin:keys'], text='Ops API Key')
+        api_key = self.client.create_key(username='johndoe@example.com', scopes=[
+                                         'write:alerts', 'admin:keys'], text='Ops API Key')
         self.assertEqual(api_key.user, 'johndoe@example.com')
-        self.assertEqual(sorted(api_key.scopes),sorted(['write:alerts', 'admin:keys']))
+        self.assertEqual(sorted(api_key.scopes), sorted(['write:alerts', 'admin:keys']))

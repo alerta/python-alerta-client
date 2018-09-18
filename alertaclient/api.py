@@ -3,11 +3,11 @@ import json
 import logging
 import os
 from datetime import datetime
+from http.client import HTTPConnection
+from urllib.parse import urlencode
 
 import requests
-from http.client import HTTPConnection
 from requests.auth import AuthBase, HTTPBasicAuth
-from urllib.parse import urlencode
 
 from alertaclient.exceptions import UnknownError
 from alertaclient.models.alert import Alert
@@ -18,12 +18,12 @@ from alertaclient.models.history import RichHistory
 from alertaclient.models.key import ApiKey
 from alertaclient.models.permission import Permission
 from alertaclient.models.user import User
-from alertaclient.utils import DateTime, CustomJsonEncoder
+from alertaclient.utils import CustomJsonEncoder, DateTime
 
 logger = logging.getLogger('alerta.client')
 
 
-class Client(object):
+class Client:
 
     DEFAULT_ENDPOINT = 'http://localhost:8080'
 
@@ -81,10 +81,10 @@ class Client(object):
         return self.http.put('/alert/%s/action' % id, data)
 
     def tag_alert(self, id, tags):
-        return self.http.put('/alert/%s/tag' % id, {"tags": tags})
+        return self.http.put('/alert/%s/tag' % id, {'tags': tags})
 
     def untag_alert(self, id, tags):
-        return self.http.put('/alert/%s/untag' % id, {"tags": tags})
+        return self.http.put('/alert/%s/untag' % id, {'tags': tags})
 
     def update_attributes(self, id, attributes):
         data = {
@@ -319,12 +319,12 @@ class Client(object):
 
     def housekeeping(self, expired_delete_hours=None, info_delete_hours=None):
         # This endpoint isn't currently JSON-encoded.
-        url = self.http.endpoint + "/management/housekeeping"
+        url = self.http.endpoint + '/management/housekeeping'
         params = dict()
         if expired_delete_hours is not None:
-            params["expired"] = expired_delete_hours
+            params['expired'] = expired_delete_hours
         if info_delete_hours is not None:
-            params["info"] = info_delete_hours
+            params['info'] = info_delete_hours
         response = self.http.session.get(url, auth=self.http.auth, timeout=self.http.timeout, params=params)
         if response.status_code != 200:
             raise UnknownError(response.text)
@@ -351,7 +351,7 @@ class TokenAuth(AuthBase):
         return r
 
 
-class HTTPClient(object):
+class HTTPClient:
 
     def __init__(self, endpoint, key=None, token=None, username=None, password=None, timeout=30.0, ssl_verify=True, debug=False):
         self.endpoint = endpoint
@@ -388,7 +388,8 @@ class HTTPClient(object):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
         try:
-            response = self.session.post(url, data=json.dumps(data, cls=CustomJsonEncoder), headers=headers, auth=self.auth, timeout=self.timeout)
+            response = self.session.post(url, data=json.dumps(data, cls=CustomJsonEncoder),
+                                         headers=headers, auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
@@ -397,7 +398,8 @@ class HTTPClient(object):
         url = self.endpoint + path
         headers = {'Content-Type': 'application/json'}
         try:
-            response = self.session.put(url, data=json.dumps(data, cls=CustomJsonEncoder), headers=headers, auth=self.auth, timeout=self.timeout)
+            response = self.session.put(url, data=json.dumps(data, cls=CustomJsonEncoder),
+                                        headers=headers, auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)

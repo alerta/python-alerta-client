@@ -6,21 +6,21 @@ import requests
 
 default_config = {
     'config_file': '~/.alerta.conf',
-    'profile':     None,
-    'endpoint':    'http://localhost:8080',
-    'key':         '',
-    'username':    None,
-    'password':    None,
-    'timezone':    'Europe/London',
-    'timeout':     5.0,
-    'sslverify':   True,
-    'output':      'simple',
-    'color':       True,
-    'debug':       False
+    'profile': None,
+    'endpoint': 'http://localhost:8080',
+    'key': '',
+    'username': None,
+    'password': None,
+    'timezone': 'Europe/London',
+    'timeout': 5.0,
+    'sslverify': True,
+    'output': 'simple',
+    'color': True,
+    'debug': False
 }
 
 
-class Config(object):
+class Config:
 
     def __init__(self, config_file):
         self.options = default_config

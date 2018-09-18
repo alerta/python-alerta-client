@@ -10,7 +10,10 @@ help:
 	@echo ""
 	@echo "Commands:"
 	@echo "   init    Initialise environment"
+	@echo "   dev     Initialise dev environment"
 	@echo "   pylint  Lint source code"
+	@echo "   mypy    Type checking"
+	@echo "   hooks   Run pre-commit hooks"
 	@echo "   clean   Clean source"
 	@echo "   test    Run tests"
 	@echo "   run     Run application"
@@ -22,9 +25,21 @@ init:
 	pip install -r requirements.txt --upgrade
 	pip install -e .
 
+dev:
+	pip install -r requirements-dev.txt --upgrade
+	pre-commit install
+	pre-commit autoupdate
+
 pylint:
 	@pip -q install pylint
 	pylint --rcfile pylintrc alertaclient
+
+mypy:
+	@pip -q install mypy==0.620
+	mypy alerta/
+
+hooks:
+	pre-commit run --all-files
 
 clean:
 	find . -name "*.pyc" -exec rm {} \;
@@ -42,4 +57,3 @@ tag:
 
 upload:
 	$(PYTHON) setup.py sdist bdist_wheel upload
-

@@ -2,7 +2,7 @@
 from alertaclient.utils import DateTime
 
 
-class User(object):
+class User:
     """
     User model for BasicAuth only.
     """
@@ -16,7 +16,7 @@ class User(object):
         self.attributes = kwargs.get('attributes', None) or dict()
         self.create_time = kwargs.get('create_time', None)
         self.last_login = kwargs.get('last_login', None)
-        self.text = text or ""
+        self.text = text or ''
         self.update_time = kwargs.get('update_time', None)
         self.email_verified = kwargs.get('email_verified', False)
 
@@ -25,7 +25,7 @@ class User(object):
         return self.email.split('@')[1] if '@' in self.email else None
 
     def __repr__(self):
-        return 'User(id=%r, name=%r, email=%r, status=%r, roles=%r, email_verified=%r)' % (
+        return 'User(id={!r}, name={!r}, email={!r}, status={!r}, roles={!r}, email_verified={!r})'.format(
             self.id, self.name, self.email, self.status, ','.join(self.roles), self.email_verified
         )
 

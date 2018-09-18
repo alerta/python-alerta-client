@@ -9,7 +9,7 @@ from alertaclient.models.alert import Alert
 from alertaclient.utils import DateTime
 
 
-class Screen(object):
+class Screen:
 
     ALIGN_RIGHT = 'R'
     ALIGN_CENTRE = 'C'
@@ -47,19 +47,19 @@ class Screen(object):
         COLOR_BLACK = curses.color_pair(7)
 
         self.SEVERITY_MAP = {
-            'security': ["Sec", COLOR_BLACK],
-            'critical': ["Crit", COLOR_RED],
-            'major': ["Majr", COLOR_MAGENTA],
-            'minor': ["Minr", COLOR_YELLOW],
-            'warning': ["Warn", COLOR_BLUE],
-            'indeterminate': ["Ind ", COLOR_CYAN],
-            'cleared': ["Clr", COLOR_GREEN],
-            'normal': ["Norm", COLOR_GREEN],
-            'ok': ["Ok", COLOR_GREEN],
-            'informational': ["Info", COLOR_GREEN],
-            'debug': ["Dbug", COLOR_BLACK],
-            'trace': ["Trce", COLOR_BLACK],
-            'unknown': ["Unkn", COLOR_BLACK]
+            'security': ['Sec', COLOR_BLACK],
+            'critical': ['Crit', COLOR_RED],
+            'major': ['Majr', COLOR_MAGENTA],
+            'minor': ['Minr', COLOR_YELLOW],
+            'warning': ['Warn', COLOR_BLUE],
+            'indeterminate': ['Ind ', COLOR_CYAN],
+            'cleared': ['Clr', COLOR_GREEN],
+            'normal': ['Norm', COLOR_GREEN],
+            'ok': ['Ok', COLOR_GREEN],
+            'informational': ['Info', COLOR_GREEN],
+            'debug': ['Dbug', COLOR_BLACK],
+            'trace': ['Trce', COLOR_BLACK],
+            'unknown': ['Unkn', COLOR_BLACK]
         }
 
         self.screen.keypad(1)
@@ -110,17 +110,17 @@ class Screen(object):
             if row >= self.lines - 2:  # leave room for footer
                 break
 
-            text = u'{:<4} {} {:5d} {:8.8} {:<12} {:<12} {:<12.12} {:5.5} {:<12.12} {:<5.5} {:.{width}}'.format(
+            text = '{:<4} {} {:5d} {:8.8} {:<12} {:<12} {:<12.12} {:5.5} {:<12.12} {:<5.5} {:.{width}}'.format(
                 short_sev(alert.severity),
                 DateTime.localtime(alert.last_receive_time, self.timezone, fmt='%H:%M:%S'),
                 alert.duplicate_count,
-                alert.customer or "-",
+                alert.customer or '-',
                 alert.environment,
                 ','.join(alert.service),
                 alert.resource,
                 alert.group,
                 alert.event,
-                alert.value or "n/a",
+                alert.value or 'n/a',
                 alert.text,
                 width=text_width
             )
