@@ -38,8 +38,8 @@ class HeartbeatTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_heartbeat(self, m):
         m.post('http://localhost:8080/heartbeat', text=self.heartbeat)
-        hb = self.client.heartbeat(origin='app/web01', timeout=10, tags=["london", "linux"])
+        hb = self.client.heartbeat(origin='app/web01', timeout=10, tags=['london', 'linux'])
         self.assertEqual(hb.origin, 'app/web01')
         self.assertEqual(hb.event_type, 'Heartbeat')
         self.assertEqual(hb.timeout, 10)
-        self.assertIn("linux", hb.tags)
+        self.assertIn('linux', hb.tags)

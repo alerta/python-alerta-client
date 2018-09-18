@@ -11,4 +11,4 @@ def cli(obj):
     for k, v in config.items():
         if isinstance(v, list):
             v = ', '.join(v)
-        click.echo("{:20}: {}".format(k, v))
+        click.echo('{:20}: {}'.format(k, v))

@@ -6,7 +6,7 @@ from alertaclient.utils import DateTime
 MAX_LATENCY = 2000  # ms
 
 
-class Heartbeat(object):
+class Heartbeat:
 
     def __init__(self, origin=None, tags=None, create_time=None, timeout=None, customer=None, **kwargs):
         self.id = kwargs.get('id', None)
@@ -37,7 +37,7 @@ class Heartbeat(object):
             return 'ok'
 
     def __repr__(self):
-        return 'Heartbeat(id=%r, origin=%r, create_time=%r, timeout=%r, customer=%r)' % (
+        return 'Heartbeat(id={!r}, origin={!r}, create_time={!r}, timeout={!r}, customer={!r})'.format(
             self.id, self.origin, self.create_time, self.timeout, self.customer)
 
     @classmethod

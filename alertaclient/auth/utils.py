@@ -1,11 +1,11 @@
 
 import os
 from netrc import netrc
-
-import click
 from urllib.parse import urlparse
 
-NETRC_FILE = os.path.join(os.environ['HOME'], ".netrc")
+import click
+
+NETRC_FILE = os.path.join(os.environ['HOME'], '.netrc')
 
 
 def machine(endpoint):
@@ -52,16 +52,16 @@ def clear_token(endpoint):
 # See https://bugs.python.org/issue30806
 def dump_netrc(self):
     """Dump the class data in the format of a .netrc file."""
-    rep = ""
+    rep = ''
     for host in self.hosts.keys():
         attrs = self.hosts[host]
-        rep = rep + "machine "+ host + "\n\tlogin " + str(attrs[0]) + "\n"
+        rep = rep + 'machine ' + host + '\n\tlogin ' + str(attrs[0]) + '\n'
         if attrs[1]:
-            rep = rep + "account " + str(attrs[1])
-        rep = rep + "\tpassword " + str(attrs[2]) + "\n"
+            rep = rep + 'account ' + str(attrs[1])
+        rep = rep + '\tpassword ' + str(attrs[2]) + '\n'
     for macro in self.macros.keys():
-        rep = rep + "macdef " + macro + "\n"
+        rep = rep + 'macdef ' + macro + '\n'
         for line in self.macros[macro]:
             rep = rep + line
-        rep = rep + "\n"
+        rep = rep + '\n'
     return rep

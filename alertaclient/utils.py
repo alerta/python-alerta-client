@@ -9,14 +9,14 @@ import six
 class CustomJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, (datetime.date, datetime.datetime)):
-            return o.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + ".%03dZ" % (o.microsecond // 1000)
+            return o.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + '.%03dZ' % (o.microsecond // 1000)
         elif isinstance(o, datetime.timedelta):
             return int(o.total_seconds())
         else:
             return json.JSONEncoder.default(self, o)
 
 
-class DateTime(object):
+class DateTime:
     @staticmethod
     def parse(date_str):
         if not isinstance(date_str, six.string_types):
@@ -28,7 +28,7 @@ class DateTime(object):
 
     @staticmethod
     def iso8601(dt):
-        return dt.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + ".%03dZ" % (dt.microsecond // 1000)
+        return dt.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + '.%03dZ' % (dt.microsecond // 1000)
 
     @staticmethod
     def localtime(dt, timezone=None, fmt='%Y/%m/%d %H:%M:%S'):

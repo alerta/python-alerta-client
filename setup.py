@@ -9,14 +9,14 @@ with open('README.md') as f:
     readme = f.read()
 
 setuptools.setup(
-    name="alerta",
+    name='alerta',
     version=version,
-    description="Alerta unified command-line tool and SDK",
+    description='Alerta unified command-line tool and SDK',
     long_description=readme,
-    url="http://github.com/alerta/python-alerta",
-    license="MIT",
-    author="Nick Satterly",
-    author_email="nick.satterly@theguardian.com",
+    url='http://github.com/alerta/python-alerta',
+    license='MIT',
+    author='Nick Satterly',
+    author_email='nick.satterly@theguardian.com',
     packages=setuptools.find_packages(exclude=['tests']),
     install_requires=[
         'Click',
@@ -32,7 +32,7 @@ setuptools.setup(
             'alerta = alertaclient.cli:cli'
         ]
     },
-    keywords="alerta client unified command line tool sdk",
+    keywords='alerta client unified command line tool sdk',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Information Technology',

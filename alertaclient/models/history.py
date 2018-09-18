@@ -4,7 +4,7 @@ from datetime import datetime
 from alertaclient.utils import DateTime
 
 
-class History(object):
+class History:
 
     def __init__(self, id, event, **kwargs):
         self.id = id
@@ -12,16 +12,16 @@ class History(object):
         self.severity = kwargs.get('severity', None)
         self.status = kwargs.get('status', None)
         self.value = kwargs.get('value', None)
-        self.change_type = kwargs.get('change_type', kwargs.get('type', None)) or ""
+        self.change_type = kwargs.get('change_type', kwargs.get('type', None)) or ''
         self.text = kwargs.get('text', None)
         self.update_time = kwargs.get('update_time', None) or datetime.utcnow()
 
     def __repr__(self):
-        return 'History(id=%r, event=%r, severity=%r, status=%r, type=%r)' % (
+        return 'History(id={!r}, event={!r}, severity={!r}, status={!r}, type={!r})'.format(
             self.id, self.event, self.severity, self.status, self.change_type)
 
 
-class RichHistory(object):
+class RichHistory:
 
     def __init__(self, resource, event, **kwargs):
 
@@ -43,7 +43,7 @@ class RichHistory(object):
         self.customer = kwargs.get('customer', None)
 
     def __repr__(self):
-        return 'RichHistory(id=%r, environment=%r, resource=%r, event=%r, severity=%r, status=%r, type=%r, customer=%r)' % (
+        return 'RichHistory(id={!r}, environment={!r}, resource={!r}, event={!r}, severity={!r}, status={!r}, type={!r}, customer={!r})'.format(
             self.id, self.environment, self.resource, self.event, self.severity, self.status, self.change_type, self.customer)
 
     @classmethod

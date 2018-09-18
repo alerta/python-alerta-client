@@ -46,9 +46,10 @@ class BlackoutTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_blackout(self, m):
         m.post('http://localhost:8080/blackout', text=self.blackout)
-        alert = self.client.create_blackout(environment='Production', service=['Web', 'App'], resource='web01', event='node_down', group='Network', tags=["london", "linux"])
+        alert = self.client.create_blackout(environment='Production', service=[
+                                            'Web', 'App'], resource='web01', event='node_down', group='Network', tags=['london', 'linux'])
         self.assertEqual(alert.environment, 'Production')
         self.assertEqual(alert.service, ['Network'])
-        self.assertIn("london", alert.tags)
+        self.assertIn('london', alert.tags)
         self.assertEqual(alert.text, 'Network outage in Bracknell')
         self.assertEqual(alert.user, 'admin@alerta.io')

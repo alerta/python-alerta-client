@@ -1,10 +1,10 @@
 
 import base64
 import json
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs, urlparse
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from six import text_type
-from urllib.parse import urlparse, parse_qs
 
 from alertaclient.exceptions import AuthError
 
@@ -45,7 +45,7 @@ class HTTPServerHandler(BaseHTTPRequestHandler):
             raise AuthError(qp['error'])
 
         self.send_response(200)
-        self.send_header("Content-type", "text/html")
+        self.send_header('Content-type', 'text/html')
         self.end_headers()
         self.wfile.write(bytes(SUCCESS_MESSAGE.encode('utf-8')))
 
@@ -53,16 +53,17 @@ class HTTPServerHandler(BaseHTTPRequestHandler):
         return
 
 
-class TokenHandler(object):
+class TokenHandler:
 
     def get_access_token(self, xsrf_token):
         server_address = ('', 9004)
-        httpd = HTTPServer(server_address, lambda request, address, server: HTTPServerHandler(request, address, server, xsrf_token))
+        httpd = HTTPServer(server_address, lambda request, address,
+                           server: HTTPServerHandler(request, address, server, xsrf_token))
         httpd.handle_request()
         return httpd.access_token
 
 
-class Jwt(object):
+class Jwt:
 
     def parse(self, jwt):
         payload = jwt.split('.')[1]

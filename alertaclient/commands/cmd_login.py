@@ -1,11 +1,12 @@
 
 import sys
+
 import click
 
-from alertaclient.auth.utils import save_token
 from alertaclient.auth import github, gitlab, google
-from alertaclient.exceptions import AuthError
 from alertaclient.auth.token import Jwt
+from alertaclient.auth.utils import save_token
+from alertaclient.exceptions import AuthError
 
 
 @click.command('login', short_help='Login with user credentials')

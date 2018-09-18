@@ -1,7 +1,5 @@
 
-import requests
 import webbrowser
-
 from uuid import uuid4
 
 from alertaclient.auth.token import TokenHandler
@@ -29,8 +27,8 @@ def login(client, github_url, client_id):
     access_token = auth.get_access_token(xsrf_token)
 
     data = {
-        "code": access_token,
-        "clientId": client_id,
-        "redirectUri": redirect_uri
+        'code': access_token,
+        'clientId': client_id,
+        'redirectUri': redirect_uri
     }
     return client.token('github', data)

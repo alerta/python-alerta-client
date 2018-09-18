@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from alertaclient.utils import DateTime
 
 
-class Blackout(object):
+class Blackout:
 
     def __init__(self, environment, **kwargs):
         if not environment:
@@ -51,13 +51,13 @@ class Blackout(object):
 
         now = datetime.utcnow()
         if self.start_time <= now and self.end_time > now:
-            self.status = "active"
+            self.status = 'active'
             self.remaining = int((self.end_time - now).total_seconds())
         elif self.start_time > now:
-            self.status = "pending"
+            self.status = 'pending'
             self.remaining = self.duration
         elif self.end_time <= now:
-            self.status = "expired"
+            self.status = 'expired'
             self.remaining = 0
 
     def __repr__(self):
@@ -75,7 +75,7 @@ class Blackout(object):
         if self.customer:
             more += 'customer=%r, ' % self.customer
 
-        return 'Blackout(id=%r, priority=%r, status=%r, environment=%r, %sstart_time=%r, end_time=%r, remaining=%r)' % (
+        return 'Blackout(id={!r}, priority={!r}, status={!r}, environment={!r}, {}start_time={!r}, end_time={!r}, remaining={!r})'.format(
             self.id,
             self.priority,
             self.status,

@@ -83,9 +83,9 @@ Usage
 
     $ alerta
     Usage: alerta [OPTIONS] COMMAND [ARGS]...
-    
+
       Alerta client unified command-line tool.
-    
+
     Options:
       --config-file <FILE>      Configuration file.
       --profile <PROFILE>       Configuration profile.
@@ -94,7 +94,7 @@ Usage
       --color / --no-color      Color-coded output based on severity.
       --debug                   Debug mode.
       --help                    Show this message and exit.
-    
+
     Commands:
       ack         Acknowledge alerts
       blackout    Suppress alerts
@@ -145,7 +145,7 @@ Example
 
     >>> [a.id for a in client.search([('resource','~we.*01'), ('environment!', 'Development')])]
     ['42254ef8-7258-4300-aaec-a9ad7d3a84ff']
-    
+
     >>> client.heartbeat().serialize()['status']
     'ok'
 

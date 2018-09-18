@@ -1,5 +1,5 @@
 
-class Customer(object):
+class Customer:
 
     def __init__(self, match, customer, **kwargs):
         self.id = kwargs.get('id', None)
@@ -7,7 +7,7 @@ class Customer(object):
         self.customer = customer
 
     def __repr__(self):
-        return 'Customer(id=%r, match=%r, customer=%r)' % (
+        return 'Customer(id={!r}, match={!r}, customer={!r})'.format(
             self.id, self.match, self.customer)
 
     @classmethod

@@ -1,6 +1,6 @@
 click
+pytz
 requests
 requests_mock
-tabulate
-pytz
 six
+tabulate
