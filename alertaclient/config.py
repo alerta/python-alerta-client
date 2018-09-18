@@ -1,17 +1,14 @@
 
+import configparser
 import os
 
-import configparser
+import requests
 
 default_config = {
     'config_file': '~/.alerta.conf',
     'profile':     None,
     'endpoint':    'http://localhost:8080',
     'key':         '',
-    'provider':    'basic',
-    'client_id':   None,
-    'github_url':   "https://github.com",
-    'gitlab_url':   "https://gitlab.com",
     'username':    None,
     'password':    None,
     'timezone':    'Europe/London',
@@ -46,3 +43,13 @@ class Config(object):
                     self.options[opt] = self.parser.getboolean('DEFAULT', opt)
                 except (ValueError, AttributeError):
                     self.options[opt] = self.parser.get('DEFAULT', opt)
+
+    def get_remote_config(self):
+        config_url = '{}/config'.format(self.options['endpoint'])
+        try:
+            r = requests.get(config_url)
+            remote_config = r.json()
+        except requests.RequestException as e:
+            raise
+
+        self.options = {**self.options, **remote_config}

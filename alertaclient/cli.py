@@ -51,16 +51,14 @@ def cli(ctx, config_file, profile, endpoint_url, output, color, debug):
     """
     config = Config(config_file)
     config.get_config_for_profle(profile)
+    config.get_remote_config()
 
-    ctx.obj = dict()
-    ctx.obj['timezone'] = config.options['timezone']
+    ctx.obj = config.options
+
+    # override current options with command-line options or environment variables
     ctx.obj['output'] = output or config.options['output']
     ctx.obj['color'] = color or os.environ.get('CLICOLOR', None) or config.options['color']
     endpoint = endpoint_url or config.options['endpoint']
-    ctx.obj['provider'] = config.options['provider']
-    ctx.obj['client_id'] = config.options['client_id']
-    ctx.obj['github_url'] = config.options['github_url']
-    ctx.obj['gitlab_url'] = config.options['gitlab_url']
 
     ctx.obj['client'] = Client(
         endpoint=endpoint,
