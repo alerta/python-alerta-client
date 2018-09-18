@@ -66,6 +66,8 @@ def cli(ctx, config_file, profile, endpoint_url, output, color, debug):
         endpoint=endpoint,
         key=config.options['key'],
         token=get_token(endpoint),
+        username=config.options.get('username', None),
+        password=config.options.get('password', None),
         timeout=float(config.options['timeout']),
         ssl_verify=config.options['sslverify'],
         debug=debug or os.environ.get('DEBUG', None) or config.options['debug']

@@ -12,6 +12,8 @@ default_config = {
     'client_id':   None,
     'github_url':   "https://github.com",
     'gitlab_url':   "https://gitlab.com",
+    'username':    None,
+    'password':    None,
     'timezone':    'Europe/London',
     'timeout':     5.0,
     'sslverify':   True,
