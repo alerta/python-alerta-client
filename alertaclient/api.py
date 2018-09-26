@@ -95,14 +95,14 @@ class Client:
     def delete_alert(self, id):
         return self.http.delete('/alert/%s' % id)
 
-    def search(self, query=None, page=1, page_size=100):
+    def search(self, query=None, page=1, page_size=1000):
         return self.get_alerts(query, page, page_size)
 
-    def get_alerts(self, query=None, page=1, page_size=100):
+    def get_alerts(self, query=None, page=1, page_size=1000):
         r = self.http.get('/alerts', query, page=page, page_size=page_size)
         return [Alert.parse(a) for a in r['alerts']]
 
-    def get_history(self, query=None, page=1, page_size=100):
+    def get_history(self, query=None, page=1, page_size=1000):
         r = self.http.get('/alerts/history', query, page=page, page_size=page_size)
         return [RichHistory.parse(a) for a in r['history']]
 
