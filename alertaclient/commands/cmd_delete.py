@@ -10,15 +10,19 @@ from alertaclient.utils import build_query
 def cli(obj, ids, filters):
     """Delete alerts."""
     client = obj['client']
+    label = 'Deleting'
     if ids:
         total = len(ids)
+        with click.progressbar(ids, label='{} {} alerts'.format(label, total)) as bar:
+            for id in bar:
+                client.delete_alert(id)
     else:
         if not filters:
             click.confirm('Deleting all alerts. Do you want to continue?', abort=True)
         query = build_query(filters)
-        total, _, _ = client.get_count(query)
-        ids = [a.id for a in client.get_alerts(query)]
-
-    with click.progressbar(ids, label='Deleting {} alerts'.format(total)) as bar:
-        for id in bar:
-            client.delete_alert(id)
+        r = client.bulk_delete(query)
+        ids = r['deleted']
+        total = r['count']
+        with click.progressbar(ids, label='{} {} alerts'.format(label, total)) as bar:
+            for id in bar:
+                pass

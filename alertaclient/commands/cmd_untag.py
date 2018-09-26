@@ -11,13 +11,17 @@ from alertaclient.utils import build_query
 def cli(obj, ids, filters, tags):
     """Remove tags from alerts."""
     client = obj['client']
+    label = 'Untagging'
     if ids:
         total = len(ids)
+        with click.progressbar(ids, label='{} {} alerts'.format(label, total)) as bar:
+            for id in bar:
+                client.untag_alert(id, tags)
     else:
         query = build_query(filters)
-        total, _, _ = client.get_count(query)
-        ids = [a.id for a in client.get_alerts(query)]
-
-    with click.progressbar(ids, label='Untagging {} alerts'.format(total)) as bar:
-        for id in bar:
-            client.untag_alert(id, tags)
+        r = client.bulk_untag(query, tags)
+        ids = r['updated']
+        total = r['count']
+        with click.progressbar(ids, label='{} {} alerts'.format(label, total)) as bar:
+            for id in bar:
+                pass

@@ -11,13 +11,17 @@ from alertaclient.utils import build_query
 def cli(obj, ids, filters, tags):
     """Add tags to alerts."""
     client = obj['client']
+    label = 'Tagging'
     if ids:
         total = len(ids)
+        with click.progressbar(ids, label='{} {} alerts'.format(label, total)) as bar:
+            for id in bar:
+                client.tag_alert(id, tags)
     else:
         query = build_query(filters)
-        total, _, _ = client.get_count(query)
-        ids = [a.id for a in client.get_alerts(query)]
-
-    with click.progressbar(ids, label='Tagging {} alerts'.format(total)) as bar:
-        for id in bar:
-            client.tag_alert(id, tags)
+        r = client.bulk_tag(query, tags)
+        ids = r['updated']
+        total = r['count']
+        with click.progressbar(ids, label='{} {} alerts'.format(label, total)) as bar:
+            for id in bar:
+                pass
