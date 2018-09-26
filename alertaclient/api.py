@@ -57,7 +57,7 @@ class Client:
             'rawData': kwargs.get('raw_data'),
             'customer': kwargs.get('customer')
         }
-        r = self.http.post('/alert', data)
+        r = self.http.post('/alert', data=data)
         alert = Alert.parse(r['alert']) if 'alert' in r else None
         return r.get('id', '-'), alert, r.get('message', None)
 
@@ -70,7 +70,7 @@ class Client:
             'text': text,
             'timeout': timeout
         }
-        return self.http.put('/alert/%s/status' % id, data)
+        return self.http.put('/alert/%s/status' % id, data=data)
 
     def action(self, id, action, text='', timeout=None):
         data = {
@@ -78,31 +78,31 @@ class Client:
             'text': text,
             'timeout': timeout
         }
-        return self.http.put('/alert/%s/action' % id, data)
+        return self.http.put('/alert/%s/action' % id, data=data)
 
     def tag_alert(self, id, tags):
-        return self.http.put('/alert/%s/tag' % id, {'tags': tags})
+        return self.http.put('/alert/%s/tag' % id, data={'tags': tags})
 
     def untag_alert(self, id, tags):
-        return self.http.put('/alert/%s/untag' % id, {'tags': tags})
+        return self.http.put('/alert/%s/untag' % id, data={'tags': tags})
 
     def update_attributes(self, id, attributes):
         data = {
             'attributes': attributes
         }
-        return self.http.put('/alert/%s/attributes' % id, data)
+        return self.http.put('/alert/%s/attributes' % id, data=data)
 
     def delete_alert(self, id):
         return self.http.delete('/alert/%s' % id)
 
-    def search(self, query=None, page=1, page_size=100):
+    def search(self, query=None, page=1, page_size=1000):
         return self.get_alerts(query, page, page_size)
 
-    def get_alerts(self, query=None, page=1, page_size=100):
+    def get_alerts(self, query=None, page=1, page_size=1000):
         r = self.http.get('/alerts', query, page=page, page_size=page_size)
         return [Alert.parse(a) for a in r['alerts']]
 
-    def get_history(self, query=None, page=1, page_size=100):
+    def get_history(self, query=None, page=1, page_size=1000):
         r = self.http.get('/alerts/history', query, page=page, page_size=page_size)
         return [RichHistory.parse(a) for a in r['history']]
 
@@ -126,6 +126,38 @@ class Client:
         counts = self.http.get('/services', query)
         return counts['services']
 
+    # Bulk
+    def bulk_set_status(self, query=None, status=None, text='', timeout=None):
+        data = {
+            'status': status,
+            'text': text,
+            'timeout': timeout
+        }
+        return self.http.put('/_bulk/alerts/status', query, data)
+
+    def bulk_action(self, query=None, action=None, text='', timeout=None):
+        data = {
+            'action': action,
+            'text': text,
+            'timeout': timeout
+        }
+        return self.http.put('/_bulk/alerts/action', query, data)
+
+    def bulk_tag(self, query=None, tags=None):
+        return self.http.put('/_bulk/alerts/tag', query, data={'tags': tags or []})
+
+    def bulk_untag(self, query=None, tags=None):
+        return self.http.put('/_bulk/alerts/untag', query, data={'tags': tags or []})
+
+    def bulk_update_attributes(self, query, attributes):
+        data = {
+            'attributes': attributes
+        }
+        return self.http.put('/_bulk/alerts/attributes', query, data=data)
+
+    def bulk_delete(self, query=None):
+        return self.http.delete('/_bulk/alerts', query)
+
     # Blackouts
     def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, customer=None, start=None, duration=None, text=None):
         data = {
@@ -140,7 +172,7 @@ class Client:
             'duration': duration,
             'text': text
         }
-        r = self.http.post('/blackout', data)
+        r = self.http.post('/blackout', data=data)
         return Blackout.parse(r['blackout'])
 
     def get_blackouts(self, query=None):
@@ -156,7 +188,7 @@ class Client:
             'customer': customer,
             'match': match
         }
-        r = self.http.post('/customer', data)
+        r = self.http.post('/customer', data=data)
         return Customer.parse(r['customer'])
 
     def get_customers(self, query=None):
@@ -175,7 +207,7 @@ class Client:
             'createTime': datetime.utcnow(),
             'customer': customer
         }
-        r = self.http.post('/heartbeat', data)
+        r = self.http.post('/heartbeat', data=data)
         return Heartbeat.parse(r['heartbeat'])
 
     def get_heartbeat(self, id):
@@ -198,7 +230,7 @@ class Client:
         }
         if expires:
             data['expireTime'] = DateTime.iso8601(expires)
-        r = self.http.post('/key', data)
+        r = self.http.post('/key', data=data)
         return ApiKey.parse(r['data'])
 
     def get_keys(self, query=None):
@@ -214,7 +246,7 @@ class Client:
             'match': role,
             'scopes': scopes or list()
         }
-        r = self.http.post('/perm', data)
+        r = self.http.post('/perm', data=data)
         return Permission.parse(r['permission'])
 
     def get_perms(self, query=None):
@@ -234,7 +266,7 @@ class Client:
             'attributes': attributes or dict(),
             'text': text
         }
-        return self.http.post('/auth/signup', data)
+        return self.http.post('/auth/signup', data=data)
 
     def create_user(self, name, email, password, status, roles=None, attributes=None, text='', email_verified=False):
         data = {
@@ -247,7 +279,7 @@ class Client:
             'text': text,
             'email_verified': email_verified
         }
-        return self.http.post('/user', data)
+        return self.http.post('/user', data=data)
 
     def get_users(self, query=None):
         r = self.http.get('/users', query)
@@ -264,7 +296,7 @@ class Client:
             'text': kwargs.get('text'),
             'email_verified': kwargs.get('email_verified')
         }
-        return self.http.put('/user/{}'.format(id), data)
+        return self.http.put('/user/{}'.format(id), data=data)
 
     def update_me(self, **kwargs):
         data = {
@@ -275,19 +307,19 @@ class Client:
             'attributes': kwargs.get('attributes', None) or dict(),
             'text': kwargs.get('text')
         }
-        return self.http.put('/user/me', data)
+        return self.http.put('/user/me', data=data)
 
     def update_user_attributes(self, id, attributes):
         data = {
             'attributes': attributes
         }
-        return self.http.put('/user/%s/attributes' % id, data)
+        return self.http.put('/user/%s/attributes' % id, data=data)
 
     def update_me_attributes(self, attributes):
         data = {
             'attributes': attributes
         }
-        return self.http.put('/user/me/attributes' % data)
+        return self.http.put('/user/me/attributes', data=data)
 
     def delete_user(self, id):
         return self.http.delete('/user/%s' % id)
@@ -301,11 +333,11 @@ class Client:
 
     def token(self, provider, data):
         if provider == 'github':
-            return self.http.post('/auth/github', data)
+            return self.http.post('/auth/github', data=data)
         if provider == 'gitlab':
-            return self.http.post('/auth/gitlab', data)
+            return self.http.post('/auth/gitlab', data=data)
         if provider == 'google':
-            return self.http.post('/auth/google', data)
+            return self.http.post('/auth/google', data=data)
 
     def userinfo(self):
         return self.http.get('/userinfo')
@@ -332,9 +364,8 @@ class Client:
 
 class ApiKeyAuth(AuthBase):
 
-    def __init__(self, api_key=None, auth_token=None):
+    def __init__(self, api_key=None):
         self.api_key = api_key
-        self.auth_token = auth_token
 
     def __call__(self, r):
         r.headers['Authorization'] = 'Key {}'.format(self.api_key)
@@ -384,8 +415,8 @@ class HTTPClient:
             raise
         return self._handle_error(response)
 
-    def post(self, path, data=None):
-        url = self.endpoint + path
+    def post(self, path, query=None, data=None):
+        url = self.endpoint + path + '?' + urlencode(query or [], doseq=True)
         headers = {'Content-Type': 'application/json'}
         try:
             response = self.session.post(url, data=json.dumps(data, cls=CustomJsonEncoder),
@@ -394,8 +425,8 @@ class HTTPClient:
             raise
         return self._handle_error(response)
 
-    def put(self, path, data=None):
-        url = self.endpoint + path
+    def put(self, path, query=None, data=None):
+        url = self.endpoint + path + '?' + urlencode(query or [], doseq=True)
         headers = {'Content-Type': 'application/json'}
         try:
             response = self.session.put(url, data=json.dumps(data, cls=CustomJsonEncoder),
@@ -404,8 +435,8 @@ class HTTPClient:
             raise
         return self._handle_error(response)
 
-    def delete(self, path):
-        url = self.endpoint + path
+    def delete(self, path, query=None):
+        url = self.endpoint + path + '?' + urlencode(query or [], doseq=True)
 
         try:
             response = self.session.delete(url, auth=self.auth, timeout=self.timeout)

@@ -11,13 +11,18 @@ from alertaclient.utils import build_query
 def cli(obj, ids, filters, text):
     """Set alert status to 'open'."""
     client = obj['client']
+    action = 'unack'
+    label = 'Un-acking'
     if ids:
         total = len(ids)
+        with click.progressbar(ids, label='{} {} alerts'.format(label, total)) as bar:
+            for id in bar:
+                client.action(id, action=action, text=text or 'status changed using CLI')
     else:
         query = build_query(filters)
-        total, _, _ = client.get_count(query)
-        ids = [a.id for a in client.get_alerts(query)]
-
-    with click.progressbar(ids, label='Un-acking {} alerts'.format(total)) as bar:
-        for id in bar:
-            client.action(id, action='unack', text=text or 'status changed using CLI')
+        r = client.bulk_action(query, action=action, text=text or 'bulk status changed using CLI')
+        ids = r['updated']
+        total = r['count']
+        with click.progressbar(ids, label='{} {} alerts'.format(label, total)) as bar:
+            for id in bar:
+                pass
