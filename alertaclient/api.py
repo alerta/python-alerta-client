@@ -297,7 +297,7 @@ class Client:
             'username': username,
             'password': password
         }
-        return self.http.post('/auth/login', data)
+        return self.http.post('/auth/login', data=data)
 
     def token(self, provider, data):
         if provider == 'github':
