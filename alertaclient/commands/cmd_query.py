@@ -19,17 +19,20 @@ COLOR_MAP = {
 
 @click.command('query', short_help='Search for alerts')
 @click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.option('--query', '-q', 'query', metavar='QUERY', help='severity:"warning" AND resource:web')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
 @click.option('--tabular', 'display', flag_value='tabular', default=True, help='Tabular output')
 @click.option('--compact', 'display', flag_value='compact', help='Compact output')
 @click.option('--details', 'display', flag_value='details', help='Compact output with details')
 @click.pass_obj
-def cli(obj, ids, filters, display, from_date=None):
+def cli(obj, ids, query, filters, display, from_date=None):
     """Query for alerts based on search filter criteria."""
     client = obj['client']
     timezone = obj['timezone']
     if ids:
         query = [('id', x) for x in ids]
+    elif query:
+        query = [('q', query)]
     else:
         query = build_query(filters)
     if from_date:

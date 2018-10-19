@@ -9,9 +9,10 @@ from alertaclient.utils import build_query
 
 @click.command('history', short_help='Show alert history')
 @click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.option('--query', '-q', 'query', metavar='QUERY', help='severity:"warning" AND resource:web')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
 @click.pass_obj
-def cli(obj, ids, filters):
+def cli(obj, ids, query, filters):
     """Show status and severity changes for alerts."""
     client = obj['client']
 
@@ -22,6 +23,8 @@ def cli(obj, ids, filters):
         timezone = obj['timezone']
         if ids:
             query = [('id', x) for x in ids]
+        elif query:
+            query = [('q', query)]
         else:
             query = build_query(filters)
         alerts = client.get_history(query)
