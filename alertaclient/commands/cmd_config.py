@@ -6,9 +6,7 @@ import click
 @click.pass_obj
 def cli(obj):
     """Display client config downloaded from API server."""
-    client = obj['client']
-    config = client.config()
-    for k, v in config.items():
+    for k, v in obj.items():
         if isinstance(v, list):
             v = ', '.join(v)
         click.echo('{:20}: {}'.format(k, v))
