@@ -52,4 +52,4 @@ class Config:
         except requests.RequestException as e:
             raise
 
-        self.options = {**self.options, **remote_config}
+        self.options = {**remote_config, **self.options}
