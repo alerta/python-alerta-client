@@ -14,6 +14,7 @@ default_config = {
     'timezone': 'Europe/London',
     'timeout': 5.0,
     'sslverify': True,
+    'use_local': [],  # eg. set to ['endpoint'] to prevent server override
     'output': 'simple',
     'color': True,
     'debug': False
@@ -52,4 +53,8 @@ class Config:
         except requests.RequestException as e:
             raise
 
-        self.options = {**self.options, **remote_config}
+        # remove local exclusions from remote config
+        remote_config_only = {k: v for k, v in remote_config.items() if k not in self.options['use_local']}
+
+        # merge local config with remote, giving precedence to remote
+        self.options = {**self.options, **remote_config_only}
