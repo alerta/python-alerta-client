@@ -2,8 +2,6 @@ import sys
 
 import click
 
-from alertaclient.exceptions import AuthError
-
 
 @click.command('user', short_help='Update user')
 @click.option('--id', '-i', metavar='UUID', help='User ID')
@@ -43,14 +41,11 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, del
         if not password:
             raise click.UsageError('Need "--password" to create user.')
         try:
-            r = client.create_user(
+            user = client.create_user(
                 name=name, email=email, password=password, status=status,
                 roles=roles, attributes=None, text=text, email_verified=email_verified
             )
         except Exception as e:
             click.echo('ERROR: {}'.format(e))
             sys.exit(1)
-        if 'token' in r:
-            click.echo('Created.')
-        else:
-            raise AuthError
+        click.echo(user.id)

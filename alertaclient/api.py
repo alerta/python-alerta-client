@@ -247,7 +247,8 @@ class Client:
             'text': text,
             'email_verified': email_verified
         }
-        return self.http.post('/user', data)
+        r = self.http.post('/user', data)
+        return User.parse(r['user'])
 
     def get_users(self, query=None):
         r = self.http.get('/users', query)
