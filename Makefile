@@ -36,7 +36,7 @@ pylint:
 
 mypy:
 	@pip -q install mypy==0.620
-	mypy alerta/
+	mypy alertaclient/
 
 hooks:
 	pre-commit run --all-files

@@ -1,6 +1,5 @@
 click
 pytz
 requests
-requests_mock
 six
 tabulate

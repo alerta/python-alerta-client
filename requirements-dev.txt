@@ -1,3 +1,5 @@
+mypy==0.620
 nose
 pre-commit
+requests_mock
 twine
