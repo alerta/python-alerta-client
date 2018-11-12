@@ -25,8 +25,9 @@ class Config:
     def __init__(self, config_file):
         self.options = default_config
         self.parser = configparser.RawConfigParser(defaults=self.options)
-        config_file = config_file or os.environ.get('ALERTA_CONF_FILE') or self.options['config_file']
-        self.parser.read(os.path.expanduser(config_file))
+
+        self.options['config_file'] = config_file or os.environ.get('ALERTA_CONF_FILE') or self.options['config_file']
+        self.parser.read(os.path.expanduser(self.options['config_file']))
 
     def get_config_for_profle(self, profile=None):
         want_profile = profile or os.environ.get('ALERTA_DEFAULT_PROFILE') or self.parser.defaults().get('profile')
@@ -43,6 +44,10 @@ class Config:
                     self.options[opt] = self.parser.getboolean('DEFAULT', opt)
                 except (ValueError, AttributeError):
                     self.options[opt] = self.parser.get('DEFAULT', opt)
+
+        self.options['profile'] = want_profile
+        self.options['endpoint'] = os.environ.get('ALERTA_ENDPOINT', self.options['endpoint'])
+        self.options['key'] = os.environ.get('ALERTA_API_KEY', self.options['key'])
 
     def get_remote_config(self):
         config_url = '{}/config'.format(self.options['endpoint'])
