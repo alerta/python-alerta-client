@@ -57,13 +57,45 @@ def cli(obj, ids, query, filters, display, from_date=None):
             click.echo(tabulate([a.tabular('summary', timezone)
                                  for a in alerts], headers=headers, tablefmt=obj['output']))
         elif display in ['compact', 'details']:
+
+            def summary(alert):
+                if alert.status == 'open':
+                    status = 'O'
+                elif alert.status == 'assign':
+                    status = 'N'
+                elif alert.status == 'ack':
+                    status = 'A'
+                elif alert.status == 'closed':
+                    status = 'C'
+                elif alert.status == 'blackout':
+                    status = 'B'
+                elif alert.status == 'shelved':
+                    status = 'S'
+                elif alert.status == 'unknown':
+                    status = 'U'
+                else:
+                    status = '-'
+                is_correlated = 'C' if alert.event in alert.correlate else 'c'
+                if alert.trend_indication == 'moreSevere':
+                    trend = '\u2191'  # up arrow
+                elif alert.trend_indication == 'lessSevere':
+                    trend = '\u2193'  # down arrow
+                else:
+                    trend = '\u2194'  # each way arrow
+                is_repeat = 'R' if alert.repeat else 'r'
+                has_tags = 'T' if len(alert.tags) else 't'
+                has_attrs = 'A' if len(alert.attributes) else 'a'
+                has_raw_data = 'D' if alert.raw_data else 'd'
+                return '{}|{}|{}|{}|{}|{}'.format(status, is_correlated, trend, is_repeat, has_tags, has_attrs, has_raw_data)
+
             for alert in reversed(alerts):
                 color = COLOR_MAP.get(alert.severity, {'fg': 'white'})
-                click.secho('{}|{}|{}|{:5d}|{}|{:<5s}|{:<10s}|{:<18s}|{:12s}|{:16s}|{:12s}'.format(
+                click.secho('{}|{}|{}|{:5d}|{}|{}|{:<11s}|{:<10s}|{:<18s}|{:12s}|{:16s}|{:12s}'.format(
                     alert.id[0:8],
                     DateTime.localtime(alert.last_receive_time, timezone),
                     alert.severity,
                     alert.duplicate_count,
+                    summary(alert),
                     alert.customer or '-',
                     alert.environment,
                     ','.join(alert.service),
