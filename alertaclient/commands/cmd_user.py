@@ -39,7 +39,7 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, del
         if not email:
             raise click.UsageError('Need "--email" to create user.')
         if not password:
-            raise click.UsageError('Need "--password" to create user.')
+            password = click.prompt('Password', hide_input=True)
         try:
             user = client.create_user(
                 name=name, email=email, password=password, status=status,
