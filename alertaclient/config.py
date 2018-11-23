@@ -9,6 +9,7 @@ default_config = {
     'profile': None,
     'endpoint': 'http://localhost:8080',
     'key': '',
+    'client_id': None,
     'username': None,
     'password': None,
     'timezone': 'Europe/London',
