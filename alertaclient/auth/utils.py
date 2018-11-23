@@ -3,7 +3,7 @@ import os
 from netrc import netrc
 from urllib.parse import urlparse
 
-import click
+from alertaclient.exceptions import ConfigurationError
 
 NETRC_FILE = os.path.join(os.environ['HOME'], '.netrc')
 
@@ -30,7 +30,7 @@ def save_token(endpoint, username, token):
     try:
         info = netrc(NETRC_FILE)
     except Exception as e:
-        raise click.UsageError('{}'.format(e))
+        raise ConfigurationError('{}'.format(e))
     info.hosts[machine(endpoint)] = (username, None, token)
     with open(NETRC_FILE, 'w') as f:
         f.write(dump_netrc(info))
@@ -40,13 +40,13 @@ def clear_token(endpoint):
     try:
         info = netrc(NETRC_FILE)
     except Exception as e:
-        raise click.UsageError('{}'.format(e))
+        raise ConfigurationError('{}'.format(e))
     try:
         del info.hosts[machine(endpoint)]
         with open(NETRC_FILE, 'w') as f:
             f.write(dump_netrc(info))
     except KeyError as e:
-        raise click.UsageError('No credentials stored for {}'.format(e))
+        raise ConfigurationError('No credentials stored for {}'.format(e))
 
 
 # See https://bugs.python.org/issue30806
