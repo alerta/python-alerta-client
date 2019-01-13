@@ -3,11 +3,26 @@ import sys
 import click
 
 
-@click.command('user', short_help='Update user')
+class CommandWithOptionalPassword(click.Command):
+
+    def parse_args(self, ctx, args):
+        for i, a in enumerate(args):
+            if args[i] == '--password':
+                try:
+                    password = args[i + 1] if not args[i + 1].startswith('--') else None
+                except IndexError:
+                    password = None
+                if not password:
+                    password = click.prompt('Password', hide_input=True, confirmation_prompt=True)
+                    args.insert(i + 1, password)
+        return super().parse_args(ctx, args)
+
+
+@click.command('user', cls=CommandWithOptionalPassword, short_help='Update user')
 @click.option('--id', '-i', metavar='UUID', help='User ID')
 @click.option('--name', help='Name of user')
 @click.option('--email', help='Email address (login username)')
-@click.option('--password', help='Password')
+@click.option('--password', help='Password (will prompt if not supplied)')
 @click.option('--status', help='Status eg. active, inactive')
 @click.option('--role', 'roles', multiple=True, help='List of roles')
 @click.option('--text', help='Description of user')
