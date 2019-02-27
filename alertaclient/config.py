@@ -50,8 +50,8 @@ class Config:
         self.options['endpoint'] = os.environ.get('ALERTA_ENDPOINT', self.options['endpoint'])
         self.options['key'] = os.environ.get('ALERTA_API_KEY', self.options['key'])
 
-    def get_remote_config(self):
-        config_url = '{}/config'.format(self.options['endpoint'])
+    def get_remote_config(self, endpoint=None):
+        config_url = '{}/config'.format(endpoint or self.options['endpoint'])
         try:
             r = requests.get(config_url)
             remote_config = r.json()
