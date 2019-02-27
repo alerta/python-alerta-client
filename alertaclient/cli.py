@@ -51,7 +51,7 @@ def cli(ctx, config_file, profile, endpoint_url, output, color, debug):
     """
     config = Config(config_file)
     config.get_config_for_profle(profile)
-    config.get_remote_config()
+    config.get_remote_config(endpoint_url)
 
     ctx.obj = config.options
 
