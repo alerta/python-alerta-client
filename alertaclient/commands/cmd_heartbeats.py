@@ -10,7 +10,7 @@ from alertaclient.models.heartbeat import MAX_LATENCY
 @click.command('heartbeats', short_help='List heartbeats')
 @click.option('--alert', is_flag=True, help='Alert on stale or slow heartbeats')
 @click.option('--severity', '-s', metavar='SEVERITY', default='major', help='Severity for stale heartbeat alerts')
-@click.option('--timeout', metavar='SECONDS', default=86000, type=int, help='Seconds before a stale heartbeat alert will be expired')
+@click.option('--timeout', metavar='SECONDS', default=86000, type=int, help='Seconds before stale heartbeat alerts will be expired')
 @click.option('--purge', is_flag=True, help='Delete all stale heartbeats')
 @click.pass_obj
 def cli(obj, alert, severity, timeout, purge):
@@ -89,6 +89,5 @@ def cli(obj, alert, severity, timeout, purge):
                             text='Heartbeat OK',
                             tags=tags,
                             type='heartbeatAlert',
-                            timeout=timeout,
                             customer=b.customer
                         )
