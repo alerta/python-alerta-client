@@ -1,8 +1,10 @@
-
+import json
 import configparser
 import os
 
 import requests
+
+from alertaclient.exceptions import ClientException
 
 default_config = {
     'config_file': '~/.alerta.conf',
@@ -54,8 +56,11 @@ class Config:
         config_url = '{}/config'.format(endpoint or self.options['endpoint'])
         try:
             r = requests.get(config_url, verify=self.options['sslverify'])
+            r.raise_for_status()
             remote_config = r.json()
         except requests.RequestException as e:
-            raise
+            raise ClientException("Failed to get config from {}. Reason: {}".format(config_url, e))
+        except json.decoder.JSONDecodeError: 
+            raise ClientException("Failed to get config from {}: Reason: not a JSON object".format(config_url))
 
         self.options = {**remote_config, **self.options}
