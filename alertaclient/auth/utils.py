@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 from alertaclient.exceptions import ConfigurationError
 
-NETRC_FILE = os.path.join(os.environ['HOME'], '.netrc')
+NETRC_FILE = os.path.join(os.path.expanduser('~'), '.netrc')
 
 
 def machine(endpoint):
