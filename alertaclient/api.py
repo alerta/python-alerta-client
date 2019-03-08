@@ -301,12 +301,16 @@ class Client:
         return self.http.post('/auth/login', data)
 
     def token(self, provider, data):
+        if provider == 'azure':
+            return self.http.post('/auth/azure', data)
         if provider == 'github':
             return self.http.post('/auth/github', data)
         if provider == 'gitlab':
             return self.http.post('/auth/gitlab', data)
         if provider == 'google':
             return self.http.post('/auth/google', data)
+        if provider == 'openid':
+            return self.http.post('/auth/openid', data)
 
     def userinfo(self):
         return self.http.get('/userinfo')

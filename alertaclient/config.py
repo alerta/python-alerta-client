@@ -1,5 +1,5 @@
-import json
 import configparser
+import json
 import os
 
 import requests
@@ -59,8 +59,11 @@ class Config:
             r.raise_for_status()
             remote_config = r.json()
         except requests.RequestException as e:
-            raise ClientException("Failed to get config from {}. Reason: {}".format(config_url, e))
-        except json.decoder.JSONDecodeError: 
-            raise ClientException("Failed to get config from {}: Reason: not a JSON object".format(config_url))
+            raise ClientException('Failed to get config from {}. Reason: {}'.format(config_url, e))
+        except json.decoder.JSONDecodeError:
+            raise ClientException('Failed to get config from {}: Reason: not a JSON object'.format(config_url))
+
+        if not self.options['client_id']:
+            del self.options['client_id']
 
         self.options = {**remote_config, **self.options}
