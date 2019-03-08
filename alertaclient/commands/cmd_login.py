@@ -3,7 +3,7 @@ import sys
 
 import click
 
-from alertaclient.auth import github, gitlab, google
+from alertaclient.auth import azure, github, gitlab, google, oidc
 from alertaclient.auth.token import Jwt
 from alertaclient.auth.utils import save_token
 from alertaclient.exceptions import AuthError
@@ -13,14 +13,16 @@ from alertaclient.exceptions import AuthError
 @click.argument('username', required=False)
 @click.pass_obj
 def cli(obj, username):
-    """Authenticate using Github, Gitlab, Google OAuth2 or Basic Auth
-    username/password instead of using an API key."""
+    """Authenticate using Azure, Github, Gitlab, Google OAuth2, OpenID or
+    Basic Auth username/password instead of using an API key."""
     client = obj['client']
     provider = obj['provider']
     client_id = obj['client_id']
 
     try:
-        if provider == 'github':
+        if provider == 'azure':
+            token = azure.login(client, obj['azure_tenant'], client_id)['token']
+        elif provider == 'github':
             token = github.login(client, obj['github_url'], client_id)['token']
         elif provider == 'gitlab':
             token = gitlab.login(client, obj['gitlab_url'], client_id)['token']
@@ -28,6 +30,8 @@ def cli(obj, username):
             if not username:
                 username = click.prompt('Email')
             token = google.login(client, username, client_id)['token']
+        elif provider == 'openid':
+            token = oidc.login(client, obj['oidc_auth_url'], client_id)['token']
         elif provider == 'basic':
             if not username:
                 username = click.prompt('Email')
