@@ -13,6 +13,8 @@ from alertaclient.exceptions import UnknownError
 from alertaclient.models.alert import Alert
 from alertaclient.models.blackout import Blackout
 from alertaclient.models.customer import Customer
+from alertaclient.models.enums import Scope
+from alertaclient.models.group import Group
 from alertaclient.models.heartbeat import Heartbeat
 from alertaclient.models.history import RichHistory
 from alertaclient.models.key import ApiKey
@@ -92,6 +94,12 @@ class Client:
         }
         return self.http.put('/alert/%s/attributes' % id, data)
 
+    def add_note(self, id, note):
+        data = {
+            'note': note
+        }
+        return self.http.put('/alert/%s/note' % id, data)
+
     def delete_alert(self, id):
         return self.http.delete('/alert/%s' % id)
 
@@ -118,13 +126,25 @@ class Client:
         counts = self.http.get('/alerts/top10/flapping', query)
         return counts['top10']
 
+    def get_top10_standing(self, query=None):
+        counts = self.http.get('/alerts/top10/standing', query)
+        return counts['top10']
+
     def get_environments(self, query=None):
-        counts = self.http.get('/environments', query)
-        return counts['environments']
+        r = self.http.get('/environments', query)
+        return r['environments']
 
     def get_services(self, query=None):
-        counts = self.http.get('/services', query)
-        return counts['services']
+        r = self.http.get('/services', query)
+        return r['services']
+
+    def get_groups(self, query=None):
+        r = self.http.get('/alerts/groups', query)
+        return r['groups']
+
+    def get_tags(self, query=None):
+        r = self.http.get('/alerts/tags', query)
+        return r['tags']
 
     # Blackouts
     def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, customer=None, start=None, duration=None, text=None):
@@ -143,9 +163,15 @@ class Client:
         r = self.http.post('/blackout', data)
         return Blackout.parse(r['blackout'])
 
+    def get_blackout(self, id):
+        return Blackout.parse(self.http.get('/blackout/%s' % id)['blackout'])
+
     def get_blackouts(self, query=None):
         r = self.http.get('/blackouts', query)
         return [Blackout.parse(b) for b in r['blackouts']]
+
+    def update_blackout(self, id, blackout):
+        self.http.put('/blackout/%s' % id, blackout)
 
     def delete_blackout(self, id):
         return self.http.delete('/blackout/%s' % id)
@@ -159,9 +185,15 @@ class Client:
         r = self.http.post('/customer', data)
         return Customer.parse(r['customer'])
 
+    def get_customer(self):
+        return Customer.parse(self.http.get('/customer/%s' % id)['customer'])
+
     def get_customers(self, query=None):
         r = self.http.get('/customers', query)
         return [Customer.parse(c) for c in r['customers']]
+
+    def update_customer(self, id, customer):
+        self.http.put('/customer/%s' % id, customer)
 
     def delete_customer(self, id):
         return self.http.delete('/customer/%s' % id)
@@ -201,9 +233,21 @@ class Client:
         r = self.http.post('/key', data)
         return ApiKey.parse(r['data'])
 
+    def get_key(self):
+        return ApiKey.parse(self.http.get('/key/%s' % id)['key'])
+
     def get_keys(self, query=None):
         r = self.http.get('/keys', query)
         return [ApiKey.parse(k) for k in r['keys']]
+
+    def update_key(self, id, **kwargs):
+        data = {
+            'scopes': kwargs.get('scopes'),
+            'text': kwargs.get('text'),
+            'expireTime': kwargs.get('expireTime'),
+            'customer': kwargs.get('customer')
+        }
+        return self.http.put('/key/{}'.format(id), data)
 
     def delete_key(self, id):
         return self.http.delete('/key/%s' % id)
@@ -217,12 +261,26 @@ class Client:
         r = self.http.post('/perm', data)
         return Permission.parse(r['permission'])
 
+    def get_perm(self):
+        return Permission.parse(self.http.get('/perm/%s' % id)['perm'])
+
     def get_perms(self, query=None):
         r = self.http.get('/perms', query)
         return [Permission.parse(p) for p in r['permissions']]
 
+    def update_perm(self, id, **kwargs):
+        data = {
+            'match': kwargs.get('match'),  # role
+            'scopes': kwargs.get('scopes')
+        }
+        return self.http.put('/perm/{}'.format(id), data)
+
     def delete_perm(self, id):
         return self.http.delete('/perm/%s' % id)
+
+    def get_scopes(self):
+        r = self.http.get('/scopes')
+        return [Scope(s) for s in r['scopes']]
 
     # Users
     def signup(self, name, email, password, status, attributes=None, text=''):
@@ -249,6 +307,19 @@ class Client:
         }
         r = self.http.post('/user', data)
         return User.parse(r['user'])
+
+    def get_user(self):
+        return Permission.parse(self.http.get('/user/%s' % id)['user'])
+
+    def get_user_groups(self, id):
+        r = self.http.get('/user/{}/groups'.format(id))
+        return [Group.parse(g) for g in r['groups']]
+
+    def get_me(self):
+        return User.parse(self.http.get('/user/me')['user'])
+
+    def get_me_attributes(self):
+        return self.http.get('/user/me/attributes')['attributes']
 
     def get_users(self, query=None):
         r = self.http.get('/users', query)
@@ -293,6 +364,7 @@ class Client:
     def delete_user(self, id):
         return self.http.delete('/user/%s' % id)
 
+    # Auth
     def login(self, username, password):
         data = {
             'username': username,
@@ -317,6 +389,42 @@ class Client:
 
     def config(self):
         return self.http.get('/config')
+
+    # Groups
+    def create_group(self, name, text):
+        data = {
+            'name': name,
+            'text': text
+        }
+        r = self.http.post('/group', data)
+        return Group.parse(r['group'])
+
+    def get_group(self):
+        return Group.parse(self.http.get('/group/%s' % id)['group'])
+
+    def get_group_users(self, id):
+        r = self.http.get('/group/{}/users'.format(id))
+        return [User.parse(u) for u in r['users']]
+
+    def get_users_groups(self, query=None):
+        r = self.http.get('/groups', query)
+        return [Group.parse(g) for g in r['groups']]
+
+    def update_group(self, id, kwargs):
+        data = {
+            'name': kwargs.get('name'),
+            'text': kwargs.get('text')
+        }
+        return self.http.put('/group/{}'.format(id), data)
+
+    def add_user_to_group(self, group_id, user_id):
+        return self.http.put('/group/{}/user/{}'.format(group_id, user_id))
+
+    def remove_user_from_group(self, group_id, user_id):
+        return self.http.delete('/group/{}/user/{}'.format(group_id, user_id))
+
+    def delete_group(self, id):
+        return self.http.delete('/group/%s' % id)
 
     # Management
     def mgmt_status(self):
