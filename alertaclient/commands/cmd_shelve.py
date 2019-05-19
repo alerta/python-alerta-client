@@ -7,9 +7,10 @@ from alertaclient.utils import build_query
 @click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--query', '-q', 'query', metavar='QUERY', help='severity:"warning" AND resource:web')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
+@click.option('--timeout', metavar='SECONDS', type=int, help='Seconds before alert auto-unshelved.')
 @click.option('--text', help='Message associated with status change')
 @click.pass_obj
-def cli(obj, ids, query, filters, text):
+def cli(obj, ids, query, filters, timeout, text):
     """Set alert status to 'shelved'."""
     client = obj['client']
     if ids:
@@ -24,4 +25,4 @@ def cli(obj, ids, query, filters, text):
 
     with click.progressbar(ids, label='Shelving {} alerts'.format(total)) as bar:
         for id in bar:
-            client.action(id, action='shelve', text=text or 'status changed using CLI')
+            client.action(id, action='shelve', text=text or 'status changed using CLI', timeout=timeout)
