@@ -1,5 +1,5 @@
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict
 from uuid import uuid4
 
 JSON = Dict[str, Any]
@@ -42,6 +42,16 @@ class Group:
     @classmethod
     def parse(cls, json: JSON) -> 'Group':
         return Group(
+            id=json.get('id', None),
             name=json.get('name', None),
-            text=json.get('text', None)
+            text=json.get('text', None),
+            count=json.get('count', 0)
         )
+
+    def tabular(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'text': self.text,
+            'count': self.count
+        }
