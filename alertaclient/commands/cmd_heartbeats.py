@@ -17,6 +17,11 @@ def cli(obj, alert, severity, timeout, purge):
     """List heartbeats."""
     client = obj['client']
 
+    try:
+        default_normal_severity = obj['alarm_model']['defaults']['normal_severity']
+    except KeyError:
+        default_normal_severity = 'normal'
+
     if obj['output'] == 'json':
         r = client.http.get('/heartbeats')
         heartbeats = [Heartbeat.parse(hb) for hb in r['heartbeats']]
@@ -85,7 +90,7 @@ def cli(obj, alert, severity, timeout, purge):
                         group=group,
                         environment=environment,
                         service=['Alerta'],
-                        severity='normal',
+                        severity=default_normal_severity,
                         value='',
                         text='Heartbeat OK',
                         tags=tags,
