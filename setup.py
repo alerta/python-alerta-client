@@ -15,6 +15,7 @@ setuptools.setup(
     description='Alerta unified command-line tool and SDK',
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
+    url='https://github.com/guardian/python-alerta',
     license='Apache License 2.0',
     author='Nick Satterly',
     author_email='nick.satterly@gmail.com',
