@@ -7,7 +7,7 @@ from alertaclient.auth.token import TokenHandler
 
 def login(client, oidc_auth_url, client_id):
     xsrf_token = str(uuid4())
-    redirect_uri = 'http://127.0.0.1:9004'
+    redirect_uri = 'http://localhost:9004'  # azure only supports 'localhost'
 
     url = (
         '{oidc_auth_url}?'
