@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import uuid
 from datetime import datetime
 from http.client import HTTPConnection
 from urllib.parse import urlencode
@@ -483,6 +484,13 @@ class HTTPClient:
 
         self.debug = debug
 
+    @staticmethod
+    def headers():
+        return {
+            'X-Request-ID': str(uuid.uuid4()),
+            'Content-Type': 'application/json'
+        }
+
     def get(self, path, query=None, **kwargs):
         query = query or []
         if 'page' in kwargs:
@@ -492,27 +500,25 @@ class HTTPClient:
 
         url = self.endpoint + path + '?' + urlencode(query, doseq=True)
         try:
-            response = self.session.get(url, auth=self.auth, timeout=self.timeout)
+            response = self.session.get(url, headers=self.headers(), auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
 
     def post(self, path, data=None):
         url = self.endpoint + path
-        headers = {'Content-Type': 'application/json'}
         try:
             response = self.session.post(url, data=json.dumps(data, cls=CustomJsonEncoder),
-                                         headers=headers, auth=self.auth, timeout=self.timeout)
+                                         headers=self.headers(), auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
 
     def put(self, path, data=None):
         url = self.endpoint + path
-        headers = {'Content-Type': 'application/json'}
         try:
             response = self.session.put(url, data=json.dumps(data, cls=CustomJsonEncoder),
-                                        headers=headers, auth=self.auth, timeout=self.timeout)
+                                        headers=self.headers(), auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
@@ -521,7 +527,7 @@ class HTTPClient:
         url = self.endpoint + path
 
         try:
-            response = self.session.delete(url, auth=self.auth, timeout=self.timeout)
+            response = self.session.delete(url, headers=self.headers(), auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
