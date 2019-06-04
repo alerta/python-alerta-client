@@ -1,6 +1,6 @@
 import click
 
-from alertaclient.utils import build_query
+from alertaclient.utils import action_progressbar, build_query
 
 
 @click.command('unshelve', short_help='Un-shelve alerts')
@@ -22,6 +22,4 @@ def cli(obj, ids, query, filters, text):
         total, _, _ = client.get_count(query)
         ids = [a.id for a in client.get_alerts(query)]
 
-    with click.progressbar(ids, label='Un-shelving {} alerts'.format(total)) as bar:
-        for id in bar:
-            client.action(id, action='unshelve', text=text or 'status changed using CLI')
+    action_progressbar(client, 'unshelve', ids, label='Un-shelving {} alerts'.format(total), text=text)

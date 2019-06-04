@@ -2,6 +2,7 @@
 import datetime
 import json
 
+import click
 import pytz
 import six
 
@@ -41,3 +42,18 @@ class DateTime:
 
 def build_query(filters):
     return [tuple(f.split('=', 1)) for f in filters if '=' in f]
+
+
+def action_progressbar(client, action, ids, label, text=None, timeout=None):
+    skipped = 0
+
+    def show_skipped(id):
+        if not id and skipped:
+            return '(skipped {})'.format(skipped)
+
+    with click.progressbar(ids, label=label, show_eta=True, item_show_func=show_skipped) as bar:
+        for id in bar:
+            try:
+                client.action(id, action=action, text=text or 'status changed using CLI', timeout=timeout)
+            except Exception as e:
+                skipped += 1
