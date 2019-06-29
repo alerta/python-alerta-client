@@ -91,7 +91,7 @@ class Screen:
         # TODO - draw bars
 
         # draw alerts
-        text_width = self.cols - 95
+        text_width = self.cols - 95 if self.cols >= 95 else 0
         self._addstr(2, 1, 'Sev. Time     Dupl. Customer Env.         Service      Resource     Group Event' +
                      '        Value Text' + ' ' * (text_width - 4), curses.A_UNDERLINE)
 
