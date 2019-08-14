@@ -46,7 +46,7 @@ clean:
 	rm -Rf build dist *.egg-info
 
 test:
-	nosetests tests
+	pytest
 
 run:
 	alerta top

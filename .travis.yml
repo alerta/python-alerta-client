@@ -9,10 +9,12 @@ python:
   - "3.7"
 
 install:
-  - pip install .
   - pip install -r requirements.txt
   - pip install -r requirements-dev.txt
+  - pip install .
 
 script:
+  - pip install coveralls
   - python -m mypy alertaclient/
-  - nosetests --verbosity=3 tests/*
+  - pytest --cov=alertaclient
+  - coveralls

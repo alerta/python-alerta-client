@@ -24,8 +24,7 @@ setuptools.setup(
         'Click',
         'requests',
         'tabulate',
-        'pytz',
-        'six'
+        'pytz'
     ],
     include_package_data=True,
     zip_safe=False,
@@ -42,6 +41,7 @@ setuptools.setup(
         'Intended Audience :: System Administrators',
         'Intended Audience :: Telecommunications Industry',
         'License :: OSI Approved :: Apache Software License',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.5',
         'Topic :: System :: Monitoring',
