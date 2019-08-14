@@ -15,4 +15,4 @@ install:
 
 script:
   - python -m mypy alertaclient/
-  - nosetests --verbosity=3 tests/*
+  - pytest --cov=alertaclient
