@@ -2,8 +2,6 @@ import sys
 
 import click
 
-from alertaclient.exceptions import AuthError
-
 
 @click.command('me', short_help='Update current user')
 @click.option('--name', help='Name of user')

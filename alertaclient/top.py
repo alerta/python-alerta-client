@@ -92,8 +92,8 @@ class Screen:
 
         # draw alerts
         text_width = self.cols - 95 if self.cols >= 95 else 0
-        self._addstr(2, 1, 'Sev. Time     Dupl. Customer Env.         Service      Resource     Group Event' +
-                     '        Value Text' + ' ' * (text_width - 4), curses.A_UNDERLINE)
+        self._addstr(2, 1, 'Sev. Time     Dupl. Customer Env.         Service      Resource     Group Event'
+                     + '        Value Text' + ' ' * (text_width - 4), curses.A_UNDERLINE)
 
         def short_sev(severity):
             return self.SEVERITY_MAP.get(severity, self.SEVERITY_MAP['unknown'])[0]

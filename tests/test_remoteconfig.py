@@ -1,8 +1,10 @@
 
 import unittest
+
 import requests
 import requests_mock
 from requests_mock import Adapter
+
 from alertaclient.cli import Config
 from alertaclient.exceptions import ClientException
 
@@ -11,7 +13,7 @@ class RemoteConfigTestCase(unittest.TestCase):
 
     def setUp(self):
         self.adapter = Adapter()
-        self.config = Config("")
+        self.config = Config('')
         self.remote_json_config = """
           {
             "actions": [],
@@ -109,6 +111,6 @@ class RemoteConfigTestCase(unittest.TestCase):
         """Tests that URL is accessible (HTTP 200)
         but there is no Alerta API config in JSON"""
 
-        m.get('/sometext/config', text="Some random text", status_code=200)
+        m.get('/sometext/config', text='Some random text', status_code=200)
         with self.assertRaises(ClientException):
             self.config.get_remote_config('http://localhost:8080/sometext')
