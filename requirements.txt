@@ -1,5 +1,4 @@
 click
 pytz
 requests
-six
 tabulate

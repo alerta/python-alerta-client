@@ -4,8 +4,6 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
 
-from six import text_type
-
 from alertaclient.exceptions import AuthError
 
 SUCCESS_MESSAGE = """
@@ -67,7 +65,7 @@ class Jwt:
 
     def parse(self, jwt):
         payload = jwt.split('.')[1]
-        if isinstance(payload, text_type):
+        if isinstance(payload, str):
             payload = payload.encode('ascii')
         padding = b'=' * (4 - (len(payload) % 4))
         decoded = base64.urlsafe_b64decode(payload + padding)

@@ -4,7 +4,6 @@ import json
 
 import click
 import pytz
-import six
 
 
 class CustomJsonEncoder(json.JSONEncoder):
@@ -20,7 +19,7 @@ class CustomJsonEncoder(json.JSONEncoder):
 class DateTime:
     @staticmethod
     def parse(date_str):
-        if not isinstance(date_str, six.string_types):
+        if not isinstance(date_str, str):
             return
         try:
             return datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -55,5 +54,5 @@ def action_progressbar(client, action, ids, label, text=None, timeout=None):
         for id in bar:
             try:
                 client.action(id, action=action, text=text or 'status changed using CLI', timeout=timeout)
-            except Exception as e:
+            except Exception:
                 skipped += 1
