@@ -21,9 +21,9 @@ COLOR_MAP = {
 @click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--query', '-q', 'query', metavar='QUERY', help='severity:"warning" AND resource:web')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
-@click.option('--tabular', 'display', flag_value='tabular', default=True, help='Tabular output')
-@click.option('--compact', 'display', flag_value='compact', help='Compact output')
-@click.option('--details', 'display', flag_value='details', help='Compact output with details')
+@click.option('--oneline', 'display', flag_value='oneline', default=True, help='Show alerts using table format')
+@click.option('--medium', 'display', flag_value='medium', help='Show important alert attributes')
+@click.option('--full', 'display', flag_value='full', help='Show full alert details')
 @click.pass_obj
 def cli(obj, ids, query, filters, display, from_date=None):
     """Query for alerts based on search filter criteria."""
@@ -50,13 +50,15 @@ def cli(obj, ids, query, filters, display, from_date=None):
         last_time = r['lastTime']
         auto_refresh = r['autoRefresh']
 
-        if display == 'tabular':
+        if display == 'oneline':
             headers = {'id': 'ID', 'lastReceiveTime': 'LAST RECEIVED', 'severity': 'SEVERITY', 'status': 'STATUS',
                        'duplicateCount': 'DUPL', 'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE',
-                       'resource': 'RESOURCE', 'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE', 'text': 'TEXT'}
-            click.echo(tabulate([a.tabular('summary', timezone)
-                                 for a in alerts], headers=headers, tablefmt=obj['output']))
-        elif display in ['compact', 'details']:
+                       'resource': 'RESOURCE', 'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE', 'text': 'DESCRIPTION'}
+
+            data = [{k: v for k, v in a.tabular(timezone).items() if k in headers.keys()} for a in alerts]
+            click.echo(tabulate(data, headers=headers, tablefmt=obj['output']))
+
+        else:
             for alert in reversed(alerts):
                 color = COLOR_MAP.get(alert.severity, {'fg': 'white'})
                 click.secho('{}|{}|{}|{:5d}|{}|{:<5s}|{:<10s}|{:<18s}|{:12s}|{:16s}|{:12s}'.format(
@@ -73,7 +75,7 @@ def cli(obj, ids, query, filters, display, from_date=None):
                     alert.value or 'n/a'), fg=color['fg'])
                 click.secho('   |{}'.format(alert.text), fg=color['fg'])
 
-                if display == 'details':
+                if display == 'full':
                     click.secho('    severity   | {} -> {}'.format(alert.previous_severity,
                                                                    alert.severity), fg=color['fg'])
                     click.secho('    trend      | {}'.format(alert.trend_indication), fg=color['fg'])

@@ -97,61 +97,33 @@ class Alert:
     def get_id(self, short=False):
         return self.id[:8] if short else self.id
 
-    def tabular(self, fields='all', timezone=None):
-        if fields == 'summary':
-            return {
-                'id': self.get_id(short=True),
-                'lastReceiveTime': DateTime.localtime(self.last_receive_time, timezone),
-                'severity': self.severity,
-                'status': self.status,
-                'duplicateCount': self.duplicate_count,
-                'customer': self.customer,
-                'environment': self.environment,
-                'service': ','.join(self.service),
-                'resource': self.resource,
-                'group': self.group,
-                'event': self.event,
-                'value': self.value,
-                'text': self.text
-            }
-        elif fields == 'details':
-            return {
-                'severity': '{} -> {}'.format(self.previous_severity, self.severity),
-                'trend': self.trend_indication,
-                'status': self.status,
-                'resource': self.resource,
-                'group': self.group,
-                'event': self.event,
-                'value': self.value,
-                'tags': ','.join(self.tags)
-            }
-        else:
-            return {
-                'id': self.id,
-                'resource': self.resource,
-                'event': self.event,
-                'environment': self.environment,
-                'severity': self.severity,
-                'correlate': self.correlate,
-                'status': self.status,
-                'service': ','.join(self.service),
-                'group': self.group,
-                'value': self.value,
-                'text': self.text,
-                'tags': ','.join(self.tags),
-                'attributes': self.attributes,
-                'origin': self.origin,
-                'type': self.event_type,
-                'createTime': DateTime.localtime(self.create_time, timezone),
-                'timeout': self.timeout,
-                'rawData': self.raw_data,
-                'customer': self.customer,
-                'duplicateCount': self.duplicate_count,
-                'repeat': self.repeat,
-                'previousSeverity': self.previous_severity,
-                'trendIndication': self.trend_indication,
-                'receiveTime': DateTime.localtime(self.receive_time, timezone),
-                'lastReceiveId': self.last_receive_id,
-                'lastReceiveTime': DateTime.localtime(self.last_receive_time, timezone),
-                'history': self.history
-            }
+    def tabular(self, timezone=None):
+        return {
+            'id': self.get_id(short=True),
+            'lastReceiveTime': DateTime.localtime(self.last_receive_time, timezone),
+            'severity': self.severity,
+            'status': self.status,
+            'duplicateCount': self.duplicate_count,
+            'customer': self.customer,
+            'environment': self.environment,
+            'service': ','.join(self.service),
+            'resource': self.resource,
+            'group': self.group,
+            'event': self.event,
+            'correlate': self.correlate,
+            'value': self.value,
+            'text': self.text,
+            'tags': ','.join(self.tags),
+            'attributes': self.attributes,
+            'origin': self.origin,
+            'type': self.event_type,
+            'createTime': DateTime.localtime(self.create_time, timezone),
+            'timeout': self.timeout,
+            'rawData': self.raw_data,
+            'repeat': self.repeat,
+            'previousSeverity': self.previous_severity,
+            'trendIndication': self.trend_indication,
+            'receiveTime': DateTime.localtime(self.receive_time, timezone),
+            'lastReceiveId': self.last_receive_id,
+            'history': self.history
+        }

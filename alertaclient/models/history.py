@@ -12,9 +12,10 @@ class History:
         self.severity = kwargs.get('severity', None)
         self.status = kwargs.get('status', None)
         self.value = kwargs.get('value', None)
-        self.change_type = kwargs.get('change_type', kwargs.get('type', None)) or ''
         self.text = kwargs.get('text', None)
+        self.change_type = kwargs.get('change_type', kwargs.get('type', None)) or ''
         self.update_time = kwargs.get('update_time', None) or datetime.utcnow()
+        self.user = kwargs.get('user', None)
 
     def __repr__(self):
         return 'History(id={!r}, event={!r}, severity={!r}, status={!r}, type={!r})'.format(
@@ -39,6 +40,7 @@ class RichHistory:
         self.attributes = kwargs.get('attributes', None) or dict()
         self.origin = kwargs.get('origin', None)
         self.update_time = kwargs.get('update_time', None)
+        self.user = kwargs.get('user', None)
         self.change_type = kwargs.get('change_type', kwargs.get('type', None))
         self.customer = kwargs.get('customer', None)
 
