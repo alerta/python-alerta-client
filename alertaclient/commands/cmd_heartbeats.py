@@ -70,12 +70,12 @@ def cli(obj, alert, severity, timeout, purge):
                     )
                 elif b.status == 'slow':
                     client.send_alert(
-                        resource=b.origin,
+                        resource=resource,
                         event='HeartbeatSlow',
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
                         group=group,
                         environment=environment,
-                        service=['Alerta'],
+                        service=[service],
                         severity=severity,
                         value='{}ms'.format(b.latency),
                         text='Heartbeat took more than {}ms to be processed'.format(MAX_LATENCY),
@@ -86,12 +86,12 @@ def cli(obj, alert, severity, timeout, purge):
                     )
                 else:
                     client.send_alert(
-                        resource=b.origin,
+                        resource=resource,
                         event='HeartbeatOK',
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
                         group=group,
                         environment=environment,
-                        service=['Alerta'],
+                        service=[service],
                         severity=default_normal_severity,
                         value='',
                         text='Heartbeat OK',
