@@ -47,17 +47,19 @@ def cli(obj, alert, severity, timeout, purge):
                 params = dict(filter(lambda a: len(a) == 2, map(lambda a: a.split(':'), b.tags)))
                 environment = params.get('environment', 'Production')
                 group = params.get('group', 'System')
+                service = params.get('service','Alerta')
+                resource = params.get('resource',b.origin)
                 tags = list(filter(lambda a: not a.startswith('environment:')
                                    and not a.startswith('group:'), b.tags))
 
                 if b.status == 'expired':  # aka. "stale"
                     client.send_alert(
-                        resource=b.origin,
+                        resource=resource,
                         event='HeartbeatFail',
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
                         group=group,
                         environment=environment,
-                        service=['Alerta'],
+                        service=[service],
                         severity=severity,
                         value='{}'.format(b.since),
                         text='Heartbeat not received in {} seconds'.format(b.timeout),
