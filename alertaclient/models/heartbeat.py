@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from alertaclient.utils import DateTime
 
-MAX_LATENCY = 2000  # ms
+DEFAULT_MAX_LATENCY = 2000  # ms
 
 
 class Heartbeat:
@@ -11,10 +11,12 @@ class Heartbeat:
     def __init__(self, origin=None, tags=None, create_time=None, timeout=None, customer=None, **kwargs):
         self.id = kwargs.get('id', None)
         self.origin = origin
+        self.status = kwargs.get('status', None) or 'unknown'
         self.tags = tags or list()
         self.event_type = kwargs.get('event_type', kwargs.get('type', None)) or 'Heartbeat'
         self.create_time = create_time
         self.timeout = timeout
+        self.max_latency = kwargs.get('max_latency', None) or DEFAULT_MAX_LATENCY
         self.receive_time = kwargs.get('receive_time', None)
         self.customer = customer
 
@@ -26,15 +28,6 @@ class Heartbeat:
     def since(self):
         since = datetime.utcnow() - self.receive_time
         return since - timedelta(microseconds=since.microseconds)
-
-    @property
-    def status(self):
-        if self.latency > MAX_LATENCY:
-            return 'slow'
-        elif self.since.total_seconds() > self.timeout:
-            return 'expired'  # aka 'stale'
-        else:
-            return 'ok'
 
     def __repr__(self):
         return 'Heartbeat(id={!r}, origin={!r}, create_time={!r}, timeout={!r}, customer={!r})'.format(
@@ -50,10 +43,12 @@ class Heartbeat:
         return Heartbeat(
             id=json.get('id', None),
             origin=json.get('origin', None),
+            status=json.get('status', None),
             tags=json.get('tags', list()),
             event_type=json.get('type', None),
             create_time=DateTime.parse(json.get('createTime')),
             timeout=json.get('timeout', None),
+            max_latency=json.get('maxLatency', None) or DEFAULT_MAX_LATENCY,
             receive_time=DateTime.parse(json.get('receiveTime')),
             customer=json.get('customer', None)
         )
@@ -66,8 +61,9 @@ class Heartbeat:
             'tags': ','.join(self.tags),
             'createTime': DateTime.localtime(self.create_time, timezone),
             'receiveTime': DateTime.localtime(self.receive_time, timezone),
-            'latency': '{:.0f}ms'.format(self.latency),
-            'timeout': '{}s'.format(self.timeout),
             'since': self.since,
+            'timeout': '{}s'.format(self.timeout),
+            'latency': '{:.0f}ms'.format(self.latency),
+            'maxLatency': '{}ms'.format(self.max_latency),
             'status': self.status
         }
