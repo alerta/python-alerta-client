@@ -10,7 +10,7 @@ def read(filename):
 
 
 setuptools.setup(
-    name='alerta',
+    name='alertaclient',
     version=read('VERSION'),
     description='Alerta unified command-line tool and SDK',
     long_description=read('README.md'),
