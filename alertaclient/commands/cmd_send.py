@@ -59,23 +59,24 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
                 message = '{} -> {}'.format(alert.previous_severity, alert.severity)
         click.echo('{} ({})'.format(id, message))
 
+    # read raw data from file or stdin
+    if raw_data and raw_data.startswith('@') or raw_data == '-':
+        print('read raw data from stdin')
+        raw_data_file = raw_data.lstrip('@')
+        with click.open_file(raw_data_file, 'r') as f:
+            raw_data = f.read()
+
     # read entire alert object from terminal stdin
-    if not sys.stdin.isatty() and (os.environ.get('TERM', None) or os.environ.get('PS1', None)):
+    elif not sys.stdin.isatty() and (os.environ.get('TERM', None) or os.environ.get('PS1', None)):
         with click.get_text_stream('stdin') as stdin:
             for line in stdin.readlines():
                 try:
                     payload = json.loads(line)
                 except Exception as e:
-                    click.echo('ERROR: JSON parse failure - {}'.format(e))
+                    click.echo("ERROR: JSON parse failure - input must be in 'json_lines' format: {}".format(e))
                     sys.exit(1)
                 send_alert(**payload)
             sys.exit(0)
-
-    # read raw data from file or stdin
-    if raw_data and raw_data.startswith('@') or raw_data == '-':
-        raw_data_file = raw_data.lstrip('@')
-        with click.open_file(raw_data_file, 'r') as f:
-            raw_data = f.read()
 
     send_alert(
         resource=resource,
