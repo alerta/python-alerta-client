@@ -4,7 +4,7 @@ import json
 import click
 from tabulate import tabulate
 
-from alertaclient.models.heartbeat import MAX_LATENCY, Heartbeat
+from alertaclient.models.heartbeat import Heartbeat
 
 
 @click.command('heartbeats', short_help='List heartbeats')
@@ -29,8 +29,9 @@ def cli(obj, alert, severity, timeout, purge):
     else:
         timezone = obj['timezone']
         headers = {
-            'id': 'ID', 'origin': 'ORIGIN', 'customer': 'CUSTOMER', 'tags': 'TAGS', 'createTime': 'CREATED',
-            'receiveTime': 'RECEIVED', 'latency': 'LATENCY', 'timeout': 'TIMEOUT', 'since': 'SINCE', 'status': 'STATUS'
+            'id': 'ID', 'origin': 'ORIGIN', 'customer': 'CUSTOMER', 'tags': 'TAGS',
+            'createTime': 'CREATED', 'receiveTime': 'RECEIVED', 'since': 'SINCE', 'timeout': 'TIMEOUT',
+            'latency': 'LATENCY', 'maxLatency': 'MAX LATENCY', 'status': 'STATUS'
         }
         heartbeats = client.get_heartbeats()
         click.echo(tabulate([h.tabular(timezone) for h in heartbeats], headers=headers, tablefmt=obj['output']))
@@ -76,7 +77,7 @@ def cli(obj, alert, severity, timeout, purge):
                         service=['Alerta'],
                         severity=severity,
                         value='{}ms'.format(b.latency),
-                        text='Heartbeat took more than {}ms to be processed'.format(MAX_LATENCY),
+                        text='Heartbeat took more than {}ms to be processed'.format(b.max_latency),
                         tags=tags,
                         type='heartbeatAlert',
                         timeout=timeout,
