@@ -1,6 +1,8 @@
-
 import datetime
 import json
+import os
+import platform
+import sys
 
 import click
 import pytz
@@ -56,3 +58,8 @@ def action_progressbar(client, action, ids, label, text=None, timeout=None):
                 client.action(id, action=action, text=text or 'status changed using CLI', timeout=timeout)
             except Exception:
                 skipped += 1
+
+
+def origin():
+    prog = os.path.basename(sys.argv[0])
+    return '{}/{}'.format(prog, platform.uname()[1])

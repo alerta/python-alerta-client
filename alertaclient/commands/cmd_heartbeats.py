@@ -1,10 +1,10 @@
-
 import json
 
 import click
 from tabulate import tabulate
 
 from alertaclient.models.heartbeat import Heartbeat
+from alertaclient.utils import origin
 
 
 @click.command('heartbeats', short_help='List heartbeats')
@@ -29,7 +29,7 @@ def cli(obj, alert, severity, timeout, purge):
     else:
         timezone = obj['timezone']
         headers = {
-            'id': 'ID', 'origin': 'ORIGIN', 'customer': 'CUSTOMER', 'tags': 'TAGS',
+            'id': 'ID', 'origin': 'ORIGIN', 'customer': 'CUSTOMER', 'tags': 'TAGS', 'attributes': 'ATTRIBUTES',
             'createTime': 'CREATED', 'receiveTime': 'RECEIVED', 'since': 'SINCE', 'timeout': 'TIMEOUT',
             'latency': 'LATENCY', 'maxLatency': 'MAX LATENCY', 'status': 'STATUS'
         }
@@ -45,24 +45,20 @@ def cli(obj, alert, severity, timeout, purge):
     if alert:
         with click.progressbar(heartbeats, label='Alerting {} heartbeats'.format(len(heartbeats))) as bar:
             for b in bar:
-                params = dict(filter(lambda a: len(a) == 2, map(lambda a: a.split(':'), b.tags)))
-                environment = params.get('environment', 'Production')
-                group = params.get('group', 'System')
-                tags = list(filter(lambda a: not a.startswith('environment:')
-                                   and not a.startswith('group:'), b.tags))
-
                 if b.status == 'expired':  # aka. "stale"
                     client.send_alert(
                         resource=b.origin,
                         event='HeartbeatFail',
+                        environment=b.attributes.get('environment', 'Production'),
+                        severity=b.attributes.get('severity', severity),
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
-                        group=group,
-                        environment=environment,
-                        service=['Alerta'],
-                        severity=severity,
+                        service=b.attributes.get('service', ['Alerta']),
+                        group=b.attributes.get('group', 'System'),
                         value='{}'.format(b.since),
                         text='Heartbeat not received in {} seconds'.format(b.timeout),
-                        tags=tags,
+                        tags=b.tags,
+                        attributes=b.attributes,
+                        origin=origin,
                         type='heartbeatAlert',
                         timeout=timeout,
                         customer=b.customer
@@ -71,14 +67,16 @@ def cli(obj, alert, severity, timeout, purge):
                     client.send_alert(
                         resource=b.origin,
                         event='HeartbeatSlow',
+                        environment=b.attributes.get('environment', 'Production'),
+                        severity=b.attributes.get('severity', severity),
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
-                        group=group,
-                        environment=environment,
-                        service=['Alerta'],
-                        severity=severity,
+                        service=b.attributes.get('service', ['Alerta']),
+                        group=b.attributes.get('group', 'System'),
                         value='{}ms'.format(b.latency),
                         text='Heartbeat took more than {}ms to be processed'.format(b.max_latency),
-                        tags=tags,
+                        tags=b.tags,
+                        attributes=b.attributes,
+                        origin=origin,
                         type='heartbeatAlert',
                         timeout=timeout,
                         customer=b.customer
@@ -87,14 +85,17 @@ def cli(obj, alert, severity, timeout, purge):
                     client.send_alert(
                         resource=b.origin,
                         event='HeartbeatOK',
+                        environment=b.attributes.get('environment', 'Production'),
+                        severity=b.attributes.get('severity', default_normal_severity),
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
-                        group=group,
-                        environment=environment,
-                        service=['Alerta'],
-                        severity=default_normal_severity,
+                        service=b.attributes.get('service', ['Alerta']),
+                        group=b.attributes.get('group', 'System'),
                         value='',
                         text='Heartbeat OK',
-                        tags=tags,
+                        tags=b.tags,
+                        attributes=b.attributes,
+                        origin=origin,
                         type='heartbeatAlert',
+                        timeout=timeout,
                         customer=b.customer
                     )
