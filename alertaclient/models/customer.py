@@ -1,4 +1,3 @@
-
 class Customer:
 
     def __init__(self, match, customer, **kwargs):

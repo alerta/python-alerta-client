@@ -1,4 +1,3 @@
-
 import click
 
 from alertaclient.auth.utils import get_token

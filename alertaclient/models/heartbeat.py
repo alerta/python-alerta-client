@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 
 from alertaclient.utils import DateTime

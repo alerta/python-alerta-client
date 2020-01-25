@@ -1,11 +1,12 @@
 import unittest
+from uuid import UUID
 
 import requests_mock
 from click.testing import CliRunner
 
 from alertaclient.api import Client
-from alertaclient.commands.cmd_send import cli as send
-from alertaclient.commands.cmd_whoami import cli as whoami
+from alertaclient.commands.cmd_heartbeat import cli as heartbeat_cmd
+from alertaclient.commands.cmd_whoami import cli as whoami_cmd
 from alertaclient.config import Config
 
 
@@ -18,104 +19,48 @@ class CommandsTestCase(unittest.TestCase):
         self.obj = config.options
         self.obj['client'] = self.client
 
-        self.runner = CliRunner()
+        self.runner = CliRunner(echo_stdin=True)
 
     @requests_mock.mock()
     def test_send_cmd(self, m):
 
+        config_response = """
+        {}
+        """
+        m.get('/config', text=config_response)
+
         send_response = """
         {
-          "alert": {
-            "attributes": {},
-            "correlate": [],
-            "createTime": "2020-01-17T23:23:31.441Z",
+          "heartbeat": {
+            "attributes": {
+              "environment": "Production",
+              "service": [
+                "Web"
+              ],
+              "severity": "major"
+            },
+            "createTime": "2020-01-25T12:32:50.223Z",
             "customer": null,
-            "duplicateCount": 10,
-            "environment": "Development",
-            "event": "node_down",
-            "group": "Misc",
-            "history": [
-              {
-                "event": "node_down",
-                "href": "https://alerta-api.herokuapp.com/alert/cca2053f-806d-478c-abb3-bbec6fddbb49",
-                "id": "cca2053f-806d-478c-abb3-bbec6fddbb49",
-                "severity": "major",
-                "status": "open",
-                "text": "new alert",
-                "type": "new",
-                "updateTime": "2020-01-17T23:23:31.441Z",
-                "user": "admin@alerta.io",
-                "value": null
-              },
-              {
-                "event": "node_down",
-                "href": "https://alerta-api.herokuapp.com/alert/cca2053f-806d-478c-abb3-bbec6fddbb49",
-                "id": "cca2053f-806d-478c-abb3-bbec6fddbb49",
-                "severity": "major",
-                "status": "shelved",
-                "text": "",
-                "type": "shelve",
-                "updateTime": "2020-01-18T02:31:56.863Z",
-                "user": null,
-                "value": null
-              },
-              {
-                "event": "node_down",
-                "href": "https://alerta-api.herokuapp.com/alert/cca2053f-806d-478c-abb3-bbec6fddbb49",
-                "id": "cca2053f-806d-478c-abb3-bbec6fddbb49",
-                "severity": "major",
-                "status": "open",
-                "text": "",
-                "type": "unshelve",
-                "updateTime": "2020-01-18T02:33:41.863Z",
-                "user": null,
-                "value": null
-              },
-              {
-                "event": "node_down",
-                "href": "https://alerta-api.herokuapp.com/alert/cca2053f-806d-478c-abb3-bbec6fddbb49",
-                "id": "cca2053f-806d-478c-abb3-bbec6fddbb49",
-                "severity": "major",
-                "status": "ack",
-                "text": "",
-                "type": "ack",
-                "updateTime": "2020-01-18T02:33:49.536Z",
-                "user": null,
-                "value": null
-              }
-            ],
-            "href": "https://alerta-api.herokuapp.com/alert/cca2053f-806d-478c-abb3-bbec6fddbb49",
-            "id": "cca2053f-806d-478c-abb3-bbec6fddbb49",
-            "lastReceiveId": "c3d6a74a-e346-4293-a44c-f6b3465e8732",
-            "lastReceiveTime": "2020-01-18T12:58:24.100Z",
-            "origin": "gunicorn/47e463df-f3db-4786-93e6-1d4f029666b3",
-            "previousSeverity": "indeterminate",
-            "rawData": null,
-            "receiveTime": "2020-01-17T23:23:31.684Z",
-            "repeat": true,
-            "resource": "web01",
-            "service": [
-              "Web"
-            ],
-            "severity": "major",
-            "status": "ack",
+            "href": "http://api.local.alerta.io:8080/heartbeat/e07d7c02-0b41-418a-b0e6-cd172e06c872",
+            "id": "e07d7c02-0b41-418a-b0e6-cd172e06c872",
+            "latency": 14,
+            "maxLatency": 2000,
+            "origin": "alerta/macbook.lan",
+            "receiveTime": "2020-01-25T12:32:50.237Z",
+            "since": 0,
+            "status": "ok",
             "tags": [],
-            "text": "Web server web01 is down",
             "timeout": 86400,
-            "trendIndication": "moreSevere",
-            "type": "exceptionAlert",
-            "updateTime": "2020-01-18T02:33:49.536Z",
-            "value": null
+            "type": "Heartbeat"
           },
-          "id": "cca2053f-806d-478c-abb3-bbec6fddbb49",
+          "id": "e07d7c02-0b41-418a-b0e6-cd172e06c872",
           "status": "ok"
         }
         """
 
-        m.post('/alert', text=send_response)
-        result = self.runner.invoke(send, ['-r', 'web01', '-e', 'node_down', '-E', 'Development', '-S', 'Web', '-s', 'major'], obj=self.obj)
-        print(result.runner.__dict__)
-        self.assertIn('foo', result.output)
+        m.post('/heartbeat', text=send_response)
+        result = self.runner.invoke(heartbeat_cmd, ['-E', 'Production', '-S', 'Web', '-s', 'major'], obj=self.obj)
+        UUID(result.output.strip())
         self.assertEqual(result.exit_code, 0)
 
     @requests_mock.mock()
@@ -143,6 +88,6 @@ class CommandsTestCase(unittest.TestCase):
         """
 
         m.get('/userinfo', text=whoami_response)
-        result = self.runner.invoke(whoami, ['-u'], obj=self.obj)
+        result = self.runner.invoke(whoami_cmd, ['-u'], obj=self.obj)
         self.assertIn('preferred_username  : admin@alerta.io', result.output)
         self.assertEqual(result.exit_code, 0)

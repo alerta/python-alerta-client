@@ -1,4 +1,3 @@
-
 import json
 import os
 import sys
@@ -29,6 +28,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
     client = obj['client']
 
     def send_alert(resource, event, **kwargs):
+        click.echo('send')
         try:
             id, alert, message = client.send_alert(
                 resource=resource,

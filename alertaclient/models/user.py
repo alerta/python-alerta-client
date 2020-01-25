@@ -1,4 +1,3 @@
-
 from alertaclient.utils import DateTime
 
 

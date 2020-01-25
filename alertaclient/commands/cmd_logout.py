@@ -1,4 +1,3 @@
-
 import click
 
 from alertaclient.auth.utils import clear_token

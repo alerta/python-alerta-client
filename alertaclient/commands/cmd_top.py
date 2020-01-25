@@ -1,4 +1,3 @@
-
 import click
 
 from alertaclient.top import Screen
