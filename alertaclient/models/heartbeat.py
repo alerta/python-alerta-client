@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 
 from alertaclient.utils import DateTime
@@ -9,10 +8,15 @@ DEFAULT_MAX_LATENCY = 2000  # ms
 class Heartbeat:
 
     def __init__(self, origin=None, tags=None, create_time=None, timeout=None, customer=None, **kwargs):
+        if any(['.' in key for key in kwargs.get('attributes', dict()).keys()])\
+                or any(['$' in key for key in kwargs.get('attributes', dict()).keys()]):
+            raise ValueError('Attribute keys must not contain "." or "$"')
+
         self.id = kwargs.get('id', None)
         self.origin = origin
         self.status = kwargs.get('status', None) or 'unknown'
         self.tags = tags or list()
+        self.attributes = kwargs.get('attributes', None) or dict()
         self.event_type = kwargs.get('event_type', kwargs.get('type', None)) or 'Heartbeat'
         self.create_time = create_time
         self.timeout = timeout
@@ -37,6 +41,8 @@ class Heartbeat:
     def parse(cls, json):
         if not isinstance(json.get('tags', []), list):
             raise ValueError('tags must be a list')
+        if not isinstance(json.get('attributes', {}), dict):
+            raise ValueError('attributes must be a JSON object')
         if not isinstance(json.get('timeout', 0), int):
             raise ValueError('timeout must be an integer')
 
@@ -45,6 +51,7 @@ class Heartbeat:
             origin=json.get('origin', None),
             status=json.get('status', None),
             tags=json.get('tags', list()),
+            attributes=json.get('attributes', dict()),
             event_type=json.get('type', None),
             create_time=DateTime.parse(json.get('createTime')),
             timeout=json.get('timeout', None),
@@ -59,6 +66,7 @@ class Heartbeat:
             'origin': self.origin,
             'customer': self.customer,
             'tags': ','.join(self.tags),
+            'attributes': self.attributes,
             'createTime': DateTime.localtime(self.create_time, timezone),
             'receiveTime': DateTime.localtime(self.receive_time, timezone),
             'since': self.since,

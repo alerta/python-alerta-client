@@ -1,4 +1,3 @@
-
 import unittest
 
 import requests_mock

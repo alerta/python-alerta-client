@@ -1,4 +1,3 @@
-
 try:
     from click import ClickException as ClientException  # type: ignore
 except Exception:

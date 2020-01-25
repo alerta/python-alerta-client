@@ -1,4 +1,3 @@
-
 import json
 import logging
 import os
@@ -200,10 +199,11 @@ class Client:
         return self.http.delete('/customer/%s' % id)
 
     # Heartbeats
-    def heartbeat(self, origin, tags=None, timeout=None, customer=None):
+    def heartbeat(self, origin, tags=None, attributes=None, timeout=None, customer=None):
         data = {
             'origin': origin,
             'tags': tags or list(),
+            'attributes': attributes or dict(),
             'timeout': timeout,
             'createTime': datetime.utcnow(),
             'customer': customer

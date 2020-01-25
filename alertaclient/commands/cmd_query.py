@@ -1,4 +1,3 @@
-
 import json
 
 import click
@@ -97,7 +96,7 @@ def cli(obj, ids, query, filters, display, from_date=None):
                         DateTime.localtime(alert.receive_time, timezone)), fg=color['fg'])
                     click.secho('        last received | {}'.format(
                         DateTime.localtime(alert.last_receive_time, timezone)), fg=color['fg'])
-                    click.secho('        latency       | {}ms'.format((latency.microseconds / 1000)), fg=color['fg'])
+                    click.secho('        latency       | {}ms'.format(latency.microseconds / 1000), fg=color['fg'])
                     click.secho('        timeout       | {}s'.format(alert.timeout), fg=color['fg'])
 
                     click.secho('            alert id     | {}'.format(alert.id), fg=color['fg'])

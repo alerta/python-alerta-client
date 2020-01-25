@@ -1,5 +1,3 @@
-
-
 class Permission:
 
     def __init__(self, match, scopes, **kwargs):

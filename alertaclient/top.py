@@ -1,4 +1,3 @@
-
 import curses
 import sys
 import time

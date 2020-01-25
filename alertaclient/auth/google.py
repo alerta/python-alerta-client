@@ -1,4 +1,3 @@
-
 import webbrowser
 from uuid import uuid4
 

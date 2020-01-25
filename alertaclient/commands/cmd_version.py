@@ -1,4 +1,3 @@
-
 import click
 from requests import __version__ as requests_version
 
