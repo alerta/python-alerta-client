@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import uuid
 
 import click
 
@@ -8,6 +9,7 @@ import click
 @click.command('send', short_help='Send an alert')
 @click.option('--resource', '-r', metavar='RESOURCE', required=False, help='Resource under alarm')
 @click.option('--event', '-e', metavar='EVENT', required=False, help='Event name')
+@click.option('--id', '-i', metavar='ID', help='ID eg. unique random UUID')
 @click.option('--environment', '-E', metavar='ENVIRONMENT', help='Environment eg. Production, Development')
 @click.option('--severity', '-s', metavar='SEVERITY', help='Severity eg. critical, major, minor, warning')
 @click.option('--correlate', '-C', metavar='EVENT', multiple=True, help='List of related events eg. node_up, node_down')
@@ -23,7 +25,7 @@ import click
 @click.option('--raw-data', metavar='STRING', help='Raw data of orignal alert eg. SNMP trap PDU. \'@\' to read from file, \'-\' to read from stdin')
 @click.option('--customer', metavar='STRING', help='Customer')
 @click.pass_obj
-def cli(obj, resource, event, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data, customer):
+def cli(obj, resource, event, id, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data, customer):
     """Send an alert."""
     client = obj['client']
 
@@ -33,6 +35,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
             id, alert, message = client.send_alert(
                 resource=resource,
                 event=event,
+                id=kwargs.get('id', None) or str(uuid.uuid4()),
                 environment=kwargs.get('environment'),
                 severity=kwargs.get('severity'),
                 correlate=kwargs.get('correlate', None) or list(),
@@ -81,6 +84,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
     send_alert(
         resource=resource,
         event=event,
+        id=id,
         environment=environment,
         severity=severity,
         correlate=correlate,

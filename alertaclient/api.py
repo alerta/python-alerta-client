@@ -43,6 +43,7 @@ class Client:
         data = {
             'resource': resource,
             'event': event,
+            'id': kwargs.get('id', None) or str(uuid.uuid4()),
             'environment': kwargs.get('environment'),
             'severity': kwargs.get('severity'),
             'correlate': kwargs.get('correlate', None) or list(),
