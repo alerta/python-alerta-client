@@ -1,4 +1,5 @@
 click
 pytz
 requests
+requests_hawk==1.0.1
 tabulate

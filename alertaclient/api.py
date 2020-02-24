@@ -8,7 +8,9 @@ from urllib.parse import urlencode
 
 import requests
 from requests.auth import AuthBase, HTTPBasicAuth
+from requests_hawk import HawkAuth
 
+from alertaclient.auth.utils import merge
 from alertaclient.exceptions import UnknownError
 from alertaclient.models.alert import Alert
 from alertaclient.models.blackout import Blackout
@@ -29,18 +31,19 @@ class Client:
 
     DEFAULT_ENDPOINT = 'http://localhost:8080'
 
-    def __init__(self, endpoint=None, key=None, token=None, username=None, password=None, timeout=5.0, ssl_verify=True, debug=False):
+    def __init__(self, endpoint=None, key=None, secret=None, token=None, username=None, password=None, timeout=5.0, ssl_verify=True, headers=None, debug=False):
         self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', self.DEFAULT_ENDPOINT)
 
         if debug:
             HTTPConnection.debuglevel = 1
 
         key = key or os.environ.get('ALERTA_API_KEY', '')
-        self.http = HTTPClient(self.endpoint, key, token, username, password, timeout, ssl_verify, debug)
+        self.http = HTTPClient(self.endpoint, key, secret, token, username, password, timeout, ssl_verify, headers, debug)
 
     # Alerts
     def send_alert(self, resource, event, **kwargs):
         data = {
+            'id': kwargs.get('id'),
             'resource': resource,
             'event': event,
             'environment': kwargs.get('environment'),
@@ -467,14 +470,16 @@ class TokenAuth(AuthBase):
 
 class HTTPClient:
 
-    def __init__(self, endpoint, key=None, token=None, username=None, password=None, timeout=30.0, ssl_verify=True, debug=False):
+    def __init__(self, endpoint, key=None, secret=None, token=None, username=None, password=None, timeout=30.0, ssl_verify=True, headers=None, debug=False):
         self.endpoint = endpoint
         self.auth = None
 
         if username:
             self.auth = HTTPBasicAuth(username, password)
+        elif secret:
+            self.auth = HawkAuth(id=key, key=secret)  # HMAC
         elif key:
-            self.auth = ApiKeyAuth(key)
+            self.auth = ApiKeyAuth(api_key=key)
         elif token:
             self.auth = TokenAuth(token)
 
@@ -482,10 +487,13 @@ class HTTPClient:
         self.session = requests.Session()
         self.session.verify = ssl_verify  # or use REQUESTS_CA_BUNDLE env var
 
+        self.headers = headers or dict()
+        merge(self.headers, self.default_headers())
+
         self.debug = debug
 
     @staticmethod
-    def headers():
+    def default_headers():
         return {
             'X-Request-ID': str(uuid.uuid4()),
             'Content-Type': 'application/json'
@@ -500,7 +508,7 @@ class HTTPClient:
 
         url = self.endpoint + path + '?' + urlencode(query, doseq=True)
         try:
-            response = self.session.get(url, headers=self.headers(), auth=self.auth, timeout=self.timeout)
+            response = self.session.get(url, headers=self.headers, auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
@@ -509,7 +517,7 @@ class HTTPClient:
         url = self.endpoint + path
         try:
             response = self.session.post(url, data=json.dumps(data, cls=CustomJsonEncoder),
-                                         headers=self.headers(), auth=self.auth, timeout=self.timeout)
+                                         headers=self.headers, auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
@@ -518,7 +526,7 @@ class HTTPClient:
         url = self.endpoint + path
         try:
             response = self.session.put(url, data=json.dumps(data, cls=CustomJsonEncoder),
-                                        headers=self.headers(), auth=self.auth, timeout=self.timeout)
+                                        headers=self.headers, auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
@@ -527,7 +535,7 @@ class HTTPClient:
         url = self.endpoint + path
 
         try:
-            response = self.session.delete(url, headers=self.headers(), auth=self.auth, timeout=self.timeout)
+            response = self.session.delete(url, headers=self.headers, auth=self.auth, timeout=self.timeout)
         except requests.exceptions.RequestException:
             raise
         return self._handle_error(response)
