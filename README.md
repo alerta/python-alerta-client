@@ -153,7 +153,7 @@ License
 -------
 
     Alerta monitoring system and console
-    Copyright 2012-2019 Nick Satterly
+    Copyright 2012-2020 Nick Satterly
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
