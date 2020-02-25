@@ -23,6 +23,7 @@ setuptools.setup(
     install_requires=[
         'Click',
         'requests',
+        'requests_hawk',
         'tabulate',
         'pytz'
     ],
