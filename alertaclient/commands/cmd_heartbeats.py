@@ -58,7 +58,7 @@ def cli(obj, alert, severity, timeout, purge):
                         text='Heartbeat not received in {} seconds'.format(b.timeout),
                         tags=b.tags,
                         attributes=b.attributes,
-                        origin=origin,
+                        origin=origin(),
                         type='heartbeatAlert',
                         timeout=timeout,
                         customer=b.customer
@@ -76,7 +76,7 @@ def cli(obj, alert, severity, timeout, purge):
                         text='Heartbeat took more than {}ms to be processed'.format(b.max_latency),
                         tags=b.tags,
                         attributes=b.attributes,
-                        origin=origin,
+                        origin=origin(),
                         type='heartbeatAlert',
                         timeout=timeout,
                         customer=b.customer
@@ -94,7 +94,7 @@ def cli(obj, alert, severity, timeout, purge):
                         text='Heartbeat OK',
                         tags=b.tags,
                         attributes=b.attributes,
-                        origin=origin,
+                        origin=origin(),
                         type='heartbeatAlert',
                         timeout=timeout,
                         customer=b.customer
