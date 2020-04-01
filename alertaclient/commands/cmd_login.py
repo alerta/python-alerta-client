@@ -31,7 +31,7 @@ def cli(obj, username):
             token = google.login(client, username, client_id)['token']
         elif provider == 'openid':
             token = oidc.login(client, obj['oidc_auth_url'], client_id)['token']
-        elif provider == 'basic':
+        elif provider == 'basic' or provider == 'ldap':
             if not username:
                 username = click.prompt('Email')
             password = click.prompt('Password', hide_input=True)
