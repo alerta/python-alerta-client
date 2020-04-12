@@ -21,6 +21,6 @@ def cli(obj, role, scopes, delete):
         try:
             perm = client.create_perm(role, scopes)
         except Exception as e:
-            click.echo('ERROR: {}'.format(e))
+            click.echo('ERROR: {}'.format(e), err=True)
             sys.exit(1)
         click.echo(perm.id)

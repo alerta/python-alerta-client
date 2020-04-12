@@ -37,7 +37,7 @@ def cli(obj, username):
             password = click.prompt('Password', hide_input=True)
             token = client.login(username, password)['token']
         else:
-            click.echo('ERROR: unknown provider {provider}'.format(provider=provider))
+            click.echo('ERROR: unknown provider {provider}'.format(provider=provider), err=True)
             sys.exit(1)
     except Exception as e:
         raise AuthError(e)

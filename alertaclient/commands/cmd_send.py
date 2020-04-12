@@ -28,7 +28,6 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
     client = obj['client']
 
     def send_alert(resource, event, **kwargs):
-        click.echo('send')
         try:
             id, alert, message = client.send_alert(
                 resource=resource,
@@ -49,7 +48,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
                 customer=kwargs.get('customer')
             )
         except Exception as e:
-            click.echo('ERROR: {}'.format(e))
+            click.echo('ERROR: {}'.format(e), err=True)
             sys.exit(1)
 
         if alert:
@@ -61,7 +60,6 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
 
     # read raw data from file or stdin
     if raw_data and raw_data.startswith('@') or raw_data == '-':
-        print('read raw data from stdin')
         raw_data_file = raw_data.lstrip('@')
         with click.open_file(raw_data_file, 'r') as f:
             raw_data = f.read()
@@ -73,7 +71,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
                 try:
                     payload = json.loads(line)
                 except Exception as e:
-                    click.echo("ERROR: JSON parse failure - input must be in 'json_lines' format: {}".format(e))
+                    click.echo("ERROR: JSON parse failure - input must be in 'json_lines' format: {}".format(e), err=True)
                     sys.exit(1)
                 send_alert(**payload)
             sys.exit(0)
