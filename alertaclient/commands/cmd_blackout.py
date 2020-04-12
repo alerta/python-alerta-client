@@ -38,6 +38,6 @@ def cli(obj, environment, service, resource, event, group, tags, customer, start
                 text=text
             )
         except Exception as e:
-            click.echo('ERROR: {}'.format(e))
+            click.echo('ERROR: {}'.format(e), err=True)
             sys.exit(1)
         click.echo(blackout.id)

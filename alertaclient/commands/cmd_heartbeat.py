@@ -28,7 +28,7 @@ def cli(obj, origin, environment, severity, service, group, tags, timeout, custo
         client.delete_heartbeat(delete)
     else:
         if any(t.startswith('environment') or t.startswith('group') for t in tags):
-            click.secho('ERROR: Do not use tags for "environment" or "group". See help.', bold=True)
+            click.secho('WARNING: Do not use tags for "environment" or "group". See help.', err=True)
 
         attributes = dict()
         if environment:
@@ -43,6 +43,6 @@ def cli(obj, origin, environment, severity, service, group, tags, timeout, custo
         try:
             heartbeat = client.heartbeat(origin=origin, tags=tags, attributes=attributes, timeout=timeout, customer=customer)
         except Exception as e:
-            click.echo('ERROR: {}'.format(e))
+            click.echo('ERROR: {}'.format(e), err=True)
             sys.exit(1)
         click.echo(heartbeat.id)

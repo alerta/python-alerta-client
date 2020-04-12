@@ -22,6 +22,6 @@ def cli(obj, username, scopes, duration, text, customer, delete):
             expires = datetime.utcnow() + timedelta(seconds=duration) if duration else None
             key = client.create_key(username, scopes, expires, text, customer)
         except Exception as e:
-            click.echo('ERROR: {}'.format(e))
+            click.echo('ERROR: {}'.format(e), err=True)
             sys.exit(1)
         click.echo(key.key)

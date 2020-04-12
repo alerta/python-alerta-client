@@ -44,7 +44,7 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, del
                 roles=roles, attributes=None, text=text, email_verified=email_verified
             )
         except Exception as e:
-            click.echo('ERROR: {}'.format(e))
+            click.echo('ERROR: {}'.format(e), err=True)
             sys.exit(1)
         if r['status'] == 'ok':
             click.echo('Updated.')
@@ -61,6 +61,6 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, del
                 roles=roles, attributes=None, text=text, email_verified=email_verified
             )
         except Exception as e:
-            click.echo('ERROR: {}'.format(e))
+            click.echo('ERROR: {}'.format(e), err=True)
             sys.exit(1)
         click.echo(user.id)
