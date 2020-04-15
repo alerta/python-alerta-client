@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks.git
-    rev: v1.4.0
+    rev: v2.5.0
     hooks:
     -   id: check-added-large-files
     -   id: check-ast
@@ -23,16 +23,16 @@ repos:
     -   id: requirements-txt-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.5
+    rev: v1.5.1
     hooks:
     -   id: autopep8
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v1.26.2
+    rev: v2.1.1
     hooks:
     -   id: pyupgrade
         args: ['--py3-plus']
 -   repo: https://github.com/asottile/seed-isort-config
-    rev: v1.9.4
+    rev: v2.1.1
     hooks:
     -   id: seed-isort-config
 -   repo: https://github.com/pre-commit/mirrors-isort
