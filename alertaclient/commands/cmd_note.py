@@ -3,25 +3,30 @@ import click
 from alertaclient.utils import build_query
 
 
-@click.command('note', short_help='Add note to alerts')
-@click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.command('note', short_help='Add note')
+@click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of note IDs')
+@click.option('--alert-ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--query', '-q', 'query', metavar='QUERY', help='severity:"warning" AND resource:web')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
-@click.option('--text', required=True, help='Note or message')
+@click.option('--text', help='Note or message')
+@click.option('--delete', '-D', metavar='ID', nargs=2, help='Delete note parent ID and note ID')
 @click.pass_obj
-def cli(obj, ids, query, filters, text):
-    """Add note to alerts."""
+def cli(obj, ids, alert_ids, query, filters, text, delete):
+    """Add or delete note to alerts."""
     client = obj['client']
-    if ids:
-        total = len(ids)
+    if delete:
+        client.delete_alert_note(*delete)
     else:
-        if query:
-            query = [('q', query)]
+        if alert_ids:
+            total = len(alert_ids)
         else:
-            query = build_query(filters)
-        total, _, _ = client.get_count(query)
-        ids = [a.id for a in client.get_alerts(query)]
+            if query:
+                query = [('q', query)]
+            else:
+                query = build_query(filters)
+            total, _, _ = client.get_count(query)
+            alert_ids = [a.id for a in client.get_alerts(query)]
 
-    with click.progressbar(ids, label='Add note to {} alerts'.format(total)) as bar:
-        for id in bar:
-            client.add_note(id, note=text)
+        with click.progressbar(alert_ids, label='Add note to {} alerts'.format(total)) as bar:
+            for id in bar:
+                client.alert_note(id, note=text)

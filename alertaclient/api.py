@@ -20,6 +20,7 @@ from alertaclient.models.group import Group
 from alertaclient.models.heartbeat import Heartbeat
 from alertaclient.models.history import RichHistory
 from alertaclient.models.key import ApiKey
+from alertaclient.models.note import Note
 from alertaclient.models.permission import Permission
 from alertaclient.models.user import User
 from alertaclient.utils import CustomJsonEncoder, DateTime
@@ -97,12 +98,6 @@ class Client:
         }
         return self.http.put('/alert/%s/attributes' % id, data)
 
-    def add_note(self, id, note):
-        data = {
-            'note': note
-        }
-        return self.http.put('/alert/%s/note' % id, data)
-
     def delete_alert(self, id):
         return self.http.delete('/alert/%s' % id)
 
@@ -148,6 +143,25 @@ class Client:
     def get_tags(self, query=None):
         r = self.http.get('/alerts/tags', query)
         return r['tags']
+
+    def alert_note(self, id, note):
+        data = {
+            'note': note
+        }
+        return self.http.put('/alert/%s/note' % id, data)
+
+    def get_alert_notes(self, id, page=1, page_size=None):
+        r = self.http.get('/alert/{}/notes'.format(id), page=page, page_size=page_size)
+        return [Note.parse(b) for b in r['notes']]
+
+    def update_alert_note(self, id, note_id, text):
+        data = {
+            'text': text,
+        }
+        self.http.put('/alert/{}/note/{}'.format(id, note_id), data)
+
+    def delete_alert_note(self, id, note_id):
+        return self.http.delete('/alert/{}/note/{}'.format(id, note_id))
 
     # Blackouts
     def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, customer=None, start=None, duration=None, text=None):
@@ -313,7 +327,7 @@ class Client:
         return User.parse(r['user'])
 
     def get_user(self):
-        return Permission.parse(self.http.get('/user/%s' % id)['user'])
+        return User.parse(self.http.get('/user/%s' % id)['user'])
 
     def get_user_groups(self, id):
         r = self.http.get('/user/{}/groups'.format(id))
@@ -414,7 +428,7 @@ class Client:
         r = self.http.get('/groups', query)
         return [Group.parse(g) for g in r['groups']]
 
-    def update_group(self, id, kwargs):
+    def update_group(self, id, **kwargs):
         data = {
             'name': kwargs.get('name'),
             'text': kwargs.get('text')
