@@ -1,3 +1,3 @@
 from alertaclient.cli import cli
 
-cli()
+cli()  # pylint: disable=no-value-for-parameter

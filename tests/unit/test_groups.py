@@ -25,7 +25,7 @@ class GroupTestCase(unittest.TestCase):
         """
 
     @requests_mock.mock()
-    def test_key(self, m):
+    def test_group(self, m):
         m.post('http://localhost:8080/group', text=self.key)
         group = self.client.create_group(name='myGroup', text='test group')
         self.assertEqual(group.name, 'myGroup')

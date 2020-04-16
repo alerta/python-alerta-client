@@ -9,7 +9,7 @@ import pytz
 
 
 class CustomJsonEncoder(json.JSONEncoder):
-    def default(self, o):
+    def default(self, o):  # pylint: disable=method-hidden
         if isinstance(o, (datetime.date, datetime.datetime)):
             return o.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + '.%03dZ' % (o.microsecond // 1000)
         elif isinstance(o, datetime.timedelta):

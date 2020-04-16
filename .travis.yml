@@ -13,8 +13,15 @@ install:
   - pip install -r requirements-dev.txt
   - pip install .
 
+
 script:
-  - pip install coveralls
-  - python -m mypy alertaclient/
-  - pytest --cov=alertaclient
-  - coveralls
+  - make test.unit
+  - make test.integration
+
+stages:
+  - lint
+
+jobs:
+  include:
+    - stage: lint
+      script: make lint
