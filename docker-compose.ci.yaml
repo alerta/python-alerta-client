@@ -1,0 +1,45 @@
+version: '3.7'
+
+services:
+  api:
+    image: alerta/alerta-web  # use API in "alerta-web" image
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=1  # remove this line to turn DEBUG off
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/monitoring
+      - AUTH_REQUIRED=True
+      - ADMIN_USERS=admin@alerta.io,devops@alerta.io #default password: alerta
+      - ADMIN_KEY=demo-key  # assigned to first user in ADMIN_USERS list
+      # - PLUGINS=reject,blackout,normalise,enhance
+    networks:
+      net:
+        aliases:
+          - api
+
+  db:
+    image: postgres:9.6
+    environment:
+      - POSTGRES_DB=monitoring
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    restart: always
+    networks:
+      net:
+        aliases:
+          - db
+
+  sut:
+    build: .
+    depends_on:
+      - api
+    command: ["./wait-for-it.sh", "api:8080", "-t", "60", "--", "pytest", "tests/integration/test_sdk.py"]
+    networks:
+      net:
+        aliases:
+          - sut
+
+networks:
+  net: {}

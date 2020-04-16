@@ -48,6 +48,11 @@ clean:
 test:
 	pytest
 
+test.integration:
+	docker-compose -f docker-compose.ci.yaml build sut
+	docker-compose -f docker-compose.ci.yaml up --exit-code-from sut
+	docker-compose -f docker-compose.ci.yaml rm --stop --force
+
 run:
 	alerta top
 
