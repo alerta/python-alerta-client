@@ -57,7 +57,7 @@ class TokenHandler:
         httpd = HTTPServer(server_address, lambda request, address,
                            server: HTTPServerHandler(request, address, server, xsrf_token))
         httpd.handle_request()
-        return httpd.access_token
+        return httpd.access_token  # pylint: disable=no-member
 
 
 class Jwt:
