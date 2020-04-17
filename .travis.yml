@@ -7,21 +7,42 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
+
+services:
+  - docker
 
 install:
   - pip install -r requirements.txt
   - pip install -r requirements-dev.txt
   - pip install .
 
-
 script:
-  - make test.unit
-  - make test.integration
+  - pytest --cov=alertaclient tests/unit
 
 stages:
-  - lint
+  - Hooks
+  - Checks
+  - Test
+  - Integration
 
 jobs:
   include:
-    - stage: lint
-      script: make lint
+    - stage: Hooks
+      name: Pre-commit
+      script: pre-commit run -a
+    - stage: Checks
+      name: Lint
+      script: pylint --rcfile pylintrc alertaclient
+    - name: Type Check
+      script: python -m mypy alertaclient/
+    - stage: Integration
+      name: Integration Test
+      script:
+      - docker-compose -f docker-compose.ci.yaml build sut
+      - docker-compose -f docker-compose.ci.yaml up --exit-code-from sut
+      - docker-compose -f docker-compose.ci.yaml rm --stop --force
+
+
+after_success:
+  - coveralls
