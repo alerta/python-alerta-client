@@ -8,7 +8,7 @@ services:
     depends_on:
       - db
     environment:
-      - DEBUG=1  # remove this line to turn DEBUG off
+#      - DEBUG=1  # remove this line to turn DEBUG off
       - DATABASE_URL=postgres://postgres:postgres@db:5432/monitoring
       - AUTH_REQUIRED=True
       - ADMIN_USERS=admin@alerta.io,devops@alerta.io #default password: alerta
@@ -21,6 +21,8 @@ services:
 
   db:
     image: postgres:9.6
+    volumes:
+      - /var/lib/postgresql/data
     environment:
       - POSTGRES_DB=monitoring
       - POSTGRES_USER=postgres
