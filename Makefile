@@ -74,6 +74,7 @@ test.unit: $(TOX) $(PYTEST)
 
 ## test.integration	- Run integration tests.
 test.integration: $(TOX) $(PYTEST)
+	docker-compose -f docker-compose.ci.yaml rm --stop --force
 	docker-compose -f docker-compose.ci.yaml build sut
 	docker-compose -f docker-compose.ci.yaml up --exit-code-from sut
 	docker-compose -f docker-compose.ci.yaml rm --stop --force
