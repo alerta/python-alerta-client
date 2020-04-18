@@ -55,7 +55,7 @@ def action_progressbar(client, action, ids, label, text=None, timeout=None):
     with click.progressbar(ids, label=label, show_eta=True, item_show_func=show_skipped) as bar:
         for id in bar:
             try:
-                client.action(id, action=action, text=text or 'status changed using CLI', timeout=timeout)
+                client.action(id, action=action, text=text, timeout=timeout)
             except Exception:
                 skipped += 1
 

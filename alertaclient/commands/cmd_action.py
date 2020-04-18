@@ -1,5 +1,3 @@
-import re
-
 import click
 
 from alertaclient.utils import action_progressbar, build_query
@@ -25,7 +23,5 @@ def cli(obj, action, ids, query, filters, text):
         total, _, _ = client.get_count(query)
         ids = [a.id for a in client.get_alerts(query)]
 
-    action_text = re.sub('([A-Z])', r' \1', action).title()  # 'createIssue' => 'Create Issue'
-    label = 'Action {} {} alerts'.format(action, total)
-    text = text or '{} using CLI'.format(action_text)
+    label = 'Action ({}) {} alerts'.format(action, total)
     action_progressbar(client, action=action, ids=ids, label=label, text=text)
