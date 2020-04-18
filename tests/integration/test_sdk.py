@@ -58,9 +58,13 @@ class AlertTestCase(unittest.TestCase):
         self.assertEqual(api_key.user, 'johndoe@example.com')
         self.assertEqual(sorted(api_key.scopes), sorted(['write:alerts', 'admin:keys']))
 
-    # def test_note(self):
-    #     n = self.client.alert_note(id='e7020428-5dad-4a41-9bfe-78e9d55cda06', note='this is a test note')
-    #     self.assertEqual(n.text, 'this is a test note')
+    def test_note(self):
+        id, alert, message = self.client.send_alert(
+            environment='Production', resource='web02', event='node_down', correlated=['node_up', 'node_down'],
+            service=['Web', 'App'], severity='critical', tags=['london', 'linux'], value=4
+        )
+        n = self.client.alert_note(id, text='this is a test note')
+        self.assertEqual(n.text, 'this is a test note')
 
     def test_permission(self):
         perm = self.client.create_perm(role='websys', scopes=['admin:users', 'admin:keys', 'write'])

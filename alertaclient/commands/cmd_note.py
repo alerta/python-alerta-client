@@ -29,4 +29,4 @@ def cli(obj, ids, alert_ids, query, filters, text, delete):
 
         with click.progressbar(alert_ids, label='Add note to {} alerts'.format(total)) as bar:
             for id in bar:
-                client.alert_note(id, note=text)
+                client.alert_note(id, text=text)

@@ -144,9 +144,9 @@ class Client:
         r = self.http.get('/alerts/tags', query)
         return r['tags']
 
-    def alert_note(self, id, note):
+    def alert_note(self, id, text):
         data = {
-            'note': note
+            'text': text
         }
         return self.http.put('/alert/%s/note' % id, data)
 
