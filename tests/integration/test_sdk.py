@@ -6,7 +6,7 @@ from alertaclient.api import Client
 class AlertTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.client = Client(endpoint='http://api:8080/api', key='demo-key')
+        self.client = Client(endpoint='http://api:8080', key='demo-key')
 
     def test_alert(self):
         id, alert, message = self.client.send_alert(
@@ -63,8 +63,20 @@ class AlertTestCase(unittest.TestCase):
             environment='Production', resource='web02', event='node_down', correlated=['node_up', 'node_down'],
             service=['Web', 'App'], severity='critical', tags=['london', 'linux'], value=4
         )
-        n = self.client.alert_note(id, text='this is a test note')
-        self.assertEqual(n.text, 'this is a test note')
+        note = self.client.alert_note(id, text='this is a test note')
+        self.assertEqual(note.text, 'this is a test note')
+
+        notes = self.client.get_alert_notes(id)
+        self.assertEqual(notes[0].text, 'this is a test note')
+        self.assertEqual(notes[0].user, 'admin@alerta.io')
+
+        note = self.client.update_alert_note(id, notes[0].id, text='updated note text')
+        self.assertEqual(note.text, 'updated note text')
+
+        self.client.delete_alert_note(id, notes[0].id)
+
+        notes = self.client.get_alert_notes(id)
+        self.assertEqual(notes, [])
 
     def test_permission(self):
         perm = self.client.create_perm(role='websys', scopes=['admin:users', 'admin:keys', 'write'])
