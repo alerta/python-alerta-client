@@ -68,12 +68,15 @@ lint: $(PYLINT) $(MYPY) $(BLACK)
 hooks: $(PRE_COMMIT)
 	$(PRE_COMMIT) run -a
 
+## test			- Run all tests.
+test: test.unit test.integration
+
 ## test.unit		- Run unit tests.
 test.unit: $(TOX) $(PYTEST)
 	$(TOX) $(toxparams)
 
 ## test.integration	- Run integration tests.
-test.integration: $(TOX) $(PYTEST)
+test.integration:
 	docker-compose -f docker-compose.ci.yaml rm --stop --force
 	docker-compose -f docker-compose.ci.yaml build sut
 	docker-compose -f docker-compose.ci.yaml up --exit-code-from sut

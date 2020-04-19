@@ -1,17 +1,16 @@
-FROM python:3.7
-RUN apt-get update
+FROM python:3.8-alpine
 
-RUN apt-get install -y \
-    build-essential \
-    python3-dev \
+RUN apk add --no-cache \
+    bash \
+    build-base \
     libffi-dev \
-    libssl-dev
+    openssl-dev \
+    postgresql-dev \
+    python3-dev
 
-WORKDIR /usr/src/app
+COPY . /app
+WORKDIR /app
 
-COPY requirements*.txt ./
-RUN pip install --no-cache-dir \
-    -r requirements.txt \
-    -r requirements-dev.txt
-
-COPY . .
+RUN pip install -r requirements.txt
+RUN pip install -r requirements-dev.txt
+RUN pip install .

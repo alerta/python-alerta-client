@@ -148,17 +148,19 @@ class Client:
         data = {
             'text': text
         }
-        return self.http.put('/alert/%s/note' % id, data)
+        r = self.http.put('/alert/{}/note'.format(id), data)
+        return Note.parse(r['note'])
 
     def get_alert_notes(self, id, page=1, page_size=None):
         r = self.http.get('/alert/{}/notes'.format(id), page=page, page_size=page_size)
-        return [Note.parse(b) for b in r['notes']]
+        return [Note.parse(n) for n in r['notes']]
 
     def update_alert_note(self, id, note_id, text):
         data = {
             'text': text,
         }
-        self.http.put('/alert/{}/note/{}'.format(id, note_id), data)
+        r = self.http.put('/alert/{}/note/{}'.format(id, note_id), data)
+        return Note.parse(r['note'])
 
     def delete_alert_note(self, id, note_id):
         return self.http.delete('/alert/{}/note/{}'.format(id, note_id))
