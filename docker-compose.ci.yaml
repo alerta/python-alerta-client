@@ -37,7 +37,7 @@ services:
     build: .
     depends_on:
       - api
-    command: ["./wait-for-it.sh", "api:8080", "-t", "60", "--", "pytest", "tests/integration/test_sdk.py"]
+    command: ["./wait-for-it.sh", "api:8080", "-t", "60", "--", "pytest", "tests/integration/"]
     networks:
       net:
         aliases:

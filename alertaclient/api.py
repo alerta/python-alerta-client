@@ -189,8 +189,22 @@ class Client:
         r = self.http.get('/blackouts', query)
         return [Blackout.parse(b) for b in r['blackouts']]
 
-    def update_blackout(self, id, blackout):
-        self.http.put('/blackout/%s' % id, blackout)
+    def update_blackout(self, id, **kwargs):
+        data = {
+            'customer': kwargs.get('customer'),
+            'environment': kwargs.get('environment'),
+            'service': kwargs.get('service'),
+            'resource': kwargs.get('resource'),
+            'event': kwargs.get('event'),
+            'group': kwargs.get('group'),
+            'tags': kwargs.get('tags'),
+            'startTime': kwargs.get('startTime'),
+            'endTime': kwargs.get('endTime'),
+            'text': kwargs.get('text'),
+        }
+
+        r = self.http.put('/blackout/{}'.format(id), data)
+        return Blackout.parse(r['blackout'])
 
     def delete_blackout(self, id):
         return self.http.delete('/blackout/%s' % id)
@@ -211,8 +225,13 @@ class Client:
         r = self.http.get('/customers', query)
         return [Customer.parse(c) for c in r['customers']]
 
-    def update_customer(self, id, customer):
-        self.http.put('/customer/%s' % id, customer)
+    def update_customer(self, id, **kwargs):
+        data = {
+            'match': kwargs.get('match'),
+            'customer': kwargs.get('customer')
+        }
+        r = self.http.put('/customer/{}'.format(id), data)
+        return Customer.parse(r['customer'])
 
     def delete_customer(self, id):
         return self.http.delete('/customer/%s' % id)
@@ -267,7 +286,8 @@ class Client:
             'expireTime': kwargs.get('expireTime'),
             'customer': kwargs.get('customer')
         }
-        return self.http.put('/key/{}'.format(id), data)
+        r = self.http.put('/key/{}'.format(id), data)
+        return ApiKey.parse(r['key'])
 
     def delete_key(self, id):
         return self.http.delete('/key/%s' % id)
@@ -293,7 +313,8 @@ class Client:
             'match': kwargs.get('match'),  # role
             'scopes': kwargs.get('scopes')
         }
-        return self.http.put('/perm/{}'.format(id), data)
+        r = self.http.put('/perm/{}'.format(id), data)
+        return Permission.parse(r['permission'])
 
     def delete_perm(self, id):
         return self.http.delete('/perm/%s' % id)
@@ -356,7 +377,8 @@ class Client:
             'text': kwargs.get('text'),
             'email_verified': kwargs.get('email_verified')
         }
-        return self.http.put('/user/{}'.format(id), data)
+        r = self.http.put('/user/{}'.format(id), data)
+        return User.parse(r['user'])
 
     def update_me(self, **kwargs):
         data = {
@@ -367,7 +389,8 @@ class Client:
             'attributes': kwargs.get('attributes', None) or dict(),
             'text': kwargs.get('text')
         }
-        return self.http.put('/user/me', data)
+        r = self.http.put('/user/me', data)
+        return User.parse(r['user'])
 
     def update_user_attributes(self, id, attributes):
         data = {
@@ -435,7 +458,8 @@ class Client:
             'name': kwargs.get('name'),
             'text': kwargs.get('text')
         }
-        return self.http.put('/group/{}'.format(id), data)
+        r = self.http.put('/group/{}'.format(id), data)
+        return Group.parse(r['group'])
 
     def add_user_to_group(self, group_id, user_id):
         return self.http.put('/group/{}/user/{}'.format(group_id, user_id))
