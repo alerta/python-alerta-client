@@ -39,10 +39,10 @@ jobs:
     - stage: Integration
       name: Integration Test
       script:
+      - echo "$GITHUB_TOKEN" | docker login docker.pkg.github.com -u "$DOCKER_USERNAME" --password-stdin
       - docker-compose -f docker-compose.ci.yaml build sut
       - docker-compose -f docker-compose.ci.yaml up --exit-code-from sut
       - docker-compose -f docker-compose.ci.yaml rm --stop --force
-
 
 after_success:
   - coveralls
