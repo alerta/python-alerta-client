@@ -77,7 +77,11 @@ class CommandsTestCase(unittest.TestCase):
           "heartbeats": [
             {
               "attributes": {
-                "environment": "infrastructure"
+                "environment": "Infrastructure",
+                "severity": "Major",
+                "service": ["Internal"],
+                "group": "Heartbeats",
+                "region": "EU"
               },
               "createTime": "2020-03-10T20:25:54.541Z",
               "customer": null,
@@ -102,9 +106,7 @@ class CommandsTestCase(unittest.TestCase):
         heartbeat_alert_response = """
         {
           "alert": {
-            "attributes": {
-              "environment": "infrastructure"
-            },
+            "attributes": {},
             "correlate": [
               "HeartbeatFail",
               "HeartbeatSlow",
@@ -113,9 +115,9 @@ class CommandsTestCase(unittest.TestCase):
             "createTime": "2020-03-10T21:55:07.884Z",
             "customer": null,
             "duplicateCount": 0,
-            "environment": "infrastructure",
+            "environment": "Infrastructure",
             "event": "HeartbeatSlow",
-            "group": "System",
+            "group": "Heartbeat",
             "history": [
               {
                 "event": "HeartbeatSlow",
@@ -141,9 +143,9 @@ class CommandsTestCase(unittest.TestCase):
             "repeat": false,
             "resource": "monitoring-01",
             "service": [
-              "Alerta"
+              "Internal"
             ],
-            "severity": "High",
+            "severity": "Major",
             "status": "open",
             "tags": [],
             "text": "Heartbeat took more than 2ms to be processed",
@@ -163,6 +165,14 @@ class CommandsTestCase(unittest.TestCase):
         result = self.runner.invoke(heartbeats_cmd, ['--alert'], obj=self.obj)
         self.assertEqual(result.exit_code, 0, result.exception)
         self.assertIn('monitoring-01', result.output)
+
+        history = m.request_history
+        data = history[1].json()
+        self.assertEqual(data['environment'], 'Infrastructure')
+        self.assertEqual(data['severity'], 'Major')
+        self.assertEqual(data['service'], ['Internal'])
+        self.assertEqual(data['group'], 'Heartbeats')
+        self.assertEqual(data['attributes'], {'region': 'EU'})
 
     @requests_mock.mock()
     def test_whoami_cmd(self, m):

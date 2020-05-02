@@ -45,15 +45,21 @@ def cli(obj, alert, severity, timeout, purge):
     if alert:
         with click.progressbar(heartbeats, label='Alerting {} heartbeats'.format(len(heartbeats))) as bar:
             for b in bar:
+
+                environment = b.attributes.pop('environment', 'Production')
+                service = b.attributes.pop('service', ['Alerta'])
+                group = b.attributes.pop('group', 'System')
+
                 if b.status == 'expired':  # aka. "stale"
+                    severity = b.attributes.pop('severity', severity)
                     client.send_alert(
                         resource=b.origin,
                         event='HeartbeatFail',
-                        environment=b.attributes.get('environment', 'Production'),
-                        severity=b.attributes.get('severity', severity),
+                        environment=environment,
+                        severity=severity,
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
-                        service=b.attributes.get('service', ['Alerta']),
-                        group=b.attributes.get('group', 'System'),
+                        service=service,
+                        group=group,
                         value='{}'.format(b.since),
                         text='Heartbeat not received in {} seconds'.format(b.timeout),
                         tags=b.tags,
@@ -64,14 +70,15 @@ def cli(obj, alert, severity, timeout, purge):
                         customer=b.customer
                     )
                 elif b.status == 'slow':
+                    severity = b.attributes.pop('severity', severity)
                     client.send_alert(
                         resource=b.origin,
                         event='HeartbeatSlow',
-                        environment=b.attributes.get('environment', 'Production'),
-                        severity=b.attributes.get('severity', severity),
+                        environment=environment,
+                        severity=severity,
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
-                        service=b.attributes.get('service', ['Alerta']),
-                        group=b.attributes.get('group', 'System'),
+                        service=service,
+                        group=group,
                         value='{}ms'.format(b.latency),
                         text='Heartbeat took more than {}ms to be processed'.format(b.max_latency),
                         tags=b.tags,
@@ -82,14 +89,15 @@ def cli(obj, alert, severity, timeout, purge):
                         customer=b.customer
                     )
                 else:
+                    severity = b.attributes.pop('severity', default_normal_severity)
                     client.send_alert(
                         resource=b.origin,
                         event='HeartbeatOK',
-                        environment=b.attributes.get('environment', 'Production'),
-                        severity=b.attributes.get('severity', default_normal_severity),
+                        environment=environment,
+                        severity=severity,
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
-                        service=b.attributes.get('service', ['Alerta']),
-                        group=b.attributes.get('group', 'System'),
+                        service=service,
+                        group=group,
                         value='',
                         text='Heartbeat OK',
                         tags=b.tags,
