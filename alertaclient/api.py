@@ -510,6 +510,9 @@ class TokenAuth(AuthBase):
 
 class HTTPClient:
 
+    DEFAULT_PAGE_NUMBER = 1
+    DEFAULT_PAGE_SIZE = 50
+
     def __init__(self, endpoint, key=None, secret=None, token=None, username=None, password=None, timeout=30.0, ssl_verify=True, headers=None, debug=False):
         self.endpoint = endpoint
         self.auth = None
@@ -542,9 +545,9 @@ class HTTPClient:
     def get(self, path, query=None, **kwargs):
         query = query or []
         if 'page' in kwargs:
-            query.append(('page', kwargs['page']))
+            query.append(('page', kwargs.get('page') or self.DEFAULT_PAGE_NUMBER))
         if 'page_size' in kwargs:
-            query.append(('page-size', kwargs['page_size']))
+            query.append(('page-size', kwargs.get('page_size') or self.DEFAULT_PAGE_SIZE))
 
         url = self.endpoint + path + '?' + urlencode(query, doseq=True)
         try:
