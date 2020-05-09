@@ -1,7 +1,7 @@
 Alerta Command-Line Tool
 ========================
 
-[![Build Status](https://travis-ci.org/alerta/python-alerta-client.svg?branch=master)](https://travis-ci.org/alerta/python-alerta-client) [![Gitter chat](https://badges.gitter.im/alerta/chat.png)](https://gitter.im/alerta/chat) [![Coverage Status](https://coveralls.io/repos/github/alerta/python-alerta-client/badge.svg?branch=master)](https://coveralls.io/github/alerta/python-alerta-client?branch=master)
+[![Build Status](https://travis-ci.org/alerta/python-alerta-client.svg?branch=master)](https://travis-ci.org/alerta/python-alerta-client) [![Gitter chat](https://badges.gitter.im/alerta/chat.png)](https://gitter.im/alerta/chat) [![Coverage Status](https://coveralls.io/repos/github/alerta/python-alerta-client/badge.svg?branch=master)](https://coveralls.io/github/alerta/python-alerta-client?branch=master) ![Docker Build and Push](https://github.com/alerta/python-alerta-client/workflows/Docker%20Build%20and%20Push/badge.svg)
 
 Unified command-line tool, terminal GUI and python SDK for the Alerta monitoring system.
 
