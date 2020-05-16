@@ -1,3 +1,4 @@
+#!make
 
 VENV=venv
 PYTHON=$(VENV)/bin/python
@@ -8,6 +9,7 @@ BLACK=$(VENV)/bin/black
 TOX=$(VENV)/bin/tox
 PYTEST=$(VENV)/bin/pytest
 PRE_COMMIT=$(VENV)/bin/pre-commit
+WHEEL=$(VENV)/bin/wheel
 TWINE=$(VENV)/bin/twine
 GIT=git
 
@@ -47,6 +49,9 @@ $(PYTEST): $(PIP)
 $(PRE_COMMIT): $(PIP)
 	$(PIP) install pre-commit
 
+$(WHEEL): $(PIP)
+	$(PIP) install wheel
+
 $(TWINE): $(PIP)
 	$(PIP) install wheel twine
 
@@ -84,7 +89,7 @@ test.integration:
 
 ## run			- Run application.
 run:
-	alertad
+	alerta
 
 ## tag			- Git tag with current version.
 tag:
@@ -92,7 +97,8 @@ tag:
 	$(GIT) push --tags
 
 ## build			- Build package.
-build: $(PKG_SDIST) $(PKG_WHEEL)
+build: $(PIP) $(WHEEL) $(PKG_SDIST) $(PKG_WHEEL)
+
 $(PKG_SDIST):
 	$(PYTHON) setup.py sdist
 $(PKG_WHEEL):
@@ -104,8 +110,11 @@ upload: $(TWINE)
 
 ## clean			- Clean source.
 clean:
+	rm -rf $(VENV)
+	rm -rf .tox
+	rm -rf dist
+	rm -rf build
 	find . -name "*.pyc" -exec rm {} \;
-	rm -Rf build dist *.egg-info
 
 ## help			- Show this help.
 help: Makefile
