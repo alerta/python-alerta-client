@@ -9,10 +9,11 @@ def login(client, azure_tenant, client_id):
     redirect_uri = 'http://localhost:9004'
 
     url = (
-        'https://login.microsoftonline.com/{azure_tenant}/oauth2/authorize?'
+        'https://login.microsoftonline.com/{azure_tenant}/oauth2/v2.0/authorize?'
         'response_type=code'
         '&client_id={client_id}'
         '&redirect_uri={redirect_uri}'
+        '&scope=openid%20profile%20email'
         '&state={state}'
     ).format(
         azure_tenant=azure_tenant,
