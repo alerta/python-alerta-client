@@ -25,12 +25,14 @@ default_config = {
 
 class Config:
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, config_override=None):
         self.options = default_config
         self.parser = configparser.RawConfigParser(defaults=self.options)
 
         self.options['config_file'] = config_file or os.environ.get('ALERTA_CONF_FILE') or self.options['config_file']
         self.parser.read(os.path.expanduser(self.options['config_file']))
+
+        self.options.update(config_override or {})
 
     def get_config_for_profle(self, profile=None):
         want_profile = profile or os.environ.get('ALERTA_DEFAULT_PROFILE') or self.parser.defaults().get('profile')
@@ -62,8 +64,5 @@ class Config:
             raise ClientException('Failed to get config from {}. Reason: {}'.format(config_url, e))
         except json.decoder.JSONDecodeError:
             raise ClientException('Failed to get config from {}: Reason: not a JSON object'.format(config_url))
-
-        if not self.options['client_id']:
-            del self.options['client_id']
 
         self.options = {**remote_config, **self.options}

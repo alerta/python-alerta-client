@@ -17,7 +17,7 @@ class RemoteConfigTestCase(unittest.TestCase):
           {
             "actions": [],
             "alarm_model": {
-              "name": "Alerta 6.7.5"
+              "name": "Alerta 8.0.1"
             },
             "audio": {
               "new": null
@@ -90,7 +90,7 @@ class RemoteConfigTestCase(unittest.TestCase):
         """Tests successful remote config fetch"""
         m.get('/api/config', text=self.remote_json_config, status_code=200)
         self.config.get_remote_config('http://localhost:8080/api')
-        self.assertEqual(self.config.options['alarm_model']['name'], 'Alerta 6.7.5')
+        self.assertEqual(self.config.options['alarm_model']['name'], 'Alerta 8.0.1')
 
     @requests_mock.mock()
     def test_config_timeout(self, m):

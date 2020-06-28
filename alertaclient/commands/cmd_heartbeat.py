@@ -30,6 +30,12 @@ def cli(obj, origin, environment, severity, service, group, tags, timeout, custo
         if any(t.startswith('environment') or t.startswith('group') for t in tags):
             click.secho('WARNING: Do not use tags for "environment" or "group". See help.', err=True)
 
+        if severity in ['normal', 'ok', 'cleared']:
+            raise click.UsageError('Must be a non-normal severity.')
+
+        if severity not in obj['alarm_model']['severity'].keys():
+            raise click.UsageError('Must be a valid severity.')
+
         attributes = dict()
         if environment:
             attributes['environment'] = environment
