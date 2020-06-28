@@ -16,7 +16,29 @@ class CommandsTestCase(unittest.TestCase):
     def setUp(self):
         self.client = Client()
 
-        config = Config(config_file=None)
+        alarm_model = {
+            'name': 'Alerta 8.0.1',
+            'severity': {
+                'security': 0,
+                'critical': 1,
+                'major': 2,
+                'minor': 3,
+                'warning': 4,
+                'indeterminate': 5,
+                'informational': 6,
+                'normal': 7,
+                'ok': 7,
+                'cleared': 7,
+                'debug': 8,
+                'trace': 9,
+                'unknown': 10
+            },
+            'defaults': {
+                'normal_severity': 'normal'
+            }
+        }
+
+        config = Config(config_file=None, config_override={'alarm_model': alarm_model})
         self.obj = config.options
         self.obj['client'] = self.client
 
@@ -24,11 +46,6 @@ class CommandsTestCase(unittest.TestCase):
 
     @requests_mock.mock()
     def test_heartbeat_cmd(self, m):
-
-        config_response = """
-        {}
-        """
-        m.get('/config', text=config_response)
 
         heartbeat_response = """
         {
@@ -67,18 +84,13 @@ class CommandsTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_heartbeats_cmd(self, m):
 
-        config_response = """
-        {}
-        """
-        m.get('/config', text=config_response)
-
         heartbeats_response = """
         {
           "heartbeats": [
             {
               "attributes": {
                 "environment": "Infrastructure",
-                "severity": "Major",
+                "severity": "major",
                 "service": ["Internal"],
                 "group": "Heartbeats",
                 "region": "EU"
@@ -123,7 +135,7 @@ class CommandsTestCase(unittest.TestCase):
                 "event": "HeartbeatSlow",
                 "href": "http://api.local.alerta.io:8080/alert/6cfbc30f-c2d6-4edf-b672-841070995206",
                 "id": "6cfbc30f-c2d6-4edf-b672-841070995206",
-                "severity": "High",
+                "severity": "warning",
                 "status": "open",
                 "text": "new alert",
                 "type": "new",
@@ -137,7 +149,7 @@ class CommandsTestCase(unittest.TestCase):
             "lastReceiveId": "6cfbc30f-c2d6-4edf-b672-841070995206",
             "lastReceiveTime": "2020-03-10T21:55:07.916Z",
             "origin": "alerta/macbook.lan",
-            "previousSeverity": "Not classified",
+            "previousSeverity": "indeterminate",
             "rawData": null,
             "receiveTime": "2020-03-10T21:55:07.916Z",
             "repeat": false,
@@ -145,7 +157,7 @@ class CommandsTestCase(unittest.TestCase):
             "service": [
               "Internal"
             ],
-            "severity": "Major",
+            "severity": "warning",
             "status": "open",
             "tags": [],
             "text": "Heartbeat took more than 2ms to be processed",
@@ -169,7 +181,7 @@ class CommandsTestCase(unittest.TestCase):
         history = m.request_history
         data = history[1].json()
         self.assertEqual(data['environment'], 'Infrastructure')
-        self.assertEqual(data['severity'], 'Major')
+        self.assertEqual(data['severity'], 'major')
         self.assertEqual(data['service'], ['Internal'])
         self.assertEqual(data['group'], 'Heartbeats')
         self.assertEqual(data['attributes'], {'region': 'EU'})
