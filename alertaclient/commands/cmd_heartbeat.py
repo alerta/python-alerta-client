@@ -8,7 +8,7 @@ from alertaclient.utils import origin
 @click.command('heartbeat', short_help='Send a heartbeat')
 @click.option('--origin', '-O', metavar='ORIGIN', default=origin, help='Origin of heartbeat.')
 @click.option('--environment', '-E', metavar='ENVIRONMENT', help='Environment eg. Production, Development')
-@click.option('--severity', '-s', metavar='SEVERITY', help='Severity eg. critical, major, minor, warning')
+@click.option('--severity', '-s', metavar='SEVERITY', default='major', help='Severity eg. critical, major, minor, warning')
 @click.option('--service', '-S', metavar='SERVICE', multiple=True, help='List of affected services eg. app name, Web, Network, Storage, Database, Security')
 @click.option('--group', '-g', metavar='GROUP', help='Group event by type eg. OS, Performance')
 @click.option('--tag', '-T', 'tags', multiple=True, metavar='TAG', help='List of tags eg. London, os:linux, AWS/EC2')
