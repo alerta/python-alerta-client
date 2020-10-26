@@ -32,14 +32,16 @@ class Client:
 
     DEFAULT_ENDPOINT = 'http://localhost:8080'
 
-    def __init__(self, endpoint=None, key=None, secret=None, token=None, username=None, password=None, timeout=5.0, ssl_verify=True, headers=None, debug=False):
+    def __init__(self, endpoint=None, key=None, secret=None, token=None, username=None, password=None, timeout=5.0, ssl_verify=True,
+                 ssl_cert=None, ssl_key=None, headers=None, debug=False):
         self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', self.DEFAULT_ENDPOINT)
 
         if debug:
             HTTPConnection.debuglevel = 1
 
         key = key or os.environ.get('ALERTA_API_KEY', '')
-        self.http = HTTPClient(self.endpoint, key, secret, token, username, password, timeout, ssl_verify, headers, debug)
+        self.http = HTTPClient(self.endpoint, key, secret, token, username, password,
+                               timeout, ssl_verify, ssl_cert, ssl_key, headers, debug)
 
     # Alerts
     def send_alert(self, resource, event, **kwargs):
@@ -513,7 +515,21 @@ class HTTPClient:
     DEFAULT_PAGE_NUMBER = 1
     DEFAULT_PAGE_SIZE = 50
 
-    def __init__(self, endpoint, key=None, secret=None, token=None, username=None, password=None, timeout=30.0, ssl_verify=True, headers=None, debug=False):
+    def __init__(
+        self,
+        endpoint,
+        key=None,
+        secret=None,
+        token=None,
+        username=None,
+        password=None,
+        timeout=30.0,
+        ssl_verify=True,
+        ssl_cert=None,
+        ssl_key=None,
+        headers=None,
+        debug=False,
+    ):
         self.endpoint = endpoint
         self.auth = None
 
@@ -529,6 +545,9 @@ class HTTPClient:
         self.timeout = timeout
         self.session = requests.Session()
         self.session.verify = ssl_verify  # or use REQUESTS_CA_BUNDLE env var
+
+        if ssl_cert:
+            self.session.cert = (ssl_cert, ssl_key)
 
         self.headers = headers or dict()
         merge(self.headers, self.default_headers())
