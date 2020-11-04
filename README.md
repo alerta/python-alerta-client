@@ -2,22 +2,13 @@ Alerta Command-Line Tool
 ========================
 
 [![Actions Status](https://github.com/alerta/python-alerta-client/workflows/CI%20Tests/badge.svg)](https://github.com/alerta/python-alerta-client/actions)
- [![Gitter chat](https://badges.gitter.im/alerta/chat.png)](https://gitter.im/alerta/chat) [![Coverage Status](https://coveralls.io/repos/github/alerta/python-alerta-client/badge.svg?branch=master)](https://coveralls.io/github/alerta/python-alerta-client?branch=master) ![Docker Build and Push](https://github.com/alerta/python-alerta-client/workflows/Docker%20Build%20and%20Push/badge.svg)
+ [![Gitter chat](https://badges.gitter.im/alerta/chat.png)](https://gitter.im/alerta/chat) [![Coverage Status](https://coveralls.io/repos/github/alerta/python-alerta-client/badge.svg?branch=master)](https://coveralls.io/github/alerta/python-alerta-client?branch=master)
 
 Unified command-line tool, terminal GUI and python SDK for the Alerta monitoring system.
 
 ![screen shot](/docs/images/alerta-top-80x25.png?raw=true&v=1)
 
 Related projects can be found on the Alerta Org Repo at <https://github.com/alerta/>.
-
-----
-
-Python 2.7 support is EOL
--------------------------
-
-Starting with Release 6.0 only Python 3.5+ is supported. Release 5.2 was the
-last to support Python 2.7 and feature enhancements for this release ended on
-August 31, 2018. Only critical bug fixes will be backported to Release 5.2.
 
 Installation
 ------------
