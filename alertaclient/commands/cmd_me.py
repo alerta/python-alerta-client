@@ -18,11 +18,8 @@ def cli(obj, name, email, password, status, text):
 
     client = obj['client']
     try:
-        r = client.update_me(name=name, email=email, password=password, status=status, attributes=None, text=text)
+        user = client.update_me(name=name, email=email, password=password, status=status, attributes=None, text=text)
     except Exception as e:
         click.echo('ERROR: {}'.format(e), err=True)
         sys.exit(1)
-    if r['status'] == 'ok':
-        click.echo('Updated.')
-    else:
-        click.echo(r['message'])
+    click.echo(user.id)
