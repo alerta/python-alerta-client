@@ -18,11 +18,6 @@ jobs:
         python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
-      - uses: act10ns/slack@v1
-        with:
-          status: starting
-          channel: '#github-ci'
-        if: always()
       - name: Checkout
         uses: actions/checkout@v2
       - name: Python ${{ matrix.python-version }}
@@ -73,5 +68,4 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          channel: '#github-ci'
         if: always()

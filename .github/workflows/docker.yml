@@ -12,11 +12,6 @@ jobs:
       IMAGE_NAME: ${{ github.repository }}/alerta-cli
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
-      - uses: act10ns/slack@v1
-        with:
-          status: starting
-          channel: '#actions'
-        if: always()
       - name: Checkout
         uses: actions/checkout@v2
       - name: Variables
@@ -42,5 +37,4 @@ jobs:
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
-          channel: '#actions'
         if: always()
