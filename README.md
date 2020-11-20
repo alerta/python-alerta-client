@@ -2,7 +2,7 @@ Alerta Command-Line Tool
 ========================
 
 [![Actions Status](https://github.com/alerta/python-alerta-client/workflows/CI%20Tests/badge.svg)](https://github.com/alerta/python-alerta-client/actions)
- [![Gitter chat](https://badges.gitter.im/alerta/chat.png)](https://gitter.im/alerta/chat) [![Coverage Status](https://coveralls.io/repos/github/alerta/python-alerta-client/badge.svg?branch=master)](https://coveralls.io/github/alerta/python-alerta-client?branch=master)
+ [![Slack chat](https://img.shields.io/badge/chat-on%20slack-blue?logo=slack)](https://slack.alerta.dev) [![Coverage Status](https://coveralls.io/repos/github/alerta/python-alerta-client/badge.svg?branch=master)](https://coveralls.io/github/alerta/python-alerta-client?branch=master)
 
 Unified command-line tool, terminal GUI and python SDK for the Alerta monitoring system.
 
