@@ -23,10 +23,14 @@ def cli(obj, alert, severity, timeout, purge):
         default_normal_severity = 'normal'
 
     if severity in ['normal', 'ok', 'cleared']:
-        raise click.UsageError('Must be a non-normal severity.')
+        raise click.UsageError('Must be a non-normal severity. "{}" is one of {}'.format(
+            severity, ', '.join(['normal', 'ok', 'cleared']))
+        )
 
     if severity not in obj['alarm_model']['severity'].keys():
-        raise click.UsageError('Must be a valid severity.')
+        raise click.UsageError('Must be a valid severity. "{}" is not one of {}'.format(
+            severity, ', '.join(obj['alarm_model']['severity'].keys()))
+        )
 
     if obj['output'] == 'json':
         r = client.http.get('/heartbeats')
