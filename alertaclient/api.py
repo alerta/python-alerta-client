@@ -32,8 +32,8 @@ class Client:
 
     DEFAULT_ENDPOINT = 'http://localhost:8080'
 
-    def __init__(self, endpoint=None, key=None, secret=None, token=None, username=None, password=None, timeout=5.0, ssl_verify=True,
-                 ssl_cert=None, ssl_key=None, headers=None, debug=False):
+    def __init__(self, endpoint=None, key=None, secret=None, token=None, username=None, password=None, timeout=5.0,
+                 ssl_verify=True, ssl_cert=None, ssl_key=None, headers=None, debug=False):
         self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', self.DEFAULT_ENDPOINT)
 
         if debug:
