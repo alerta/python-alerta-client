@@ -63,6 +63,7 @@ def cli(ctx, config_file, profile, endpoint_url, output, color, debug):
     ctx.obj['client'] = Client(
         endpoint=endpoint,
         key=config.options['key'],
+        secret=config.options['secret'],
         token=get_token(endpoint),
         username=config.options.get('username', None),
         password=config.options.get('password', None),
