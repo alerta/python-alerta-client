@@ -18,9 +18,9 @@ def cli(obj, purge):
         timezone = obj['timezone']
         headers = {
             'id': 'ID', 'priority': 'P', 'environment': 'ENVIRONMENT', 'service': 'SERVICE', 'resource': 'RESOURCE',
-            'event': 'EVENT', 'group': 'GROUP', 'tags': 'TAGS', 'customer': 'CUSTOMER', 'startTime': 'START', 'endTime': 'END',
-            'duration': 'DURATION', 'user': 'USER', 'createTime': 'CREATED', 'text': 'COMMENT',
-            'status': 'STATUS', 'remaining': 'REMAINING'
+            'event': 'EVENT', 'group': 'GROUP', 'tags': 'TAGS', 'origin': 'ORIGIN', 'customer': 'CUSTOMER',
+            'startTime': 'START', 'endTime': 'END', 'duration': 'DURATION', 'user': 'USER',
+            'createTime': 'CREATED', 'text': 'COMMENT', 'status': 'STATUS', 'remaining': 'REMAINING'
         }
         blackouts = client.get_blackouts()
         click.echo(tabulate([b.tabular(timezone) for b in blackouts], headers=headers, tablefmt=obj['output']))

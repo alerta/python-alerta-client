@@ -24,6 +24,7 @@ class Blackout:
         self.event = kwargs.get('event', None)
         self.group = kwargs.get('group', None)
         self.tags = kwargs.get('tags', None) or list()
+        self.origin = kwargs.get('origin', None)
         self.customer = kwargs.get('customer', None)
         self.start_time = start_time
         self.end_time = end_time
@@ -47,6 +48,8 @@ class Blackout:
             self.priority = 6
         elif self.tags:
             self.priority = 7
+        if self.origin:
+            self.priority = 8
 
         now = datetime.utcnow()
         if self.start_time <= now and self.end_time > now:
@@ -71,6 +74,8 @@ class Blackout:
             more += 'group=%r, ' % self.group
         if self.tags:
             more += 'tags=%r, ' % self.tags
+        if self.origin:
+            more += 'origin=%r, ' % self.origin
         if self.customer:
             more += 'customer=%r, ' % self.customer
 
@@ -100,6 +105,7 @@ class Blackout:
             event=json.get('event', None),
             group=json.get('group', None),
             tags=json.get('tags', list()),
+            origin=json.get('origin', None),
             customer=json.get('customer', None),
             start_time=DateTime.parse(json.get('startTime')),
             end_time=DateTime.parse(json.get('endTime')),
@@ -119,6 +125,7 @@ class Blackout:
             'event': self.event,
             'group': self.group,
             'tags': ','.join(self.tags),
+            'origin': self.origin,
             'customer': self.customer,
             'startTime': DateTime.localtime(self.start_time, timezone),
             'endTime': DateTime.localtime(self.end_time, timezone),
