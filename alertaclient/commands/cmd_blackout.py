@@ -10,13 +10,14 @@ import click
 @click.option('--event', '-e', metavar='EVENT', help='Event name')
 @click.option('--group', '-g', metavar='GROUP', help='Group event by type eg. OS, Performance')
 @click.option('--tag', '-T', 'tags', multiple=True, metavar='TAG', help='List of tags eg. London, os:linux, AWS/EC2')
+@click.option('--origin', '-O', metavar='ORIGIN', help='Origin of alert in form app/host')
 @click.option('--customer', metavar='STRING', help='Customer (Admin only)')
 @click.option('--start', metavar='DATETIME', help='Start time in ISO8601 eg. 2018-02-01T12:00:00.000Z')
 @click.option('--duration', metavar='SECONDS', type=int, help='Blackout period in seconds')
 @click.option('--text', help='Reason for blackout')
 @click.option('--delete', '-D', help='Delete blackout using ID')
 @click.pass_obj
-def cli(obj, environment, service, resource, event, group, tags, customer, start, duration, text, delete):
+def cli(obj, environment, service, resource, event, group, tags, origin, customer, start, duration, text, delete):
     """Suppress alerts for specified duration based on alert attributes."""
     client = obj['client']
     if delete:
@@ -32,6 +33,7 @@ def cli(obj, environment, service, resource, event, group, tags, customer, start
                 event=event,
                 group=group,
                 tags=tags,
+                origin=origin,
                 customer=customer,
                 start=start,
                 duration=duration,

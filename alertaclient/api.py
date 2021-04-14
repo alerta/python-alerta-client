@@ -168,7 +168,8 @@ class Client:
         return self.http.delete('/alert/{}/note/{}'.format(id, note_id))
 
     # Blackouts
-    def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None, customer=None, start=None, duration=None, text=None):
+    def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None,
+                        origin=None, customer=None, start=None, duration=None, text=None):
         data = {
             'environment': environment,
             'service': service or list(),
@@ -176,6 +177,7 @@ class Client:
             'event': event,
             'group': group,
             'tags': tags or list(),
+            'origin': origin,
             'customer': customer,
             'startTime': start,
             'duration': duration,
@@ -200,6 +202,7 @@ class Client:
             'event': kwargs.get('event'),
             'group': kwargs.get('group'),
             'tags': kwargs.get('tags'),
+            'origin': kwargs.get('origin'),
             'startTime': kwargs.get('startTime'),
             'endTime': kwargs.get('endTime'),
             'text': kwargs.get('text'),

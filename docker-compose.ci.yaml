@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   api:
-    image: docker.pkg.github.com/alerta/alerta/alerta-api:latest
+    image: ghcr.io/alerta/alerta-api:latest
     ports:
       - "8080:8080"
     depends_on:
