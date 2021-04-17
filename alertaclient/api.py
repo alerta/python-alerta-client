@@ -354,7 +354,7 @@ class Client:
         r = self.http.post('/user', data)
         return User.parse(r['user'])
 
-    def get_user(self):
+    def get_user(self, id):
         return User.parse(self.http.get('/user/%s' % id)['user'])
 
     def get_user_groups(self, id):
