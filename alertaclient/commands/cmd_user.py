@@ -1,6 +1,7 @@
 import sys
 
 import click
+from tabulate import tabulate
 
 
 class CommandWithOptionalPassword(click.Command):
@@ -30,23 +31,29 @@ class CommandWithOptionalPassword(click.Command):
 @click.option('--delete', '-D', metavar='UUID', help='Delete user using ID')
 @click.pass_obj
 def cli(obj, id, name, email, password, status, roles, text, email_verified, delete):
-    """Create user or update user details, including password reset."""
+    """Create user, show or update user details, including password reset."""
     client = obj['client']
     if delete:
         client.delete_user(delete)
     elif id:
         if not any([name, email, password, status, roles, text, (email_verified is not None)]):
-            click.echo('Nothing to update.')
-            sys.exit(1)
-        try:
-            user = client.update_user(
-                id, name=name, email=email, password=password, status=status,
-                roles=roles, attributes=None, text=text, email_verified=email_verified
-            )
-        except Exception as e:
-            click.echo('ERROR: {}'.format(e), err=True)
-            sys.exit(1)
-        click.echo(user.id)
+            user = client.get_user(id)
+            timezone = obj['timezone']
+            headers = {'id': 'ID', 'name': 'USER', 'email': 'EMAIL', 'roles': 'ROLES', 'status': 'STATUS',
+                       'text': 'TEXT',
+                       'createTime': 'CREATED', 'updateTime': 'LAST UPDATED', 'lastLogin': 'LAST LOGIN',
+                       'email_verified': 'VERIFIED'}
+            click.echo(tabulate([user.tabular(timezone)], headers=headers, tablefmt=obj['output']))
+        else:
+            try:
+                user = client.update_user(
+                    id, name=name, email=email, password=password, status=status,
+                    roles=roles, attributes=None, text=text, email_verified=email_verified
+                )
+            except Exception as e:
+                click.echo('ERROR: {}'.format(e), err=True)
+                sys.exit(1)
+            click.echo(user.id)
     else:
         if not email:
             raise click.UsageError('Need "--email" to create user.')
