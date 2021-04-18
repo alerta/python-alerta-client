@@ -10,10 +10,34 @@ from tabulate import tabulate
 @click.option('--text', help='Description of user group')
 @click.option('--user', '-U', help='Add user to group')
 @click.option('--users', is_flag=True, metavar='ID', help='Get list of group users')
-@click.option('--delete', '-D', metavar='ID', help='Delete user group using ID')
+@click.option('--delete', '-D', metavar='ID', help='Delete user group, or remove user from group')
 @click.pass_obj
 def cli(obj, id, name, text, user, users, delete):
-    """Create or delete a user group."""
+    """
+    Create or delete a user group, add and remove users from groups.
+
+    EXAMPLES
+
+        Create a group.
+
+            $ alerta group --name <group-name> --text <description>
+
+        Add a user to a group.
+
+            $ alerta group -id <group-id> --user <user-id>
+
+        List users in a group.
+
+            $ alerta group <group-id> --users
+
+        Delete a user from a group.
+
+            $ alerta group -id <group-id> -D <user-id>
+
+        Delete a group.
+
+            $ alerta group -D <group-id>
+    """
     client = obj['client']
     if id and user:
         client.add_user_to_group(id, user)
