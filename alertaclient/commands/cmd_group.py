@@ -8,13 +8,18 @@ from tabulate import tabulate
 @click.option('--id', '-i', metavar='UUID', help='Group ID')
 @click.option('--name', help='Group name')
 @click.option('--text', help='Description of user group')
-@click.option('--users', '-U', is_flag=True, metavar='ID', help='Get list of group users')
+@click.option('--user', '-U', help='Add user to group')
+@click.option('--users', is_flag=True, metavar='ID', help='Get list of group users')
 @click.option('--delete', '-D', metavar='ID', help='Delete user group using ID')
 @click.pass_obj
-def cli(obj, id, name, text, users, delete):
+def cli(obj, id, name, text, user, users, delete):
     """Create or delete a user group."""
     client = obj['client']
-    if users:
+    if id and user:
+        client.add_user_to_group(id, user)
+    elif id and delete:
+        client.remove_user_from_group(id, delete)
+    elif users:
         group_users = client.get_group_users(id)
         timezone = obj['timezone']
         headers = {'id': 'ID', 'name': 'USER', 'email': 'EMAIL', 'roles': 'ROLES', 'status': 'STATUS',
