@@ -4,7 +4,7 @@ from alertaclient.utils import build_query
 
 
 @click.command('update', short_help='Update alert attributes')
-@click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.option('--ids', '-i', metavar='ID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--query', '-q', 'query', metavar='QUERY', help='severity:"warning" AND resource:web')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
 @click.option('--attributes', '-A', metavar='KEY=VALUE', multiple=True, required=True, help='List of attributes eg. priority=high')
