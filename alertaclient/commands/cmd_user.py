@@ -28,12 +28,17 @@ class CommandWithOptionalPassword(click.Command):
 @click.option('--role', 'roles', multiple=True, help='List of roles')
 @click.option('--text', help='Description of user')
 @click.option('--email-verified/--email-not-verified', default=None, help='Email address verified flag')
+@click.option('--groups', '-g', is_flag=True, help='Get list of user groups')
 @click.option('--delete', '-D', metavar='ID', help='Delete user using ID')
 @click.pass_obj
-def cli(obj, id, name, email, password, status, roles, text, email_verified, delete):
-    """Create user, show or update user details, including password reset."""
+def cli(obj, id, name, email, password, status, roles, text, email_verified, groups, delete):
+    """Create user, show or update user details, including password reset, list user groups and delete user."""
     client = obj['client']
-    if delete:
+    if groups:
+        user_groups = client.get_user_groups(id)
+        headers = {'id': 'ID', 'name': 'USER', 'text': 'TEXT', 'count': 'COUNT'}
+        click.echo(tabulate([ug.tabular() for ug in user_groups], headers=headers, tablefmt=obj['output']))
+    elif delete:
         client.delete_user(delete)
     elif id:
         if not any([name, email, password, status, roles, text, (email_verified is not None)]):
