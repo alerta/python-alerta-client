@@ -40,12 +40,12 @@ class Note:
         note = {
             'id': self.id,
             'text': self.text,
+            'createTime': DateTime.localtime(self.create_time, timezone),
             'user': self.user,
             # 'attributes': self.attributes,
             'type': self.note_type,
-            'createTime': DateTime.localtime(self.create_time, timezone),
-            'updateTime': DateTime.localtime(self.update_time, timezone),
             'related': self.alert,
+            'updateTime': DateTime.localtime(self.update_time, timezone),
             'customer': self.customer
         }
         return note
