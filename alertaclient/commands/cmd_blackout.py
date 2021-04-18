@@ -15,7 +15,7 @@ import click
 @click.option('--start', metavar='DATETIME', help='Start time in ISO8601 eg. 2018-02-01T12:00:00.000Z')
 @click.option('--duration', metavar='SECONDS', type=int, help='Blackout period in seconds')
 @click.option('--text', help='Reason for blackout')
-@click.option('--delete', '-D', help='Delete blackout using ID')
+@click.option('--delete', '-D', metavar='ID', help='Delete blackout using ID')
 @click.pass_obj
 def cli(obj, environment, service, resource, event, group, tags, origin, customer, start, duration, text, delete):
     """Suppress alerts for specified duration based on alert attributes."""

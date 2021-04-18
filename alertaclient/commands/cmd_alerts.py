@@ -4,7 +4,7 @@ import click
 from tabulate import tabulate
 
 
-@click.command('alerts', short_help='List alert environments, services, groups and tags')
+@click.command('alerts', short_help='List environments, services, groups and tags')
 @click.option('--environments', '-E', is_flag=True, help='List alert environments.')
 @click.option('--services', '-S', is_flag=True, help='List alert services.')
 @click.option('--groups', '-g', is_flag=True, help='List alert groups.')

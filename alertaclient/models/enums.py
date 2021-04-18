@@ -1,13 +1,14 @@
 from enum import Enum
 
 
-class Scope(str, Enum):
+class Scope(str):
 
     read = 'read'
     write = 'write'
     admin = 'admin'
     read_alerts = 'read:alerts'
     write_alerts = 'write:alerts'
+    delete_alerts = 'delete:alerts'
     admin_alerts = 'admin:alerts'
     read_blackouts = 'read:blackouts'
     write_blackouts = 'write:blackouts'
@@ -57,6 +58,11 @@ class Scope(str, Enum):
             return Scope('{}:{}'.format(action, resource))
         else:
             return Scope(action)
+
+    def tabular(self):
+        return {
+            'scope': self
+        }
 
 
 ADMIN_SCOPES = [Scope.admin, Scope.read, Scope.write]
