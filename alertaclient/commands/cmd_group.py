@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 
 @click.command('group', short_help='Create user group')
-@click.option('--id', '-i', metavar='UUID', help='Group ID')
+@click.option('--id', '-i', metavar='ID', help='Group ID')
 @click.option('--name', help='Group name')
 @click.option('--text', help='Description of user group')
 @click.option('--user', '-U', help='Add user to group')

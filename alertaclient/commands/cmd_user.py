@@ -20,7 +20,7 @@ class CommandWithOptionalPassword(click.Command):
 
 
 @click.command('user', cls=CommandWithOptionalPassword, short_help='Update user')
-@click.option('--id', '-i', metavar='UUID', help='User ID')
+@click.option('--id', '-i', metavar='ID', help='User ID')
 @click.option('--name', help='Name of user')
 @click.option('--email', help='Email address (login username)')
 @click.option('--password', help='Password (will prompt if not supplied)')

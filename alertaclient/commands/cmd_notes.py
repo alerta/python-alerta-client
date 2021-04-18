@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 
 @click.command('notes', short_help='List notes')
-@click.option('--alert-id', '-i', metavar='UUID', help='alert IDs (can use short 8-char id)')
+@click.option('--alert-id', '-i', metavar='ID', help='alert IDs (can use short 8-char id)')
 @click.pass_obj
 def cli(obj, alert_id):
     """List notes."""

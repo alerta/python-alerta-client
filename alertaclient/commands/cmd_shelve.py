@@ -4,7 +4,7 @@ from alertaclient.utils import action_progressbar, build_query
 
 
 @click.command('shelve', short_help='Shelve alerts')
-@click.option('--ids', '-i', metavar='UUID', multiple=True, help='List of alert IDs (can use short 8-char id)')
+@click.option('--ids', '-i', metavar='ID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--query', '-q', 'query', metavar='QUERY', help='severity:"warning" AND resource:web')
 @click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
 @click.option('--timeout', metavar='SECONDS', type=int, help='Seconds before alert auto-unshelved.', default=7200, show_default=True)
