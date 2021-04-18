@@ -28,7 +28,7 @@ class CommandWithOptionalPassword(click.Command):
 @click.option('--role', 'roles', multiple=True, help='List of roles')
 @click.option('--text', help='Description of user')
 @click.option('--email-verified/--email-not-verified', default=None, help='Email address verified flag')
-@click.option('--delete', '-D', metavar='UUID', help='Delete user using ID')
+@click.option('--delete', '-D', metavar='ID', help='Delete user using ID')
 @click.pass_obj
 def cli(obj, id, name, email, password, status, roles, text, email_verified, delete):
     """Create user, show or update user details, including password reset."""
