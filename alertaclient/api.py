@@ -265,7 +265,7 @@ class Client:
         return self.http.delete('/heartbeat/%s' % id)
 
     # API Keys
-    def create_key(self, username, scopes=None, expires=None, text='', customer=None):
+    def create_key(self, username, scopes=None, expires=None, text='', customer=None, **kwargs):
         data = {
             'user': username,
             'scopes': scopes or list(),
@@ -274,6 +274,8 @@ class Client:
         }
         if expires:
             data['expireTime'] = DateTime.iso8601(expires)
+        if kwargs.get('key'):
+            data['key'] = kwargs['key']
         r = self.http.post('/key', data)
         return ApiKey.parse(r['data'])
 
