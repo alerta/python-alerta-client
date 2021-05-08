@@ -23,8 +23,9 @@ class AlertTestCase(unittest.TestCase):
         self.assertEqual(api_key.text, 'Updated Ops API Key')
 
         api_key = self.client.create_key(
-            username='key@alerta.io', scopes=[Scope.admin], text='Admin API Key'
+            username='key@alerta.io', scopes=[Scope.admin], text='Admin API Key', key='admin-key'
         )
+        self.assertEqual(api_key.key, 'admin-key')
 
         api_keys = self.client.get_keys(query=[('user', 'key@alerta.io')])
         self.assertEqual(len(api_keys), 2)
