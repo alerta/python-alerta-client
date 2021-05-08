@@ -270,12 +270,11 @@ class Client:
             'user': username,
             'scopes': scopes or list(),
             'text': text,
-            'customer': customer
+            'customer': customer,
+            'key': kwargs.get('key')
         }
         if expires:
             data['expireTime'] = DateTime.iso8601(expires)
-        if kwargs.get('key'):
-            data['key'] = kwargs['key']
         r = self.http.post('/key', data)
         return ApiKey.parse(r['data'])
 
