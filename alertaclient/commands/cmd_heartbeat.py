@@ -52,6 +52,6 @@ def cli(obj, origin, environment, severity, service, group, tags, timeout, custo
         try:
             heartbeat = client.heartbeat(origin=origin, tags=tags, attributes=attributes, timeout=timeout, customer=customer)
         except Exception as e:
-            click.echo('ERROR: {}'.format(e), err=True)
+            click.echo(f'ERROR: {e}', err=True)
             sys.exit(1)
         click.echo(heartbeat.id)

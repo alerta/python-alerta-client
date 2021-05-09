@@ -22,6 +22,6 @@ def cli(obj, ids, query, filters, tags):
         total, _, _ = client.get_count(query)
         ids = [a.id for a in client.get_alerts(query)]
 
-    with click.progressbar(ids, label='Untagging {} alerts'.format(total)) as bar:
+    with click.progressbar(ids, label=f'Untagging {total} alerts') as bar:
         for id in bar:
             client.untag_alert(id, tags)

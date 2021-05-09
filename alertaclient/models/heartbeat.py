@@ -70,8 +70,8 @@ class Heartbeat:
             'createTime': DateTime.localtime(self.create_time, timezone),
             'receiveTime': DateTime.localtime(self.receive_time, timezone),
             'since': self.since,
-            'timeout': '{}s'.format(self.timeout),
-            'latency': '{:.0f}ms'.format(self.latency),
-            'maxLatency': '{}ms'.format(self.max_latency),
+            'timeout': f'{self.timeout}s',
+            'latency': f'{self.latency:.0f}ms',
+            'maxLatency': f'{self.max_latency}ms',
             'status': self.status
         }

@@ -11,7 +11,7 @@ def cli(ctx, obj):
     """Show Alerta server and client versions."""
     client = obj['client']
     click.echo('alerta {}'.format(client.mgmt_status()['version']))
-    click.echo('alerta client {}'.format(client_version))
-    click.echo('requests {}'.format(requests_version))
-    click.echo('click {}'.format(click.__version__))
+    click.echo(f'alerta client {client_version}')
+    click.echo(f'requests {requests_version}')
+    click.echo(f'click {click.__version__}')
     ctx.exit()

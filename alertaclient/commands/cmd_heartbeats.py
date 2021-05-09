@@ -48,12 +48,12 @@ def cli(obj, alert, severity, timeout, purge):
 
     not_ok = [hb for hb in heartbeats if hb.status != 'ok']
     if purge:
-        with click.progressbar(not_ok, label='Purging {} heartbeats'.format(len(not_ok))) as bar:
+        with click.progressbar(not_ok, label=f'Purging {len(not_ok)} heartbeats') as bar:
             for b in bar:
                 client.delete_heartbeat(b.id)
 
     if alert:
-        with click.progressbar(heartbeats, label='Alerting {} heartbeats'.format(len(heartbeats))) as bar:
+        with click.progressbar(heartbeats, label=f'Alerting {len(heartbeats)} heartbeats') as bar:
             for b in bar:
 
                 want_environment = b.attributes.pop('environment', 'Production')
@@ -70,8 +70,8 @@ def cli(obj, alert, severity, timeout, purge):
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
                         service=want_service,
                         group=want_group,
-                        value='{}'.format(b.since),
-                        text='Heartbeat not received in {} seconds'.format(b.timeout),
+                        value=f'{b.since}',
+                        text=f'Heartbeat not received in {b.timeout} seconds',
                         tags=b.tags,
                         attributes=b.attributes,
                         origin=origin(),
@@ -88,8 +88,8 @@ def cli(obj, alert, severity, timeout, purge):
                         correlate=['HeartbeatFail', 'HeartbeatSlow', 'HeartbeatOK'],
                         service=want_service,
                         group=want_group,
-                        value='{}ms'.format(b.latency),
-                        text='Heartbeat took more than {}ms to be processed'.format(b.max_latency),
+                        value=f'{b.latency}ms',
+                        text=f'Heartbeat took more than {b.max_latency}ms to be processed',
                         tags=b.tags,
                         attributes=b.attributes,
                         origin=origin(),

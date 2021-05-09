@@ -64,8 +64,8 @@ class Config:
             r.raise_for_status()
             remote_config = r.json()
         except requests.RequestException as e:
-            raise ClientException('Failed to get config from {}. Reason: {}'.format(config_url, e))
+            raise ClientException(f'Failed to get config from {config_url}. Reason: {e}')
         except json.decoder.JSONDecodeError:
-            raise ClientException('Failed to get config from {}: Reason: not a JSON object'.format(config_url))
+            raise ClientException(f'Failed to get config from {config_url}: Reason: not a JSON object')
 
         self.options = {**remote_config, **self.options}

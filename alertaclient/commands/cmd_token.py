@@ -16,6 +16,6 @@ def cli(obj, decode):
         for k, v in jwt.parse(token).items():
             if isinstance(v, list):
                 v = ', '.join(v)
-            click.echo('{:20}: {}'.format(k, v))
+            click.echo(f'{k:20}: {v}')
     else:
         click.echo(token)

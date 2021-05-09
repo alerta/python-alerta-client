@@ -150,22 +150,22 @@ class Client:
         data = {
             'text': text
         }
-        r = self.http.put('/alert/{}/note'.format(id), data)
+        r = self.http.put(f'/alert/{id}/note', data)
         return Note.parse(r['note'])
 
     def get_alert_notes(self, id, page=1, page_size=None):
-        r = self.http.get('/alert/{}/notes'.format(id), page=page, page_size=page_size)
+        r = self.http.get(f'/alert/{id}/notes', page=page, page_size=page_size)
         return [Note.parse(n) for n in r['notes']]
 
     def update_alert_note(self, id, note_id, text):
         data = {
             'text': text,
         }
-        r = self.http.put('/alert/{}/note/{}'.format(id, note_id), data)
+        r = self.http.put(f'/alert/{id}/note/{note_id}', data)
         return Note.parse(r['note'])
 
     def delete_alert_note(self, id, note_id):
-        return self.http.delete('/alert/{}/note/{}'.format(id, note_id))
+        return self.http.delete(f'/alert/{id}/note/{note_id}')
 
     # Blackouts
     def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None,
@@ -208,7 +208,7 @@ class Client:
             'text': kwargs.get('text'),
         }
 
-        r = self.http.put('/blackout/{}'.format(id), data)
+        r = self.http.put(f'/blackout/{id}', data)
         return Blackout.parse(r['blackout'])
 
     def delete_blackout(self, id):
@@ -235,7 +235,7 @@ class Client:
             'match': kwargs.get('match'),
             'customer': kwargs.get('customer')
         }
-        r = self.http.put('/customer/{}'.format(id), data)
+        r = self.http.put(f'/customer/{id}', data)
         return Customer.parse(r['customer'])
 
     def delete_customer(self, id):
@@ -292,7 +292,7 @@ class Client:
             'expireTime': kwargs.get('expireTime'),
             'customer': kwargs.get('customer')
         }
-        r = self.http.put('/key/{}'.format(id), data)
+        r = self.http.put(f'/key/{id}', data)
         return ApiKey.parse(r['key'])
 
     def delete_key(self, id):
@@ -319,7 +319,7 @@ class Client:
             'match': kwargs.get('match'),  # role
             'scopes': kwargs.get('scopes')
         }
-        r = self.http.put('/perm/{}'.format(id), data)
+        r = self.http.put(f'/perm/{id}', data)
         return Permission.parse(r['permission'])
 
     def delete_perm(self, id):
@@ -359,7 +359,7 @@ class Client:
         return User.parse(self.http.get('/user/%s' % id)['user'])
 
     def get_user_groups(self, id):
-        r = self.http.get('/user/{}/groups'.format(id))
+        r = self.http.get(f'/user/{id}/groups')
         return [Group.parse(g) for g in r['groups']]
 
     def get_me(self):
@@ -383,7 +383,7 @@ class Client:
             'text': kwargs.get('text'),
             'email_verified': kwargs.get('email_verified')
         }
-        r = self.http.put('/user/{}'.format(id), data)
+        r = self.http.put(f'/user/{id}', data)
         return User.parse(r['user'])
 
     def update_me(self, **kwargs):
@@ -452,7 +452,7 @@ class Client:
         return Group.parse(self.http.get('/group/%s' % id)['group'])
 
     def get_group_users(self, id):
-        r = self.http.get('/group/{}/users'.format(id))
+        r = self.http.get(f'/group/{id}/users')
         return [User.parse(u) for u in r['users']]
 
     def get_users_groups(self, query=None):
@@ -464,14 +464,14 @@ class Client:
             'name': kwargs.get('name'),
             'text': kwargs.get('text')
         }
-        r = self.http.put('/group/{}'.format(id), data)
+        r = self.http.put(f'/group/{id}', data)
         return Group.parse(r['group'])
 
     def add_user_to_group(self, group_id, user_id):
-        return self.http.put('/group/{}/user/{}'.format(group_id, user_id))
+        return self.http.put(f'/group/{group_id}/user/{user_id}')
 
     def remove_user_from_group(self, group_id, user_id):
-        return self.http.delete('/group/{}/user/{}'.format(group_id, user_id))
+        return self.http.delete(f'/group/{group_id}/user/{user_id}')
 
     def delete_group(self, id):
         return self.http.delete('/group/%s' % id)
@@ -500,7 +500,7 @@ class ApiKeyAuth(AuthBase):
         self.auth_token = auth_token
 
     def __call__(self, r):
-        r.headers['Authorization'] = 'Key {}'.format(self.api_key)
+        r.headers['Authorization'] = f'Key {self.api_key}'
         return r
 
 
@@ -510,7 +510,7 @@ class TokenAuth(AuthBase):
         self.auth_token = auth_token
 
     def __call__(self, r):
-        r.headers['Authorization'] = 'Bearer {}'.format(self.auth_token)
+        r.headers['Authorization'] = f'Bearer {self.auth_token}'
         return r
 
 
@@ -608,7 +608,7 @@ class HTTPClient:
 
     def _handle_error(self, response):
         if self.debug:
-            print('\nbody: {}'.format(response.text))
+            print(f'\nbody: {response.text}')
         resp = response.json()
         status = resp.get('status', None)
         if status == 'ok':

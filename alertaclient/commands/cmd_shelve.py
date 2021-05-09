@@ -24,4 +24,4 @@ def cli(obj, ids, query, filters, timeout, text):
         ids = [a.id for a in client.get_alerts(query)]
 
     action_progressbar(client, action='shelve', ids=ids,
-                       label='Shelving {} alerts'.format(total), text=text, timeout=timeout)
+                       label=f'Shelving {total} alerts', text=text, timeout=timeout)

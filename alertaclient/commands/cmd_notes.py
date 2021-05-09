@@ -12,7 +12,7 @@ def cli(obj, alert_id):
     client = obj['client']
     if alert_id:
         if obj['output'] == 'json':
-            r = client.http.get('/alert/{}/notes'.format(alert_id))
+            r = client.http.get(f'/alert/{alert_id}/notes')
             click.echo(json.dumps(r['notes'], sort_keys=True, indent=4, ensure_ascii=False))
         else:
             timezone = obj['timezone']

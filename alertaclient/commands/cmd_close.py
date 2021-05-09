@@ -22,4 +22,4 @@ def cli(obj, ids, query, filters, text):
         total, _, _ = client.get_count(query)
         ids = [a.id for a in client.get_alerts(query)]
 
-    action_progressbar(client, action='close', ids=ids, label='Closing {} alerts'.format(total), text=text)
+    action_progressbar(client, action='close', ids=ids, label=f'Closing {total} alerts', text=text)

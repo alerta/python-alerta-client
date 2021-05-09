@@ -20,6 +20,6 @@ def cli(obj, name, email, password, status, text):
     try:
         user = client.update_me(name=name, email=email, password=password, status=status, attributes=None, text=text)
     except Exception as e:
-        click.echo('ERROR: {}'.format(e), err=True)
+        click.echo(f'ERROR: {e}', err=True)
         sys.exit(1)
     click.echo(user.id)

@@ -22,6 +22,6 @@ def cli(obj, ids, query, filters, attributes):
         total, _, _ = client.get_count(query)
         ids = [a.id for a in client.get_alerts(query)]
 
-    with click.progressbar(ids, label='Updating {} alerts'.format(total)) as bar:
+    with click.progressbar(ids, label=f'Updating {total} alerts') as bar:
         for id in bar:
             client.update_attributes(id, dict(a.split('=') for a in attributes))

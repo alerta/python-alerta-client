@@ -29,7 +29,7 @@ def save_token(endpoint, username, token):
     try:
         info = netrc(NETRC_FILE)
     except Exception as e:
-        raise ConfigurationError('{}'.format(e))
+        raise ConfigurationError(f'{e}')
     info.hosts[machine(endpoint)] = (username, None, token)
     with open(NETRC_FILE, 'w') as f:
         f.write(dump_netrc(info))
@@ -39,13 +39,13 @@ def clear_token(endpoint):
     try:
         info = netrc(NETRC_FILE)
     except Exception as e:
-        raise ConfigurationError('{}'.format(e))
+        raise ConfigurationError(f'{e}')
     try:
         del info.hosts[machine(endpoint)]
         with open(NETRC_FILE, 'w') as f:
             f.write(dump_netrc(info))
     except KeyError as e:
-        raise ConfigurationError('No credentials stored for {}'.format(e))
+        raise ConfigurationError(f'No credentials stored for {e}')
 
 
 # See https://bugs.python.org/issue30806

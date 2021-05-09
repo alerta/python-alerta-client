@@ -50,7 +50,7 @@ def action_progressbar(client, action, ids, label, text=None, timeout=None):
 
     def show_skipped(id):
         if not id and skipped:
-            return '(skipped {})'.format(skipped)
+            return f'(skipped {skipped})'
 
     with click.progressbar(ids, label=label, show_eta=True, item_show_func=show_skipped) as bar:
         for id in bar:
@@ -62,4 +62,4 @@ def action_progressbar(client, action, ids, label, text=None, timeout=None):
 
 def origin():
     prog = os.path.basename(sys.argv[0])
-    return '{}/{}'.format(prog, platform.uname()[1])
+    return f'{prog}/{platform.uname()[1]}'
