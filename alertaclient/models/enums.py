@@ -55,7 +55,7 @@ class Scope(str):
         :return: Scope
         """
         if resource:
-            return Scope('{}:{}'.format(action, resource))
+            return Scope(f'{action}:{resource}')
         else:
             return Scope(action)
 

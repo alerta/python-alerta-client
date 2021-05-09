@@ -27,6 +27,6 @@ def cli(obj, purge):
 
         expired = [b for b in blackouts if b.status == 'expired']
         if purge:
-            with click.progressbar(expired, label='Purging {} blackouts'.format(len(expired))) as bar:
+            with click.progressbar(expired, label=f'Purging {len(expired)} blackouts') as bar:
                 for b in bar:
                     client.delete_blackout(b.id)

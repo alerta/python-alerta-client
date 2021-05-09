@@ -72,21 +72,21 @@ def cli(obj, ids, query, filters, display, from_date=None):
                     alert.group,
                     alert.event,
                     alert.value or 'n/a'), fg=color['fg'])
-                click.secho('   |{}'.format(alert.text), fg=color['fg'])
+                click.secho(f'   |{alert.text}', fg=color['fg'])
 
                 if display == 'full':
                     click.secho('    severity   | {} -> {}'.format(alert.previous_severity,
                                                                    alert.severity), fg=color['fg'])
-                    click.secho('    trend      | {}'.format(alert.trend_indication), fg=color['fg'])
-                    click.secho('    status     | {}'.format(alert.status), fg=color['fg'])
-                    click.secho('    resource   | {}'.format(alert.resource), fg=color['fg'])
-                    click.secho('    group      | {}'.format(alert.group), fg=color['fg'])
-                    click.secho('    event      | {}'.format(alert.event), fg=color['fg'])
-                    click.secho('    value      | {}'.format(alert.value), fg=color['fg'])
+                    click.secho(f'    trend      | {alert.trend_indication}', fg=color['fg'])
+                    click.secho(f'    status     | {alert.status}', fg=color['fg'])
+                    click.secho(f'    resource   | {alert.resource}', fg=color['fg'])
+                    click.secho(f'    group      | {alert.group}', fg=color['fg'])
+                    click.secho(f'    event      | {alert.event}', fg=color['fg'])
+                    click.secho(f'    value      | {alert.value}', fg=color['fg'])
                     click.secho('    tags       | {}'.format(' '.join(alert.tags)), fg=color['fg'])
 
                     for key, value in alert.attributes.items():
-                        click.secho('    {} | {}'.format(key.ljust(10), value), fg=color['fg'])
+                        click.secho(f'    {key.ljust(10)} | {value}', fg=color['fg'])
 
                     latency = alert.receive_time - alert.create_time
 
@@ -96,18 +96,18 @@ def cli(obj, ids, query, filters, display, from_date=None):
                         DateTime.localtime(alert.receive_time, timezone)), fg=color['fg'])
                     click.secho('        last received | {}'.format(
                         DateTime.localtime(alert.last_receive_time, timezone)), fg=color['fg'])
-                    click.secho('        latency       | {}ms'.format(latency.microseconds / 1000), fg=color['fg'])
-                    click.secho('        timeout       | {}s'.format(alert.timeout), fg=color['fg'])
+                    click.secho(f'        latency       | {latency.microseconds / 1000}ms', fg=color['fg'])
+                    click.secho(f'        timeout       | {alert.timeout}s', fg=color['fg'])
 
-                    click.secho('            alert id     | {}'.format(alert.id), fg=color['fg'])
-                    click.secho('            last recv id | {}'.format(alert.last_receive_id), fg=color['fg'])
-                    click.secho('            customer     | {}'.format(alert.customer), fg=color['fg'])
-                    click.secho('            environment  | {}'.format(alert.environment), fg=color['fg'])
+                    click.secho(f'            alert id     | {alert.id}', fg=color['fg'])
+                    click.secho(f'            last recv id | {alert.last_receive_id}', fg=color['fg'])
+                    click.secho(f'            customer     | {alert.customer}', fg=color['fg'])
+                    click.secho(f'            environment  | {alert.environment}', fg=color['fg'])
                     click.secho('            service      | {}'.format(','.join(alert.service)), fg=color['fg'])
-                    click.secho('            resource     | {}'.format(alert.resource), fg=color['fg'])
-                    click.secho('            type         | {}'.format(alert.event_type), fg=color['fg'])
-                    click.secho('            repeat       | {}'.format(alert.repeat), fg=color['fg'])
-                    click.secho('            origin       | {}'.format(alert.origin), fg=color['fg'])
+                    click.secho(f'            resource     | {alert.resource}', fg=color['fg'])
+                    click.secho(f'            type         | {alert.event_type}', fg=color['fg'])
+                    click.secho(f'            repeat       | {alert.repeat}', fg=color['fg'])
+                    click.secho(f'            origin       | {alert.origin}', fg=color['fg'])
                     click.secho('            correlate    | {}'.format(','.join(alert.correlate)), fg=color['fg'])
 
         return auto_refresh, last_time

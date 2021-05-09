@@ -129,9 +129,9 @@ class Blackout:
             'customer': self.customer,
             'startTime': DateTime.localtime(self.start_time, timezone),
             'endTime': DateTime.localtime(self.end_time, timezone),
-            'duration': '{}s'.format(self.duration),
+            'duration': f'{self.duration}s',
             'status': self.status,
-            'remaining': '{}s'.format(self.remaining),
+            'remaining': f'{self.remaining}s',
             'user': self.user,
             'createTime': DateTime.localtime(self.create_time, timezone),
             'text': self.text

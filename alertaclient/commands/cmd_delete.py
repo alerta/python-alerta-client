@@ -23,6 +23,6 @@ def cli(obj, ids, query, filters):
         total, _, _ = client.get_count(query)
         ids = [a.id for a in client.get_alerts(query)]
 
-    with click.progressbar(ids, label='Deleting {} alerts'.format(total)) as bar:
+    with click.progressbar(ids, label=f'Deleting {total} alerts') as bar:
         for id in bar:
             client.delete_alert(id)

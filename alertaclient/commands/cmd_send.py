@@ -48,15 +48,15 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
                 customer=kwargs.get('customer')
             )
         except Exception as e:
-            click.echo('ERROR: {}'.format(e), err=True)
+            click.echo(f'ERROR: {e}', err=True)
             sys.exit(1)
 
         if alert:
             if alert.repeat:
-                message = '{} duplicates'.format(alert.duplicate_count)
+                message = f'{alert.duplicate_count} duplicates'
             else:
-                message = '{} -> {}'.format(alert.previous_severity, alert.severity)
-        click.echo('{} ({})'.format(id, message))
+                message = f'{alert.previous_severity} -> {alert.severity}'
+        click.echo(f'{id} ({message})')
 
     # read raw data from file or stdin
     if raw_data and raw_data.startswith('@') or raw_data == '-':
@@ -71,7 +71,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
                 try:
                     payload = json.loads(line)
                 except Exception as e:
-                    click.echo("ERROR: JSON parse failure - input must be in 'json_lines' format: {}".format(e), err=True)
+                    click.echo(f"ERROR: JSON parse failure - input must be in 'json_lines' format: {e}", err=True)
                     sys.exit(1)
                 send_alert(**payload)
             sys.exit(0)

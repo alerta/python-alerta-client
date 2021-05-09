@@ -21,6 +21,6 @@ def cli(obj, customer, match, delete):
         try:
             customer = client.create_customer(customer, match)
         except Exception as e:
-            click.echo('ERROR: {}'.format(e), err=True)
+            click.echo(f'ERROR: {e}', err=True)
             sys.exit(1)
         click.echo(customer.id)

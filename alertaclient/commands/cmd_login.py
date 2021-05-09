@@ -37,7 +37,7 @@ def cli(obj, username):
             password = click.prompt('Password', hide_input=True)
             token = client.login(username, password)['token']
         else:
-            click.echo('ERROR: unknown provider {provider}'.format(provider=provider), err=True)
+            click.echo(f'ERROR: unknown provider {provider}', err=True)
             sys.exit(1)
     except Exception as e:
         raise AuthError(e)
@@ -46,7 +46,7 @@ def cli(obj, username):
     preferred_username = jwt.parse(token)['preferred_username']
     if preferred_username:
         save_token(client.endpoint, preferred_username, token)
-        click.echo('Logged in as {}'.format(preferred_username))
+        click.echo(f'Logged in as {preferred_username}')
     else:
         click.echo('Failed to login.')
         sys.exit(1)

@@ -84,7 +84,7 @@ class Screen:
 
         # draw header
         self._addstr(0, 0, self.client.endpoint, curses.A_BOLD)
-        self._addstr(0, 'C', 'alerta {}'.format(version), curses.A_BOLD)
+        self._addstr(0, 'C', f'alerta {version}', curses.A_BOLD)
         self._addstr(0, 'R', '{}'.format(now.strftime('%H:%M:%S %d/%m/%y')), curses.A_BOLD)
 
         # TODO - draw bars

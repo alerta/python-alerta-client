@@ -56,6 +56,6 @@ def cli(obj, id, name, text, user, users, delete):
         try:
             group = client.create_group(name, text)
         except Exception as e:
-            click.echo('ERROR: {}'.format(e), err=True)
+            click.echo(f'ERROR: {e}', err=True)
             sys.exit(1)
         click.echo(group.id)

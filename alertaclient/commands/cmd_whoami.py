@@ -12,6 +12,6 @@ def cli(obj, show_userinfo):
         for k, v in userinfo.items():
             if isinstance(v, list):
                 v = ', '.join(v)
-            click.echo('{:20}: {}'.format(k, v))
+            click.echo(f'{k:20}: {v}')
     else:
         click.echo(userinfo['preferred_username'])

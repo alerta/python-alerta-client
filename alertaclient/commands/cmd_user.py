@@ -56,7 +56,7 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, gro
                     roles=roles, attributes=None, text=text, email_verified=email_verified
                 )
             except Exception as e:
-                click.echo('ERROR: {}'.format(e), err=True)
+                click.echo(f'ERROR: {e}', err=True)
                 sys.exit(1)
             click.echo(user.id)
     else:
@@ -70,6 +70,6 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, gro
                 roles=roles, attributes=None, text=text, email_verified=email_verified
             )
         except Exception as e:
-            click.echo('ERROR: {}'.format(e), err=True)
+            click.echo(f'ERROR: {e}', err=True)
             sys.exit(1)
         click.echo(user.id)
