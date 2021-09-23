@@ -2,5 +2,5 @@ Click==8.0.1
 pytz==2021.1
 PyYAML==5.4.1
 requests==2.25.1
-requests-hawk==1.1.0
+requests-hawk==1.1.1
 tabulate==0.8.9
