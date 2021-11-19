@@ -17,9 +17,22 @@ def cli(obj, alert_id):
         else:
             timezone = obj['timezone']
             headers = {
-                'id': 'NOTE ID', 'text': 'NOTE', 'user': 'USER', 'type': 'TYPE', 'attributes': 'ATTRIBUTES',
-                'createTime': 'CREATED', 'updateTime': 'UPDATED', 'related': 'RELATED ID', 'customer': 'CUSTOMER'
+                'id': 'NOTE ID',
+                'text': 'NOTE',
+                'user': 'USER',
+                'type': 'TYPE',
+                'attributes': 'ATTRIBUTES',
+                'createTime': 'CREATED',
+                'updateTime': 'UPDATED',
+                'related': 'RELATED ID',
+                'customer': 'CUSTOMER',
             }
-            click.echo(tabulate([n.tabular(timezone) for n in client.get_alert_notes(alert_id)], headers=headers, tablefmt=obj['output']))
+            click.echo(
+                tabulate(
+                    [n.tabular(timezone) for n in client.get_alert_notes(alert_id)],
+                    headers=headers,
+                    tablefmt=obj['output'],
+                )
+            )
     else:
         raise click.UsageError('Need "--alert-id" to list notes.')

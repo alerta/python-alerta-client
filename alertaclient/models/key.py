@@ -2,7 +2,6 @@ from alertaclient.utils import DateTime
 
 
 class ApiKey:
-
     def __init__(self, user, scopes, text='', expire_time=None, customer=None, **kwargs):
         self.id = kwargs.get('id', None)
         self.key = kwargs.get('key', None)
@@ -20,7 +19,8 @@ class ApiKey:
 
     def __repr__(self):
         return 'ApiKey(key={!r}, user={!r}, scopes={!r}, expireTime={!r}, customer={!r})'.format(
-            self.key, self.user, self.scopes, self.expire_time, self.customer)
+            self.key, self.user, self.scopes, self.expire_time, self.customer
+        )
 
     @classmethod
     def parse(cls, json):
@@ -36,7 +36,7 @@ class ApiKey:
             expire_time=DateTime.parse(json.get('expireTime')),
             count=json.get('count', None),
             last_used_time=DateTime.parse(json.get('lastUsedTime')),
-            customer=json.get('customer', None)
+            customer=json.get('customer', None),
         )
 
     def scopes_to_type(self, scopes):
@@ -55,5 +55,5 @@ class ApiKey:
             'expireTime': DateTime.localtime(self.expire_time, timezone),
             'count': self.count,
             'lastUsedTime': DateTime.localtime(self.last_used_time, timezone),
-            'customer': self.customer
+            'customer': self.customer,
         }

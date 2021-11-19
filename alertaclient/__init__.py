@@ -23,4 +23,5 @@ See the following URL for more up-to-date information:
 
 https://github.com/alerta/alerta/wiki/Python-3
 
-""")
+"""
+    )

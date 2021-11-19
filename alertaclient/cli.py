@@ -16,12 +16,10 @@ cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands')
 
 
 class AlertaCLI(click.MultiCommand):
-
     def list_commands(self, ctx):
         rv = []
         for filename in os.listdir(cmd_folder):
-            if filename.endswith('.py') and \
-               filename.startswith('cmd_'):
+            if filename.endswith('.py') and filename.startswith('cmd_'):
                 rv.append(filename[4:-3])
         rv.sort()
         return rv
@@ -40,7 +38,12 @@ class AlertaCLI(click.MultiCommand):
 @click.option('--config-file', metavar='<FILE>', help='Configuration file.')
 @click.option('--profile', metavar='<PROFILE>', help='Configuration profile.')
 @click.option('--endpoint-url', metavar='<URL>', help='API endpoint URL.')
-@click.option('--output', 'output', metavar='<FORMAT>', help='Output format. eg. plain, simple, grid, psql, presto, rst, html, json, json_lines')
+@click.option(
+    '--output',
+    'output',
+    metavar='<FORMAT>',
+    help='Output format. eg. plain, simple, grid, psql, presto, rst, html, json, json_lines',
+)
 @click.option('--json', 'output', flag_value='json', help='Output in JSON format. Shortcut for "--output json"')
 @click.option('--color/--no-color', help='Color-coded output based on severity.')
 @click.option('--debug', is_flag=True, help='Debug mode.')
@@ -71,5 +74,5 @@ def cli(ctx, config_file, profile, endpoint_url, output, color, debug):
         ssl_verify=config.options['sslverify'],
         ssl_cert=config.options.get('sslcert', None),
         ssl_key=config.options.get('sslkey', None),
-        debug=debug or os.environ.get('DEBUG', None) or config.options['debug']
+        debug=debug or os.environ.get('DEBUG', None) or config.options['debug'],
     )

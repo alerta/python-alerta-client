@@ -35,8 +35,7 @@ class Group:
         self.count = kwargs.get('count')
 
     def __repr__(self) -> str:
-        return 'Group(id={!r}, name={!r}, text={!r}, count={!r})'.format(
-            self.id, self.name, self.text, self.count)
+        return 'Group(id={!r}, name={!r}, text={!r}, count={!r})'.format(self.id, self.name, self.text, self.count)
 
     @classmethod
     def parse(cls, json: JSON) -> 'Group':
@@ -44,13 +43,8 @@ class Group:
             id=json.get('id', None),
             name=json.get('name', None),
             text=json.get('text', None),
-            count=json.get('count', 0)
+            count=json.get('count', 0),
         )
 
     def tabular(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'text': self.text,
-            'count': self.count
-        }
+        return {'id': self.id, 'name': self.name, 'text': self.text, 'count': self.count}

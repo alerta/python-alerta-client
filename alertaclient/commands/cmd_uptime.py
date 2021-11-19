@@ -13,7 +13,4 @@ def cli(obj):
     now = datetime.fromtimestamp(int(status['time']) / 1000.0)
     uptime = datetime(1, 1, 1) + timedelta(seconds=int(status['uptime']) / 1000.0)
 
-    click.echo('{} up {} days {:02d}:{:02d}'.format(
-        now.strftime('%H:%M'),
-        uptime.day - 1, uptime.hour, uptime.minute
-    ))
+    click.echo('{} up {} days {:02d}:{:02d}'.format(now.strftime('%H:%M'), uptime.day - 1, uptime.hour, uptime.minute))

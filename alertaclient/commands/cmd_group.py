@@ -46,9 +46,18 @@ def cli(obj, id, name, text, user, users, delete):
     elif users:
         group_users = client.get_group_users(id)
         timezone = obj['timezone']
-        headers = {'id': 'ID', 'name': 'USER', 'email': 'EMAIL', 'roles': 'ROLES', 'status': 'STATUS',
-                   'text': 'TEXT', 'createTime': 'CREATED', 'updateTime': 'LAST UPDATED',
-                   'lastLogin': 'LAST LOGIN', 'email_verified': 'VERIFIED'}
+        headers = {
+            'id': 'ID',
+            'name': 'USER',
+            'email': 'EMAIL',
+            'roles': 'ROLES',
+            'status': 'STATUS',
+            'text': 'TEXT',
+            'createTime': 'CREATED',
+            'updateTime': 'LAST UPDATED',
+            'lastLogin': 'LAST LOGIN',
+            'email_verified': 'VERIFIED',
+        }
         click.echo(tabulate([gu.tabular(timezone) for gu in group_users], headers=headers, tablefmt=obj['output']))
     elif delete:
         client.delete_group(delete)

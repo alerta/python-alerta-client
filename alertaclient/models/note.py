@@ -4,7 +4,6 @@ from alertaclient.utils import DateTime
 
 
 class Note:
-
     def __init__(self, text, user, note_type, **kwargs):
 
         self.id = kwargs.get('id', None)
@@ -28,7 +27,7 @@ class Note:
             create_time=DateTime.parse(json['createTime']) if 'createTime' in json else None,
             update_time=DateTime.parse(json['updateTime']) if 'updateTime' in json else None,
             alert=json.get('related', {}).get('alert'),
-            customer=json.get('customer', None)
+            customer=json.get('customer', None),
         )
 
     def __repr__(self):
@@ -46,6 +45,6 @@ class Note:
             'type': self.note_type,
             'related': self.alert,
             'updateTime': DateTime.localtime(self.update_time, timezone),
-            'customer': self.customer
+            'customer': self.customer,
         }
         return note

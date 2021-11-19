@@ -6,10 +6,10 @@ DEFAULT_MAX_LATENCY = 2000  # ms
 
 
 class Heartbeat:
-
     def __init__(self, origin=None, tags=None, create_time=None, timeout=None, customer=None, **kwargs):
-        if any(['.' in key for key in kwargs.get('attributes', dict()).keys()])\
-                or any(['$' in key for key in kwargs.get('attributes', dict()).keys()]):
+        if any(['.' in key for key in kwargs.get('attributes', dict()).keys()]) or any(
+            ['$' in key for key in kwargs.get('attributes', dict()).keys()]
+        ):
             raise ValueError('Attribute keys must not contain "." or "$"')
 
         self.id = kwargs.get('id', None)
@@ -35,7 +35,8 @@ class Heartbeat:
 
     def __repr__(self):
         return 'Heartbeat(id={!r}, origin={!r}, create_time={!r}, timeout={!r}, customer={!r})'.format(
-            self.id, self.origin, self.create_time, self.timeout, self.customer)
+            self.id, self.origin, self.create_time, self.timeout, self.customer
+        )
 
     @classmethod
     def parse(cls, json):
@@ -57,7 +58,7 @@ class Heartbeat:
             timeout=json.get('timeout', None),
             max_latency=json.get('maxLatency', None) or DEFAULT_MAX_LATENCY,
             receive_time=DateTime.parse(json.get('receiveTime')),
-            customer=json.get('customer', None)
+            customer=json.get('customer', None),
         )
 
     def tabular(self, timezone=None):
@@ -73,5 +74,5 @@ class Heartbeat:
             'timeout': f'{self.timeout}s',
             'latency': f'{self.latency:.0f}ms',
             'maxLatency': f'{self.max_latency}ms',
-            'status': self.status
+            'status': self.status,
         }

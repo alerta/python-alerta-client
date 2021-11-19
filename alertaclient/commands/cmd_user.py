@@ -5,7 +5,6 @@ from tabulate import tabulate
 
 
 class CommandWithOptionalPassword(click.Command):
-
     def parse_args(self, ctx, args):
         for i, a in enumerate(args):
             if args[i] == '--password':
@@ -44,16 +43,31 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, gro
         if not any([name, email, password, status, roles, text, (email_verified is not None)]):
             user = client.get_user(id)
             timezone = obj['timezone']
-            headers = {'id': 'ID', 'name': 'USER', 'email': 'EMAIL', 'roles': 'ROLES', 'status': 'STATUS',
-                       'text': 'TEXT',
-                       'createTime': 'CREATED', 'updateTime': 'LAST UPDATED', 'lastLogin': 'LAST LOGIN',
-                       'email_verified': 'VERIFIED'}
+            headers = {
+                'id': 'ID',
+                'name': 'USER',
+                'email': 'EMAIL',
+                'roles': 'ROLES',
+                'status': 'STATUS',
+                'text': 'TEXT',
+                'createTime': 'CREATED',
+                'updateTime': 'LAST UPDATED',
+                'lastLogin': 'LAST LOGIN',
+                'email_verified': 'VERIFIED',
+            }
             click.echo(tabulate([user.tabular(timezone)], headers=headers, tablefmt=obj['output']))
         else:
             try:
                 user = client.update_user(
-                    id, name=name, email=email, password=password, status=status,
-                    roles=roles, attributes=None, text=text, email_verified=email_verified
+                    id,
+                    name=name,
+                    email=email,
+                    password=password,
+                    status=status,
+                    roles=roles,
+                    attributes=None,
+                    text=text,
+                    email_verified=email_verified,
                 )
             except Exception as e:
                 click.echo(f'ERROR: {e}', err=True)
@@ -66,8 +80,14 @@ def cli(obj, id, name, email, password, status, roles, text, email_verified, gro
             password = click.prompt('Password', hide_input=True)
         try:
             user = client.create_user(
-                name=name, email=email, password=password, status=status,
-                roles=roles, attributes=None, text=text, email_verified=email_verified
+                name=name,
+                email=email,
+                password=password,
+                status=status,
+                roles=roles,
+                attributes=None,
+                text=text,
+                email_verified=email_verified,
             )
         except Exception as e:
             click.echo(f'ERROR: {e}', err=True)

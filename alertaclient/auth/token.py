@@ -22,7 +22,6 @@ SUCCESS_MESSAGE = """
 
 
 class HTTPServerHandler(BaseHTTPRequestHandler):
-
     def __init__(self, request, address, server, xsrf_token):
         self.xsrf_token = xsrf_token
         self.access_token = None
@@ -51,17 +50,16 @@ class HTTPServerHandler(BaseHTTPRequestHandler):
 
 
 class TokenHandler:
-
     def get_access_token(self, xsrf_token):
         server_address = ('', 9004)
-        httpd = HTTPServer(server_address, lambda request, address,
-                           server: HTTPServerHandler(request, address, server, xsrf_token))
+        httpd = HTTPServer(
+            server_address, lambda request, address, server: HTTPServerHandler(request, address, server, xsrf_token)
+        )
         httpd.handle_request()
         return httpd.access_token  # pylint: disable=no-member
 
 
 class Jwt:
-
     def parse(self, jwt):
         payload = jwt.split('.')[1]
         if isinstance(payload, str):

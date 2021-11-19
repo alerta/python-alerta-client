@@ -15,20 +15,11 @@ def login(client, username, client_id):
         'redirect_uri={redirect_uri}&'
         'state={state}&'
         'login_hint={username}'
-    ).format(
-        client_id=client_id,
-        redirect_uri=redirect_uri,
-        state=xsrf_token,
-        username=username
-    )
+    ).format(client_id=client_id, redirect_uri=redirect_uri, state=xsrf_token, username=username)
 
     webbrowser.open(url, new=0, autoraise=True)
     auth = TokenHandler()
     access_token = auth.get_access_token(xsrf_token)
 
-    data = {
-        'code': access_token,
-        'clientId': client_id,
-        'redirectUri': redirect_uri
-    }
+    data = {'code': access_token, 'clientId': client_id, 'redirectUri': redirect_uri}
     return client.token('google', data)

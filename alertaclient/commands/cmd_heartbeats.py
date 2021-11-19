@@ -23,13 +23,15 @@ def cli(obj, alert, severity, timeout, purge):
         default_normal_severity = 'normal'
 
     if severity in ['normal', 'ok', 'cleared']:
-        raise click.UsageError('Must be a non-normal severity. "{}" is one of {}'.format(
-            severity, ', '.join(['normal', 'ok', 'cleared']))
+        raise click.UsageError(
+            'Must be a non-normal severity. "{}" is one of {}'.format(severity, ', '.join(['normal', 'ok', 'cleared']))
         )
 
     if severity not in obj['alarm_model']['severity'].keys():
-        raise click.UsageError('Must be a valid severity. "{}" is not one of {}'.format(
-            severity, ', '.join(obj['alarm_model']['severity'].keys()))
+        raise click.UsageError(
+            'Must be a valid severity. "{}" is not one of {}'.format(
+                severity, ', '.join(obj['alarm_model']['severity'].keys())
+            )
         )
 
     if obj['output'] == 'json':
@@ -39,9 +41,18 @@ def cli(obj, alert, severity, timeout, purge):
     else:
         timezone = obj['timezone']
         headers = {
-            'id': 'ID', 'origin': 'ORIGIN', 'customer': 'CUSTOMER', 'tags': 'TAGS', 'attributes': 'ATTRIBUTES',
-            'createTime': 'CREATED', 'receiveTime': 'RECEIVED', 'since': 'SINCE', 'timeout': 'TIMEOUT',
-            'latency': 'LATENCY', 'maxLatency': 'MAX LATENCY', 'status': 'STATUS'
+            'id': 'ID',
+            'origin': 'ORIGIN',
+            'customer': 'CUSTOMER',
+            'tags': 'TAGS',
+            'attributes': 'ATTRIBUTES',
+            'createTime': 'CREATED',
+            'receiveTime': 'RECEIVED',
+            'since': 'SINCE',
+            'timeout': 'TIMEOUT',
+            'latency': 'LATENCY',
+            'maxLatency': 'MAX LATENCY',
+            'status': 'STATUS',
         }
         heartbeats = client.get_heartbeats()
         click.echo(tabulate([h.tabular(timezone) for h in heartbeats], headers=headers, tablefmt=obj['output']))
@@ -77,7 +88,7 @@ def cli(obj, alert, severity, timeout, purge):
                         origin=origin(),
                         type='heartbeatAlert',
                         timeout=timeout,
-                        customer=b.customer
+                        customer=b.customer,
                     )
                 elif b.status == 'slow':
                     client.send_alert(
@@ -95,7 +106,7 @@ def cli(obj, alert, severity, timeout, purge):
                         origin=origin(),
                         type='heartbeatAlert',
                         timeout=timeout,
-                        customer=b.customer
+                        customer=b.customer,
                     )
                 else:
                     client.send_alert(
@@ -113,5 +124,5 @@ def cli(obj, alert, severity, timeout, purge):
                         origin=origin(),
                         type='heartbeatAlert',
                         timeout=timeout,
-                        customer=b.customer
+                        customer=b.customer,
                     )

@@ -60,9 +60,7 @@ class Scope(str):
             return Scope(action)
 
     def tabular(self):
-        return {
-            'scope': self
-        }
+        return {'scope': self}
 
 
 ADMIN_SCOPES = [Scope.admin, Scope.read, Scope.write]

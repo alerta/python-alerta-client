@@ -14,20 +14,11 @@ def login(client, gitlab_url, client_id):
         'redirect_uri={redirect_uri}&'
         'scope=openid&'
         'state={state}'
-    ).format(
-        gitlab_url=gitlab_url,
-        client_id=client_id,
-        redirect_uri=redirect_uri,
-        state=xsrf_token
-    )
+    ).format(gitlab_url=gitlab_url, client_id=client_id, redirect_uri=redirect_uri, state=xsrf_token)
 
     webbrowser.open(url, new=0, autoraise=True)
     auth = TokenHandler()
     access_token = auth.get_access_token(xsrf_token)
 
-    data = {
-        'code': access_token,
-        'clientId': client_id,
-        'redirectUri': redirect_uri
-    }
+    data = {'code': access_token, 'clientId': client_id, 'redirectUri': redirect_uri}
     return client.token('gitlab', data)

@@ -5,7 +5,13 @@ import click
 
 @click.command('blackout', short_help='Suppress alerts')
 @click.option('--environment', '-E', metavar='ENVIRONMENT', help='Environment eg. Production, Development')
-@click.option('--service', '-S', metavar='SERVICE', multiple=True, help='List of affected services eg. app name, Web, Network, Storage, Database, Security')
+@click.option(
+    '--service',
+    '-S',
+    metavar='SERVICE',
+    multiple=True,
+    help='List of affected services eg. app name, Web, Network, Storage, Database, Security',
+)
 @click.option('--resource', '-r', metavar='RESOURCE', help='Resource under alarm')
 @click.option('--event', '-e', metavar='EVENT', help='Event name')
 @click.option('--group', '-g', metavar='GROUP', help='Group event by type eg. OS, Performance')
@@ -37,7 +43,7 @@ def cli(obj, environment, service, resource, event, group, tags, origin, custome
                 customer=customer,
                 start=start,
                 duration=duration,
-                text=text
+                text=text,
             )
         except Exception as e:
             click.echo(f'ERROR: {e}', err=True)

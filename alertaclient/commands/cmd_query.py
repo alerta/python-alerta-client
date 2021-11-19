@@ -19,7 +19,9 @@ COLOR_MAP = {
 @click.command('query', short_help='Search for alerts')
 @click.option('--ids', '-i', metavar='ID', multiple=True, help='List of alert IDs (can use short 8-char id)')
 @click.option('--query', '-q', 'query', metavar='QUERY', help='severity:"warning" AND resource:web')
-@click.option('--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web')
+@click.option(
+    '--filter', '-f', 'filters', metavar='FILTER', multiple=True, help='KEY=VALUE eg. serverity=warning resource=web'
+)
 @click.option('--oneline', 'display', flag_value='oneline', default=True, help='Show alerts using table format')
 @click.option('--medium', 'display', flag_value='medium', help='Show important alert attributes')
 @click.option('--full', 'display', flag_value='full', help='Show full alert details')
@@ -50,9 +52,21 @@ def cli(obj, ids, query, filters, display, from_date=None):
         auto_refresh = r['autoRefresh']
 
         if display == 'oneline':
-            headers = {'id': 'ID', 'lastReceiveTime': 'LAST RECEIVED', 'severity': 'SEVERITY', 'status': 'STATUS',
-                       'duplicateCount': 'DUPL', 'customer': 'CUSTOMER', 'environment': 'ENVIRONMENT', 'service': 'SERVICE',
-                       'resource': 'RESOURCE', 'group': 'GROUP', 'event': 'EVENT', 'value': 'VALUE', 'text': 'DESCRIPTION'}
+            headers = {
+                'id': 'ID',
+                'lastReceiveTime': 'LAST RECEIVED',
+                'severity': 'SEVERITY',
+                'status': 'STATUS',
+                'duplicateCount': 'DUPL',
+                'customer': 'CUSTOMER',
+                'environment': 'ENVIRONMENT',
+                'service': 'SERVICE',
+                'resource': 'RESOURCE',
+                'group': 'GROUP',
+                'event': 'EVENT',
+                'value': 'VALUE',
+                'text': 'DESCRIPTION',
+            }
 
             data = [{k: v for k, v in a.tabular(timezone).items() if k in headers.keys()} for a in alerts]
             click.echo(tabulate(data, headers=headers, tablefmt=obj['output']))
@@ -60,23 +74,28 @@ def cli(obj, ids, query, filters, display, from_date=None):
         else:
             for alert in reversed(alerts):
                 color = COLOR_MAP.get(alert.severity, {'fg': 'white'})
-                click.secho('{}|{}|{}|{:5d}|{}|{:<5s}|{:<10s}|{:<18s}|{:12s}|{:16s}|{:12s}'.format(
-                    alert.id[0:8],
-                    DateTime.localtime(alert.last_receive_time, timezone),
-                    alert.severity,
-                    alert.duplicate_count,
-                    alert.customer or '-',
-                    alert.environment,
-                    ','.join(alert.service),
-                    alert.resource,
-                    alert.group,
-                    alert.event,
-                    alert.value or 'n/a'), fg=color['fg'])
+                click.secho(
+                    '{}|{}|{}|{:5d}|{}|{:<5s}|{:<10s}|{:<18s}|{:12s}|{:16s}|{:12s}'.format(
+                        alert.id[0:8],
+                        DateTime.localtime(alert.last_receive_time, timezone),
+                        alert.severity,
+                        alert.duplicate_count,
+                        alert.customer or '-',
+                        alert.environment,
+                        ','.join(alert.service),
+                        alert.resource,
+                        alert.group,
+                        alert.event,
+                        alert.value or 'n/a',
+                    ),
+                    fg=color['fg'],
+                )
                 click.secho(f'   |{alert.text}', fg=color['fg'])
 
                 if display == 'full':
-                    click.secho('    severity   | {} -> {}'.format(alert.previous_severity,
-                                                                   alert.severity), fg=color['fg'])
+                    click.secho(
+                        '    severity   | {} -> {}'.format(alert.previous_severity, alert.severity), fg=color['fg']
+                    )
                     click.secho(f'    trend      | {alert.trend_indication}', fg=color['fg'])
                     click.secho(f'    status     | {alert.status}', fg=color['fg'])
                     click.secho(f'    resource   | {alert.resource}', fg=color['fg'])
@@ -90,12 +109,18 @@ def cli(obj, ids, query, filters, display, from_date=None):
 
                     latency = alert.receive_time - alert.create_time
 
-                    click.secho('        time created  | {}'.format(
-                        DateTime.localtime(alert.create_time, timezone)), fg=color['fg'])
-                    click.secho('        time received | {}'.format(
-                        DateTime.localtime(alert.receive_time, timezone)), fg=color['fg'])
-                    click.secho('        last received | {}'.format(
-                        DateTime.localtime(alert.last_receive_time, timezone)), fg=color['fg'])
+                    click.secho(
+                        '        time created  | {}'.format(DateTime.localtime(alert.create_time, timezone)),
+                        fg=color['fg'],
+                    )
+                    click.secho(
+                        '        time received | {}'.format(DateTime.localtime(alert.receive_time, timezone)),
+                        fg=color['fg'],
+                    )
+                    click.secho(
+                        '        last received | {}'.format(DateTime.localtime(alert.last_receive_time, timezone)),
+                        fg=color['fg'],
+                    )
                     click.secho(f'        latency       | {latency.microseconds / 1000}ms', fg=color['fg'])
                     click.secho(f'        timeout       | {alert.timeout}s', fg=color['fg'])
 

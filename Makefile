@@ -32,22 +32,22 @@ $(PIP):
 	python3 -m venv $(VENV)
 
 $(PYLINT): $(PIP)
-	$(PIP) install pylint
+	$(PIP) install pylint==2.11.1
 
 $(MYPY): $(PIP)
-	$(PIP) install mypy
+	$(PIP) install mypy==0.812
 
 $(BLACK): $(PIP)
-	$(PIP) install black
+	$(PIP) install black==21.11b1
 
 $(TOX): $(PIP)
 	$(PIP) install tox
 
 $(PYTEST): $(PIP)
-	$(PIP) install pytest
+	$(PIP) install pytest==6.2.5 pytest-cov==3.0.0
 
 $(PRE_COMMIT): $(PIP)
-	$(PIP) install pre-commit
+	$(PIP) install pre-commit==2.15.0
 
 $(WHEEL): $(PIP)
 	$(PIP) install wheel
@@ -58,6 +58,10 @@ $(TWINE): $(PIP)
 ifdef TOXENV
 toxparams?=-e $(TOXENV)
 endif
+
+## install			- Install dependencies.
+install: $(PIP)
+	$(PIP) install -r requirements.txt
 
 ## format			- Code formatter.
 format: $(BLACK)

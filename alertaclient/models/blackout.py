@@ -4,7 +4,6 @@ from alertaclient.utils import DateTime
 
 
 class Blackout:
-
     def __init__(self, environment, **kwargs):
         if not environment:
             raise ValueError('Missing mandatory value for "environment"')
@@ -80,14 +79,7 @@ class Blackout:
             more += 'customer=%r, ' % self.customer
 
         return 'Blackout(id={!r}, priority={!r}, status={!r}, environment={!r}, {}start_time={!r}, end_time={!r}, remaining={!r})'.format(
-            self.id,
-            self.priority,
-            self.status,
-            self.environment,
-            more,
-            self.start_time,
-            self.end_time,
-            self.remaining
+            self.id, self.priority, self.status, self.environment, more, self.start_time, self.end_time, self.remaining
         )
 
     @classmethod
@@ -112,7 +104,7 @@ class Blackout:
             duration=json.get('duration', None),
             user=json.get('user', None),
             create_time=DateTime.parse(json.get('createTime')),
-            text=json.get('text', None)
+            text=json.get('text', None),
         )
 
     def tabular(self, timezone=None):
@@ -134,5 +126,5 @@ class Blackout:
             'remaining': f'{self.remaining}s',
             'user': self.user,
             'createTime': DateTime.localtime(self.create_time, timezone),
-            'text': self.text
+            'text': self.text,
         }

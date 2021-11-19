@@ -27,23 +27,23 @@ class Screen:
     def main(self, stdscr):
         self.screen = stdscr
 
-        curses.use_default_colors()
+        curses.use_default_colors()  # pylint: disable = no-member
 
-        curses.init_pair(1, curses.COLOR_RED, -1)
-        curses.init_pair(2, curses.COLOR_MAGENTA, -1)
-        curses.init_pair(3, curses.COLOR_YELLOW, -1)
-        curses.init_pair(4, curses.COLOR_BLUE, -1)
-        curses.init_pair(5, curses.COLOR_CYAN, -1)
-        curses.init_pair(6, curses.COLOR_GREEN, -1)
-        curses.init_pair(7, curses.COLOR_WHITE, curses.COLOR_BLACK)
+        curses.init_pair(1, curses.COLOR_RED, -1)  # pylint: disable = no-member
+        curses.init_pair(2, curses.COLOR_MAGENTA, -1)  # pylint: disable = no-member
+        curses.init_pair(3, curses.COLOR_YELLOW, -1)  # pylint: disable = no-member
+        curses.init_pair(4, curses.COLOR_BLUE, -1)  # pylint: disable = no-member
+        curses.init_pair(5, curses.COLOR_CYAN, -1)  # pylint: disable = no-member
+        curses.init_pair(6, curses.COLOR_GREEN, -1)  # pylint: disable = no-member
+        curses.init_pair(7, curses.COLOR_WHITE, curses.COLOR_BLACK)  # pylint: disable = no-member
 
-        COLOR_RED = curses.color_pair(1)
-        COLOR_MAGENTA = curses.color_pair(2)
-        COLOR_YELLOW = curses.color_pair(3)
-        COLOR_BLUE = curses.color_pair(4)
-        COLOR_CYAN = curses.color_pair(5)
-        COLOR_GREEN = curses.color_pair(6)
-        COLOR_BLACK = curses.color_pair(7)
+        COLOR_RED = curses.color_pair(1)  # pylint: disable = no-member
+        COLOR_MAGENTA = curses.color_pair(2)  # pylint: disable = no-member
+        COLOR_YELLOW = curses.color_pair(3)  # pylint: disable = no-member
+        COLOR_BLUE = curses.color_pair(4)  # pylint: disable = no-member
+        COLOR_CYAN = curses.color_pair(5)  # pylint: disable = no-member
+        COLOR_GREEN = curses.color_pair(6)  # pylint: disable = no-member
+        COLOR_BLACK = curses.color_pair(7)  # pylint: disable = no-member
 
         self.SEVERITY_MAP = {
             'security': ['Sec', COLOR_BLACK],
@@ -58,7 +58,7 @@ class Screen:
             'informational': ['Info', COLOR_GREEN],
             'debug': ['Dbug', COLOR_BLACK],
             'trace': ['Trce', COLOR_BLACK],
-            'unknown': ['Unkn', COLOR_BLACK]
+            'unknown': ['Unkn', COLOR_BLACK],
         }
 
         self.screen.keypad(1)
@@ -91,8 +91,14 @@ class Screen:
 
         # draw alerts
         text_width = self.cols - 95 if self.cols >= 95 else 0
-        self._addstr(2, 1, 'Sev. Time     Dupl. Customer Env.         Service      Resource     Group Event'
-                     + '        Value Text' + ' ' * (text_width - 4), curses.A_UNDERLINE)
+        self._addstr(
+            2,
+            1,
+            'Sev. Time     Dupl. Customer Env.         Service      Resource     Group Event'
+            + '        Value Text'
+            + ' ' * (text_width - 4),
+            curses.A_UNDERLINE,
+        )
 
         def short_sev(severity):
             return self.SEVERITY_MAP.get(severity, self.SEVERITY_MAP['unknown'])[0]
@@ -121,7 +127,7 @@ class Screen:
                 alert.event,
                 alert.value or 'n/a',
                 alert.text,
-                width=text_width
+                width=text_width,
             )
             # XXX - needed to support python2 and python3
             if not isinstance(text, str):

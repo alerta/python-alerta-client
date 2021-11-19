@@ -4,14 +4,14 @@ from alertaclient.utils import DateTime
 
 
 class Alert:
-
     def __init__(self, resource, event, **kwargs):
         if not resource:
             raise ValueError('Missing mandatory value for "resource"')
         if not event:
             raise ValueError('Missing mandatory value for "event"')
-        if any(['.' in key for key in kwargs.get('attributes', dict()).keys()])\
-                or any(['$' in key for key in kwargs.get('attributes', dict()).keys()]):
+        if any(['.' in key for key in kwargs.get('attributes', dict()).keys()]) or any(
+            ['$' in key for key in kwargs.get('attributes', dict()).keys()]
+        ):
             raise ValueError('Attribute keys must not contain "." or "$"')
 
         self.id = kwargs.get('id', None)
@@ -47,7 +47,8 @@ class Alert:
 
     def __repr__(self):
         return 'Alert(id={!r}, environment={!r}, resource={!r}, event={!r}, severity={!r}, status={!r}, customer={!r})'.format(
-            self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)
+            self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer
+        )
 
     @classmethod
     def parse(cls, json):
@@ -82,7 +83,6 @@ class Alert:
             timeout=json.get('timeout', None),
             raw_data=json.get('rawData', None),
             customer=json.get('customer', None),
-
             duplicate_count=json.get('duplicateCount', None),
             repeat=json.get('repeat', None),
             previous_severity=json.get('previousSeverity', None),
@@ -90,7 +90,7 @@ class Alert:
             receive_time=DateTime.parse(json.get('receiveTime')),
             last_receive_id=json.get('lastReceiveId', None),
             last_receive_time=DateTime.parse(json.get('lastReceiveTime')),
-            history=json.get('history', None)
+            history=json.get('history', None),
         )
 
     def get_id(self, short=False):
@@ -124,5 +124,5 @@ class Alert:
             'trendIndication': self.trend_indication,
             'receiveTime': DateTime.localtime(self.receive_time, timezone),
             'lastReceiveId': self.last_receive_id,
-            'history': self.history
+            'history': self.history,
         }

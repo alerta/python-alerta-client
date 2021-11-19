@@ -10,8 +10,12 @@ from alertaclient.utils import origin
 @click.command('keys', short_help='List API keys')
 @click.option('--alert', is_flag=True, help='Alert on expiring and expired keys')
 @click.option('--maxage', metavar='DAYS', default=7, type=int, help='Max remaining days before alerting')
-@click.option('--timeout', metavar='SECONDS', default=86400, type=int, help='Seconds before expired key alerts will be expired')
-@click.option('--severity', '-s', metavar='SEVERITY', default='warning', help='Severity for expiring and expired alerts')
+@click.option(
+    '--timeout', metavar='SECONDS', default=86400, type=int, help='Seconds before expired key alerts will be expired'
+)
+@click.option(
+    '--severity', '-s', metavar='SEVERITY', default='warning', help='Severity for expiring and expired alerts'
+)
 @click.pass_obj
 def cli(obj, alert, maxage, severity, timeout):
     """List API keys."""
@@ -23,8 +27,15 @@ def cli(obj, alert, maxage, severity, timeout):
     else:
         timezone = obj['timezone']
         headers = {
-            'id': 'ID', 'key': 'API KEY', 'user': 'USER', 'scopes': 'SCOPES', 'text': 'TEXT',
-            'expireTime': 'EXPIRES', 'count': 'COUNT', 'lastUsedTime': 'LAST USED', 'customer': 'CUSTOMER'
+            'id': 'ID',
+            'key': 'API KEY',
+            'user': 'USER',
+            'scopes': 'SCOPES',
+            'text': 'TEXT',
+            'expireTime': 'EXPIRES',
+            'count': 'COUNT',
+            'lastUsedTime': 'LAST USED',
+            'customer': 'CUSTOMER',
         }
         click.echo(tabulate([k.tabular(timezone) for k in client.get_keys()], headers=headers, tablefmt=obj['output']))
 
@@ -49,7 +60,7 @@ def cli(obj, alert, maxage, severity, timeout):
                         origin=origin(),
                         type='apiKeyAlert',
                         timeout=timeout,
-                        customer=b['customer']
+                        customer=b['customer'],
                     )
                 elif b['status'] == 'active':
                     expiration = datetime.fromisoformat(b['expireTime'].split('.')[0])
@@ -68,7 +79,7 @@ def cli(obj, alert, maxage, severity, timeout):
                             origin=origin(),
                             type='apiKeyAlert',
                             timeout=timeout,
-                            customer=b['customer']
+                            customer=b['customer'],
                         )
                     else:
                         client.send_alert(
@@ -84,5 +95,5 @@ def cli(obj, alert, maxage, severity, timeout):
                             origin=origin(),
                             type='apiKeyAlert',
                             timeout=timeout,
-                            customer=b['customer']
+                            customer=b['customer'],
                         )

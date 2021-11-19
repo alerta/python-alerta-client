@@ -11,7 +11,13 @@ import click
 @click.option('--environment', '-E', metavar='ENVIRONMENT', help='Environment eg. Production, Development')
 @click.option('--severity', '-s', metavar='SEVERITY', help='Severity eg. critical, major, minor, warning')
 @click.option('--correlate', '-C', metavar='EVENT', multiple=True, help='List of related events eg. node_up, node_down')
-@click.option('--service', '-S', metavar='SERVICE', multiple=True, help='List of affected services eg. app name, Web, Network, Storage, Database, Security')
+@click.option(
+    '--service',
+    '-S',
+    metavar='SERVICE',
+    multiple=True,
+    help='List of affected services eg. app name, Web, Network, Storage, Database, Security',
+)
 @click.option('--group', '-g', metavar='GROUP', help='Group event by type eg. OS, Performance')
 @click.option('--value', '-v', metavar='VALUE', help='Event value')
 @click.option('--text', '-t', metavar='DESCRIPTION', help='Description of alert')
@@ -20,10 +26,32 @@ import click
 @click.option('--origin', '-O', metavar='ORIGIN', help='Origin of alert in form app/host')
 @click.option('--type', metavar='EVENT_TYPE', help='Event type eg. exceptionAlert, performanceAlert, nagiosAlert')
 @click.option('--timeout', metavar='SECONDS', type=int, help='Seconds before an open alert will be expired')
-@click.option('--raw-data', metavar='STRING', help='Raw data of orignal alert eg. SNMP trap PDU. \'@\' to read from file, \'-\' to read from stdin')
+@click.option(
+    '--raw-data',
+    metavar='STRING',
+    help='Raw data of orignal alert eg. SNMP trap PDU. \'@\' to read from file, \'-\' to read from stdin',
+)
 @click.option('--customer', metavar='STRING', help='Customer')
 @click.pass_obj
-def cli(obj, resource, event, environment, severity, correlate, service, group, value, text, tags, attributes, origin, type, timeout, raw_data, customer):
+def cli(
+    obj,
+    resource,
+    event,
+    environment,
+    severity,
+    correlate,
+    service,
+    group,
+    value,
+    text,
+    tags,
+    attributes,
+    origin,
+    type,
+    timeout,
+    raw_data,
+    customer,
+):
     """Send an alert."""
     client = obj['client']
 
@@ -45,7 +73,7 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
                 type=kwargs.get('type'),
                 timeout=kwargs.get('timeout'),
                 raw_data=kwargs.get('raw_data'),
-                customer=kwargs.get('customer')
+                customer=kwargs.get('customer'),
             )
         except Exception as e:
             click.echo(f'ERROR: {e}', err=True)
@@ -92,5 +120,5 @@ def cli(obj, resource, event, environment, severity, correlate, service, group, 
         type=type,
         timeout=timeout,
         raw_data=raw_data,
-        customer=customer
+        customer=customer,
     )

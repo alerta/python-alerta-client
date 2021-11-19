@@ -17,8 +17,18 @@ def cli(obj, roles):
         click.echo(json.dumps(r['users'], sort_keys=True, indent=4, ensure_ascii=False))
     else:
         timezone = obj['timezone']
-        headers = {'id': 'ID', 'name': 'USER', 'email': 'EMAIL', 'roles': 'ROLES', 'status': 'STATUS', 'text': 'TEXT',
-                   'createTime': 'CREATED', 'updateTime': 'LAST UPDATED', 'lastLogin': 'LAST LOGIN', 'email_verified': 'VERIFIED'}
+        headers = {
+            'id': 'ID',
+            'name': 'USER',
+            'email': 'EMAIL',
+            'roles': 'ROLES',
+            'status': 'STATUS',
+            'text': 'TEXT',
+            'createTime': 'CREATED',
+            'updateTime': 'LAST UPDATED',
+            'lastLogin': 'LAST LOGIN',
+            'email_verified': 'VERIFIED',
+        }
         click.echo(
             tabulate([u.tabular(timezone) for u in client.get_users(query)], headers=headers, tablefmt=obj['output'])
         )

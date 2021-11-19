@@ -4,7 +4,6 @@ from alertaclient.utils import DateTime
 
 
 class History:
-
     def __init__(self, id, event, **kwargs):
         self.id = id
         self.event = event
@@ -18,11 +17,11 @@ class History:
 
     def __repr__(self):
         return 'History(id={!r}, event={!r}, severity={!r}, status={!r}, type={!r})'.format(
-            self.id, self.event, self.severity, self.status, self.change_type)
+            self.id, self.event, self.severity, self.status, self.change_type
+        )
 
 
 class RichHistory:
-
     def __init__(self, resource, event, **kwargs):
 
         self.id = kwargs.get('id', None)
@@ -45,7 +44,15 @@ class RichHistory:
 
     def __repr__(self):
         return 'RichHistory(id={!r}, environment={!r}, resource={!r}, event={!r}, severity={!r}, status={!r}, type={!r}, customer={!r})'.format(
-            self.id, self.environment, self.resource, self.event, self.severity, self.status, self.change_type, self.customer)
+            self.id,
+            self.environment,
+            self.resource,
+            self.event,
+            self.severity,
+            self.status,
+            self.change_type,
+            self.customer,
+        )
 
     @classmethod
     def parse(cls, json):
@@ -70,7 +77,7 @@ class RichHistory:
             origin=json.get('origin', None),
             change_type=json.get('type', None),
             update_time=DateTime.parse(json.get('updateTime')),
-            customer=json.get('customer', None)
+            customer=json.get('customer', None),
         )
 
     def tabular(self, timezone=None):
@@ -87,7 +94,7 @@ class RichHistory:
             # 'origin': self.origin,
             'type': self.change_type,
             'updateTime': DateTime.localtime(self.update_time, timezone),
-            'customer': self.customer
+            'customer': self.customer,
         }
 
         if self.severity:

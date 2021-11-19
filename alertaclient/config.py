@@ -22,12 +22,11 @@ default_config = {
     'sslkey': None,
     'output': 'simple',
     'color': True,
-    'debug': False
+    'debug': False,
 }
 
 
 class Config:
-
     def __init__(self, config_file, config_override=None):
         self.options = default_config
         self.parser = configparser.RawConfigParser(defaults=self.options)
@@ -60,7 +59,9 @@ class Config:
     def get_remote_config(self, endpoint=None):
         config_url = '{}/config'.format(endpoint or self.options['endpoint'])
         try:
-            r = requests.get(config_url, verify=self.options['sslverify'], cert=(self.options['sslcert'], self.options['sslkey']))
+            r = requests.get(
+                config_url, verify=self.options['sslverify'], cert=(self.options['sslcert'], self.options['sslkey'])
+            )
             r.raise_for_status()
             remote_config = r.json()
         except requests.RequestException as e:

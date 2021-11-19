@@ -41,7 +41,7 @@ class User:
             last_login=DateTime.parse(json.get('lastLogin')),
             text=json.get('text', None),
             update_time=DateTime.parse(json.get('updateTime')),
-            email_verified=json.get('email_verified', None)
+            email_verified=json.get('email_verified', None),
         )
 
     def tabular(self, timezone=None):
@@ -56,5 +56,5 @@ class User:
             'lastLogin': DateTime.localtime(self.last_login, timezone),
             'text': self.text,
             'updateTime': DateTime.localtime(self.update_time, timezone),
-            'email_verified': 'yes' if self.email_verified else 'no'
+            'email_verified': 'yes' if self.email_verified else 'no',
         }
