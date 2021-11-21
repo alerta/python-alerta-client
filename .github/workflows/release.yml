@@ -13,11 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install
+        id: install
+        run: make install
       - name: Lint
         id: lint
         run: |
-          make pylint
-          make mypy
+          make format
+          make lint
       - name: Test
         id: test
         run: make test

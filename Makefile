@@ -3,11 +3,11 @@
 VENV=venv
 PYTHON=$(VENV)/bin/python
 PIP=$(VENV)/bin/pip --disable-pip-version-check
-PYLINT=$(VENV)/bin/pylint
+FLAKE8=$(VENV)/bin/flake8
 MYPY=$(VENV)/bin/mypy
-BLACK=$(VENV)/bin/black
 TOX=$(VENV)/bin/tox
 PYTEST=$(VENV)/bin/pytest
+DOCKER_COMPOSE=docker-compose
 PRE_COMMIT=$(VENV)/bin/pre-commit
 WHEEL=$(VENV)/bin/wheel
 TWINE=$(VENV)/bin/twine
@@ -31,23 +31,20 @@ all:	help
 $(PIP):
 	python3 -m venv $(VENV)
 
-$(PYLINT): $(PIP)
-	$(PIP) install pylint
+$(FLAKE8): $(PIP)
+	$(PIP) install flake8==4.0.1
 
 $(MYPY): $(PIP)
-	$(PIP) install mypy
-
-$(BLACK): $(PIP)
-	$(PIP) install black
+	$(PIP) install mypy==0.812
 
 $(TOX): $(PIP)
 	$(PIP) install tox
 
 $(PYTEST): $(PIP)
-	$(PIP) install pytest
+	$(PIP) install pytest==6.2.5 pytest-cov==3.0.0
 
 $(PRE_COMMIT): $(PIP)
-	$(PIP) install pre-commit
+	$(PIP) install pre-commit==2.15.0
 
 $(WHEEL): $(PIP)
 	$(PIP) install wheel
@@ -59,19 +56,18 @@ ifdef TOXENV
 toxparams?=-e $(TOXENV)
 endif
 
-## format			- Code formatter.
-format: $(BLACK)
-	$(BLACK) -l120 -S -v $(PROJECT)
-
-## lint			- Lint and type checking.
-lint: $(PYLINT) $(MYPY) $(BLACK)
-	$(PYLINT) --rcfile pylintrc $(PROJECT)
-	$(MYPY) $(PROJECT)/
-	$(BLACK) -l120 -S --check -v $(PROJECT) || true
+## install		- Install dependencies.
+install: $(PIP)
+	$(PIP) install -r requirements.txt
 
 ## hooks			- Run pre-commit hooks.
 hooks: $(PRE_COMMIT)
-	$(PRE_COMMIT) run -a
+	$(PRE_COMMIT) run --all-files --show-diff-on-failure
+
+## lint			- Lint and type checking.
+lint: $(FLAKE8) $(MYPY)
+	$(FLAKE8) $(PROJECT)/
+	$(MYPY) $(PROJECT)/
 
 ## test			- Run all tests.
 test: test.unit test.integration
@@ -82,11 +78,11 @@ test.unit: $(TOX) $(PYTEST)
 
 ## test.integration	- Run integration tests.
 test.integration:
-	docker-compose -f docker-compose.ci.yaml rm --stop --force
-	docker-compose -f docker-compose.ci.yaml pull
-	docker-compose -f docker-compose.ci.yaml build sut
-	docker-compose -f docker-compose.ci.yaml up --exit-code-from sut
-	docker-compose -f docker-compose.ci.yaml rm --stop --force
+	$(DOCKER_COMPOSE) -f docker-compose.ci.yaml rm --stop --force
+	$(DOCKER_COMPOSE) -f docker-compose.ci.yaml pull
+	$(DOCKER_COMPOSE) -f docker-compose.ci.yaml build sut
+	$(DOCKER_COMPOSE) -f docker-compose.ci.yaml up --exit-code-from sut
+	$(DOCKER_COMPOSE) -f docker-compose.ci.yaml rm --stop --force
 
 ## run			- Run application.
 run:
@@ -102,7 +98,8 @@ build: $(PIP) $(WHEEL) $(PKG_SDIST) $(PKG_WHEEL)
 
 $(PKG_SDIST):
 	$(PYTHON) setup.py sdist
-$(PKG_WHEEL):
+
+$(PKG_WHEEL): $(WHEEL)
 	$(PYTHON) setup.py bdist_wheel
 
 ## upload			- Upload package to PyPI.
