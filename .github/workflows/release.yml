@@ -33,10 +33,8 @@ jobs:
           pre-commit run -a --show-diff-on-failure
       - name: Test with pytest
         id: test
-        env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/alerta
         run: |
-          pytest --cov=alerta tests/*.py
+          pytest --cov=alertaclient tests/*.py
       - uses: act10ns/slack@v2
         with:
           status: ${{ job.status }}
