@@ -1,3 +1,21 @@
+## v8.5.2 (2023-03-18)
+
+### Refactor
+
+- convert formatted strings to f-strings (#272)
+
+## v8.5.1 (2021-11-21)
+
+### Feat
+
+- Add a --alert flag to alert keys to alert on expired and expiring key (#274)
+- Add option to use custom value when creating API key (#270)
+
+### Refactor
+
+- convert formatted strings to f-strings (#272)
+- assign api key directly (#271)
+
 ## v8.5.0 (2021-04-18)
 
 ### Fix
