@@ -74,5 +74,5 @@ jobs:
 
       - name: Test Install
         run: |
-          python3 -m pip install --upgrade alerta-server
+          python3 -m pip install --upgrade alerta
           python3 -m pip freeze
