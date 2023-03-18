@@ -1,8 +1,8 @@
 version: '3.7'
 
 services:
-  api:
-    image: ghcr.io/alerta/alerta-api:latest
+  alerta:
+    image: alerta/alerta-web
     ports:
       - "8080:8080"
     depends_on:
@@ -14,34 +14,17 @@ services:
       - ADMIN_USERS=admin@alerta.io,devops@alerta.io #default password: alerta
       - ADMIN_KEY=demo-key  # assigned to first user in ADMIN_USERS list
       # - PLUGINS=reject,blackout,normalise,enhance
-    networks:
-      net:
-        aliases:
-          - api
 
   db:
-    image: postgres:9.6
-    volumes:
-      - /var/lib/postgresql/data
+    image: postgres:14
     environment:
       - POSTGRES_DB=monitoring
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     restart: always
-    networks:
-      net:
-        aliases:
-          - db
 
   sut:
     build: .
     depends_on:
-      - api
-    command: ["./wait-for-it.sh", "api:8080", "-t", "60", "--", "pytest", "tests/integration/"]
-    networks:
-      net:
-        aliases:
-          - sut
-
-networks:
-  net: {}
+      - alerta
+    command: ["./wait-for-it.sh", "alerta:8080", "-t", "60", "--", "pytest", "tests/integration/"]

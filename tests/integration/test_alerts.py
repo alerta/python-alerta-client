@@ -6,7 +6,7 @@ from alertaclient.api import Client
 class AlertTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.client = Client(endpoint='http://api:8080', key='demo-key')
+        self.client = Client(endpoint='http://alerta:8080/api', key='demo-key')
 
     def test_alert(self):
         id, alert, message = self.client.send_alert(

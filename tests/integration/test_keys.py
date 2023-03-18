@@ -7,7 +7,7 @@ from alertaclient.models.enums import Scope
 class AlertTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.client = Client(endpoint='http://api:8080', key='demo-key')
+        self.client = Client(endpoint='http://alerta:8080/api', key='demo-key')
 
     def test_key(self):
         api_key = self.client.create_key(
