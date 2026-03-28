@@ -1,4 +1,10 @@
+from __future__ import annotations
+
+from typing import Any
+
 from alertaclient.utils import DateTime
+
+JSON = dict[str, Any]
 
 
 class User:
@@ -6,7 +12,7 @@ class User:
     User model for BasicAuth only.
     """
 
-    def __init__(self, name, email, roles, text, **kwargs):
+    def __init__(self, name: str, email: str, roles: list[str], text: str | None, **kwargs: Any) -> None:
         self.id = kwargs.get('id', None)
         self.name = name
         self.email = email
@@ -20,16 +26,16 @@ class User:
         self.email_verified = kwargs.get('email_verified', False)
 
     @property
-    def domain(self):
+    def domain(self) -> str | None:
         return self.email.split('@')[1] if '@' in self.email else None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'User(id={!r}, name={!r}, email={!r}, status={!r}, roles={!r}, email_verified={!r})'.format(
             self.id, self.name, self.email, self.status, ','.join(self.roles), self.email_verified
         )
 
     @classmethod
-    def parse(cls, json):
+    def parse(cls, json: JSON) -> User:
         return User(
             id=json.get('id'),
             name=json.get('name'),
@@ -44,7 +50,7 @@ class User:
             email_verified=json.get('email_verified', None)
         )
 
-    def tabular(self, timezone=None):
+    def tabular(self, timezone: str | None = None) -> dict[str, Any]:
         return {
             'id': self.id,
             'name': self.name,

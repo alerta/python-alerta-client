@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import Any
 
 from alertaclient.utils import DateTime
+
+JSON = dict[str, Any]
 
 
 class Alert:
 
-    def __init__(self, resource, event, **kwargs):
+    def __init__(self, resource: str, event: str, **kwargs: Any) -> None:
         if not resource:
             raise ValueError('Missing mandatory value for "resource"')
         if not event:
@@ -45,12 +50,12 @@ class Alert:
         self.last_receive_time = kwargs.get('last_receive_time', None)
         self.history = kwargs.get('history', None) or list()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Alert(id={!r}, environment={!r}, resource={!r}, event={!r}, severity={!r}, status={!r}, customer={!r})'.format(
             self.id, self.environment, self.resource, self.event, self.severity, self.status, self.customer)
 
     @classmethod
-    def parse(cls, json):
+    def parse(cls, json: JSON) -> Alert:
         if not isinstance(json.get('correlate', []), list):
             raise ValueError('correlate must be a list')
         if not isinstance(json.get('service', []), list):
@@ -93,10 +98,10 @@ class Alert:
             history=json.get('history', None)
         )
 
-    def get_id(self, short=False):
+    def get_id(self, short: bool = False) -> str | None:
         return self.id[:8] if short else self.id
 
-    def tabular(self, timezone=None):
+    def tabular(self, timezone: str | None = None) -> dict[str, Any]:
         return {
             'id': self.get_id(short=True),
             'lastReceiveTime': DateTime.localtime(self.last_receive_time, timezone),

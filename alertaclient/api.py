@@ -1,13 +1,17 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
 import uuid
 from datetime import datetime
 from http.client import HTTPConnection
+from typing import Any
 from urllib.parse import urlencode
 
 import requests
 from requests.auth import AuthBase, HTTPBasicAuth
+from requests.models import PreparedRequest, Response
 from requests_hawk import HawkAuth
 
 from alertaclient.auth.utils import merge
@@ -25,6 +29,9 @@ from alertaclient.models.permission import Permission
 from alertaclient.models.user import User
 from alertaclient.utils import CustomJsonEncoder, DateTime
 
+JSON = dict[str, Any]
+Query = list[tuple[str, str]]
+
 logger = logging.getLogger('alerta.client')
 
 
@@ -32,8 +39,8 @@ class Client:
 
     DEFAULT_ENDPOINT = 'http://localhost:8080'
 
-    def __init__(self, endpoint=None, key=None, secret=None, token=None, username=None, password=None, timeout=5.0,
-                 ssl_verify=True, ssl_cert=None, ssl_key=None, headers=None, debug=False):
+    def __init__(self, endpoint: str | None = None, key: str | None = None, secret: str | None = None, token: str | None = None, username: str | None = None, password: str | None = None, timeout: float = 5.0,
+                 ssl_verify: bool = True, ssl_cert: str | None = None, ssl_key: str | None = None, headers: dict[str, str] | None = None, debug: bool = False) -> None:
         self.endpoint = endpoint or os.environ.get('ALERTA_ENDPOINT', self.DEFAULT_ENDPOINT)
 
         if debug:
@@ -44,7 +51,7 @@ class Client:
                                timeout, ssl_verify, ssl_cert, ssl_key, headers, debug)
 
     # Alerts
-    def send_alert(self, resource, event, **kwargs):
+    def send_alert(self, resource: str, event: str, **kwargs) -> tuple[str, Alert | None, str | None]:
         data = {
             'id': kwargs.get('id'),
             'resource': resource,
@@ -69,10 +76,10 @@ class Client:
         alert = Alert.parse(r['alert']) if 'alert' in r else None
         return r.get('id', '-'), alert, r.get('message', None)
 
-    def get_alert(self, id):
+    def get_alert(self, id: str) -> Alert:
         return Alert.parse(self.http.get('/alert/%s' % id)['alert'])
 
-    def set_status(self, id, status, text='', timeout=None):
+    def set_status(self, id: str, status: str, text: str = '', timeout: int | None = None) -> JSON:
         data = {
             'status': status,
             'text': text,
@@ -80,7 +87,7 @@ class Client:
         }
         return self.http.put('/alert/%s/status' % id, data)
 
-    def action(self, id, action, text='', timeout=None):
+    def action(self, id: str, action: str, text: str = '', timeout: int | None = None) -> JSON:
         data = {
             'action': action,
             'text': text,
@@ -88,30 +95,30 @@ class Client:
         }
         return self.http.put('/alert/%s/action' % id, data)
 
-    def tag_alert(self, id, tags):
+    def tag_alert(self, id: str, tags: list[str]) -> JSON:
         return self.http.put('/alert/%s/tag' % id, {'tags': tags})
 
-    def untag_alert(self, id, tags):
+    def untag_alert(self, id: str, tags: list[str]) -> JSON:
         return self.http.put('/alert/%s/untag' % id, {'tags': tags})
 
-    def update_attributes(self, id, attributes):
+    def update_attributes(self, id: str, attributes: dict[str, Any]) -> JSON:
         data = {
             'attributes': attributes
         }
         return self.http.put('/alert/%s/attributes' % id, data)
 
-    def delete_alert(self, id):
+    def delete_alert(self, id: str) -> JSON:
         return self.http.delete('/alert/%s' % id)
 
-    def search(self, query=None, page=1, page_size=None):
+    def search(self, query: Query | None = None, page: int = 1, page_size: int | None = None) -> list[Alert]:
         return self.get_alerts(query, page, page_size)
 
-    def get_alerts(self, query=None, page=1, page_size=None):
+    def get_alerts(self, query: Query | None = None, page: int = 1, page_size: int | None = None) -> list[Alert]:
         r = self.http.get('/alerts', query, page=page, page_size=page_size)
         return [Alert.parse(a) for a in r['alerts']]
 
-    def get_all_alerts(self, query=None, page_size=1000):
-        alerts = []
+    def get_all_alerts(self, query: Query | None = None, page_size: int = 1000) -> list[Alert]:
+        alerts: list[Alert] = []
         page = 1
         while True:
             r = self.http.get('/alerts', query, page=page, page_size=page_size)
@@ -121,66 +128,66 @@ class Client:
             page += 1
         return alerts
 
-    def get_history(self, query=None, page=1, page_size=None):
+    def get_history(self, query: Query | None = None, page: int = 1, page_size: int | None = None) -> list[RichHistory]:
         r = self.http.get('/alerts/history', query, page=page, page_size=page_size)
         return [RichHistory.parse(a) for a in r['history']]
 
-    def get_count(self, query=None):
+    def get_count(self, query: Query | None = None) -> tuple[int, dict, dict]:
         counts = self.http.get('/alerts/count', query)
         return counts['total'], counts['severityCounts'], counts['statusCounts']
 
-    def get_top10_count(self, query=None):
+    def get_top10_count(self, query: Query | None = None) -> list[dict[str, Any]]:
         counts = self.http.get('/alerts/top10/count', query)
         return counts['top10']
 
-    def get_top10_flapping(self, query=None):
+    def get_top10_flapping(self, query: Query | None = None) -> list[dict[str, Any]]:
         counts = self.http.get('/alerts/top10/flapping', query)
         return counts['top10']
 
-    def get_top10_standing(self, query=None):
+    def get_top10_standing(self, query: Query | None = None) -> list[dict[str, Any]]:
         counts = self.http.get('/alerts/top10/standing', query)
         return counts['top10']
 
-    def get_environments(self, query=None):
+    def get_environments(self, query: Query | None = None) -> list[dict[str, Any]]:
         r = self.http.get('/environments', query)
         return r['environments']
 
-    def get_services(self, query=None):
+    def get_services(self, query: Query | None = None) -> list[dict[str, Any]]:
         r = self.http.get('/services', query)
         return r['services']
 
-    def get_groups(self, query=None):
+    def get_groups(self, query: Query | None = None) -> list[dict[str, Any]]:
         r = self.http.get('/alerts/groups', query)
         return r['groups']
 
-    def get_tags(self, query=None):
+    def get_tags(self, query: Query | None = None) -> list[dict[str, Any]]:
         r = self.http.get('/alerts/tags', query)
         return r['tags']
 
-    def alert_note(self, id, text):
+    def alert_note(self, id: str, text: str) -> Note:
         data = {
             'text': text
         }
         r = self.http.put(f'/alert/{id}/note', data)
         return Note.parse(r['note'])
 
-    def get_alert_notes(self, id, page=1, page_size=None):
+    def get_alert_notes(self, id: str, page: int = 1, page_size: int | None = None) -> list[Note]:
         r = self.http.get(f'/alert/{id}/notes', page=page, page_size=page_size)
         return [Note.parse(n) for n in r['notes']]
 
-    def update_alert_note(self, id, note_id, text):
+    def update_alert_note(self, id: str, note_id: str, text: str) -> Note:
         data = {
             'text': text,
         }
         r = self.http.put(f'/alert/{id}/note/{note_id}', data)
         return Note.parse(r['note'])
 
-    def delete_alert_note(self, id, note_id):
+    def delete_alert_note(self, id: str, note_id: str) -> JSON:
         return self.http.delete(f'/alert/{id}/note/{note_id}')
 
     # Blackouts
-    def create_blackout(self, environment, service=None, resource=None, event=None, group=None, tags=None,
-                        origin=None, customer=None, start=None, duration=None, text=None):
+    def create_blackout(self, environment: str, service: list[str] | None = None, resource: str | None = None, event: str | None = None, group: str | None = None, tags: list[str] | None = None,
+                        origin: str | None = None, customer: str | None = None, start: str | None = None, duration: int | None = None, text: str | None = None) -> Blackout:
         data = {
             'environment': environment,
             'service': service or list(),
@@ -197,14 +204,14 @@ class Client:
         r = self.http.post('/blackout', data)
         return Blackout.parse(r['blackout'])
 
-    def get_blackout(self, id):
+    def get_blackout(self, id: str) -> Blackout:
         return Blackout.parse(self.http.get('/blackout/%s' % id)['blackout'])
 
-    def get_blackouts(self, query=None):
+    def get_blackouts(self, query: Query | None = None) -> list[Blackout]:
         r = self.http.get('/blackouts', query)
         return [Blackout.parse(b) for b in r['blackouts']]
 
-    def update_blackout(self, id, **kwargs):
+    def update_blackout(self, id: str, **kwargs) -> Blackout:
         data = {
             'customer': kwargs.get('customer'),
             'environment': kwargs.get('environment'),
@@ -222,11 +229,11 @@ class Client:
         r = self.http.put(f'/blackout/{id}', data)
         return Blackout.parse(r['blackout'])
 
-    def delete_blackout(self, id):
+    def delete_blackout(self, id: str) -> JSON:
         return self.http.delete('/blackout/%s' % id)
 
     # Customers
-    def create_customer(self, customer, match):
+    def create_customer(self, customer: str, match: str) -> Customer:
         data = {
             'customer': customer,
             'match': match
@@ -234,14 +241,14 @@ class Client:
         r = self.http.post('/customer', data)
         return Customer.parse(r['customer'])
 
-    def get_customer(self, id):
+    def get_customer(self, id: str) -> Customer:
         return Customer.parse(self.http.get('/customer/%s' % id)['customer'])
 
-    def get_customers(self, query=None):
+    def get_customers(self, query: Query | None = None) -> list[Customer]:
         r = self.http.get('/customers', query)
         return [Customer.parse(c) for c in r['customers']]
 
-    def update_customer(self, id, **kwargs):
+    def update_customer(self, id: str, **kwargs) -> Customer:
         data = {
             'match': kwargs.get('match'),
             'customer': kwargs.get('customer')
@@ -249,11 +256,11 @@ class Client:
         r = self.http.put(f'/customer/{id}', data)
         return Customer.parse(r['customer'])
 
-    def delete_customer(self, id):
+    def delete_customer(self, id: str) -> JSON:
         return self.http.delete('/customer/%s' % id)
 
     # Heartbeats
-    def heartbeat(self, origin, tags=None, attributes=None, timeout=None, customer=None):
+    def heartbeat(self, origin: str, tags: list[str] | None = None, attributes: dict[str, Any] | None = None, timeout: int | None = None, customer: str | None = None) -> Heartbeat:
         data = {
             'origin': origin,
             'tags': tags or list(),
@@ -265,18 +272,18 @@ class Client:
         r = self.http.post('/heartbeat', data)
         return Heartbeat.parse(r['heartbeat'])
 
-    def get_heartbeat(self, id):
+    def get_heartbeat(self, id: str) -> Heartbeat:
         return Heartbeat.parse(self.http.get('/heartbeat/%s' % id)['heartbeat'])
 
-    def get_heartbeats(self, query=None):
+    def get_heartbeats(self, query: Query | None = None) -> list[Heartbeat]:
         r = self.http.get('/heartbeats', query)
         return [Heartbeat.parse(hb) for hb in r['heartbeats']]
 
-    def delete_heartbeat(self, id):
+    def delete_heartbeat(self, id: str) -> JSON:
         return self.http.delete('/heartbeat/%s' % id)
 
     # API Keys
-    def create_key(self, username, scopes=None, expires=None, text='', customer=None, **kwargs):
+    def create_key(self, username: str, scopes: list[str] | None = None, expires: str | None = None, text: str = '', customer: str | None = None, **kwargs) -> ApiKey:
         data = {
             'user': username,
             'scopes': scopes or list(),
@@ -289,14 +296,14 @@ class Client:
         r = self.http.post('/key', data)
         return ApiKey.parse(r['data'])
 
-    def get_key(self, id):
+    def get_key(self, id: str) -> ApiKey:
         return ApiKey.parse(self.http.get('/key/%s' % id)['key'])
 
-    def get_keys(self, query=None):
+    def get_keys(self, query: Query | None = None) -> list[ApiKey]:
         r = self.http.get('/keys', query)
         return [ApiKey.parse(k) for k in r['keys']]
 
-    def update_key(self, id, **kwargs):
+    def update_key(self, id: str, **kwargs) -> ApiKey:
         data = {
             'scopes': kwargs.get('scopes'),
             'text': kwargs.get('text'),
@@ -306,11 +313,11 @@ class Client:
         r = self.http.put(f'/key/{id}', data)
         return ApiKey.parse(r['key'])
 
-    def delete_key(self, id):
+    def delete_key(self, id: str) -> JSON:
         return self.http.delete('/key/%s' % id)
 
     # Permissions
-    def create_perm(self, role, scopes=None):
+    def create_perm(self, role: str, scopes: list[str] | None = None) -> Permission:
         data = {
             'match': role,
             'scopes': scopes or list()
@@ -318,14 +325,14 @@ class Client:
         r = self.http.post('/perm', data)
         return Permission.parse(r['permission'])
 
-    def get_perm(self, id):
+    def get_perm(self, id: str) -> Permission:
         return Permission.parse(self.http.get('/perm/%s' % id)['perm'])
 
-    def get_perms(self, query=None):
+    def get_perms(self, query: Query | None = None) -> list[Permission]:
         r = self.http.get('/perms', query)
         return [Permission.parse(p) for p in r['permissions']]
 
-    def update_perm(self, id, **kwargs):
+    def update_perm(self, id: str, **kwargs) -> Permission:
         data = {
             'match': kwargs.get('match'),  # role
             'scopes': kwargs.get('scopes')
@@ -333,15 +340,15 @@ class Client:
         r = self.http.put(f'/perm/{id}', data)
         return Permission.parse(r['permission'])
 
-    def delete_perm(self, id):
+    def delete_perm(self, id: str) -> JSON:
         return self.http.delete('/perm/%s' % id)
 
-    def get_scopes(self):
+    def get_scopes(self) -> list[Scope]:
         r = self.http.get('/scopes')
         return [Scope(s) for s in r['scopes']]
 
     # Users
-    def signup(self, name, email, password, status, attributes=None, text=''):
+    def signup(self, name: str, email: str, password: str, status: str, attributes: dict[str, Any] | None = None, text: str = '') -> JSON:
         data = {
             'name': name,
             'email': email,
@@ -352,7 +359,7 @@ class Client:
         }
         return self.http.post('/auth/signup', data)
 
-    def create_user(self, name, email, password, status, roles=None, attributes=None, text='', email_verified=False):
+    def create_user(self, name: str, email: str, password: str, status: str, roles: list[str] | None = None, attributes: dict[str, Any] | None = None, text: str = '', email_verified: bool = False) -> User:
         data = {
             'name': name,
             'email': email,
@@ -366,24 +373,24 @@ class Client:
         r = self.http.post('/user', data)
         return User.parse(r['user'])
 
-    def get_user(self, id):
+    def get_user(self, id: str) -> User:
         return User.parse(self.http.get('/user/%s' % id)['user'])
 
-    def get_user_groups(self, id):
+    def get_user_groups(self, id: str) -> list[Group]:
         r = self.http.get(f'/user/{id}/groups')
         return [Group.parse(g) for g in r['groups']]
 
-    def get_me(self):
+    def get_me(self) -> User:
         return User.parse(self.http.get('/user/me')['user'])
 
-    def get_me_attributes(self):
+    def get_me_attributes(self) -> dict[str, Any]:
         return self.http.get('/user/me/attributes')['attributes']
 
-    def get_users(self, query=None):
+    def get_users(self, query: Query | None = None) -> list[User]:
         r = self.http.get('/users', query)
         return [User.parse(u) for u in r['users']]
 
-    def update_user(self, id, **kwargs):
+    def update_user(self, id: str, **kwargs) -> User:
         data = {
             'name': kwargs.get('name'),
             'email': kwargs.get('email'),
@@ -397,7 +404,7 @@ class Client:
         r = self.http.put(f'/user/{id}', data)
         return User.parse(r['user'])
 
-    def update_me(self, **kwargs):
+    def update_me(self, **kwargs) -> User:
         data = {
             'name': kwargs.get('name'),
             'email': kwargs.get('email'),
@@ -409,30 +416,30 @@ class Client:
         r = self.http.put('/user/me', data)
         return User.parse(r['user'])
 
-    def update_user_attributes(self, id, attributes):
+    def update_user_attributes(self, id: str, attributes: dict[str, Any]) -> JSON:
         data = {
             'attributes': attributes
         }
         return self.http.put('/user/%s/attributes' % id, data)
 
-    def update_me_attributes(self, attributes):
+    def update_me_attributes(self, attributes: dict[str, Any]) -> JSON:
         data = {
             'attributes': attributes
         }
         return self.http.put('/user/me/attributes', data)
 
-    def delete_user(self, id):
+    def delete_user(self, id: str) -> JSON:
         return self.http.delete('/user/%s' % id)
 
     # Auth
-    def login(self, username, password):
+    def login(self, username: str, password: str) -> JSON:
         data = {
             'username': username,
             'password': password
         }
         return self.http.post('/auth/login', data)
 
-    def token(self, provider, data):
+    def token(self, provider: str, data: JSON) -> JSON | None:
         if provider == 'azure':
             return self.http.post('/auth/azure', data)
         if provider == 'github':
@@ -444,14 +451,14 @@ class Client:
         if provider == 'openid':
             return self.http.post('/auth/openid', data)
 
-    def userinfo(self):
+    def userinfo(self) -> JSON:
         return self.http.get('/userinfo')
 
-    def config(self):
+    def config(self) -> JSON:
         return self.http.get('/config')
 
     # Groups
-    def create_group(self, name, text):
+    def create_group(self, name: str, text: str) -> Group:
         data = {
             'name': name,
             'text': text
@@ -459,18 +466,18 @@ class Client:
         r = self.http.post('/group', data)
         return Group.parse(r['group'])
 
-    def get_group(self, id):
+    def get_group(self, id: str) -> Group:
         return Group.parse(self.http.get('/group/%s' % id)['group'])
 
-    def get_group_users(self, id):
+    def get_group_users(self, id: str) -> list[User]:
         r = self.http.get(f'/group/{id}/users')
         return [User.parse(u) for u in r['users']]
 
-    def get_users_groups(self, query=None):
+    def get_users_groups(self, query: Query | None = None) -> list[Group]:
         r = self.http.get('/groups', query)
         return [Group.parse(g) for g in r['groups']]
 
-    def update_group(self, id, **kwargs):
+    def update_group(self, id: str, **kwargs) -> Group:
         data = {
             'name': kwargs.get('name'),
             'text': kwargs.get('text')
@@ -478,20 +485,20 @@ class Client:
         r = self.http.put(f'/group/{id}', data)
         return Group.parse(r['group'])
 
-    def add_user_to_group(self, group_id, user_id):
+    def add_user_to_group(self, group_id: str, user_id: str) -> JSON:
         return self.http.put(f'/group/{group_id}/user/{user_id}')
 
-    def remove_user_from_group(self, group_id, user_id):
+    def remove_user_from_group(self, group_id: str, user_id: str) -> JSON:
         return self.http.delete(f'/group/{group_id}/user/{user_id}')
 
-    def delete_group(self, id):
+    def delete_group(self, id: str) -> JSON:
         return self.http.delete('/group/%s' % id)
 
     # Management
-    def mgmt_status(self):
+    def mgmt_status(self) -> JSON:
         return self.http.get('/management/status')
 
-    def housekeeping(self, expired_delete_hours=None, info_delete_hours=None):
+    def housekeeping(self, expired_delete_hours: int | None = None, info_delete_hours: int | None = None) -> None:
         # This endpoint isn't currently JSON-encoded.
         url = self.http.endpoint + '/management/housekeeping'
         params = dict()
@@ -506,21 +513,21 @@ class Client:
 
 class ApiKeyAuth(AuthBase):
 
-    def __init__(self, api_key=None, auth_token=None):
+    def __init__(self, api_key: str | None = None, auth_token: str | None = None) -> None:
         self.api_key = api_key
         self.auth_token = auth_token
 
-    def __call__(self, r):
+    def __call__(self, r: PreparedRequest) -> PreparedRequest:
         r.headers['Authorization'] = f'Key {self.api_key}'
         return r
 
 
 class TokenAuth(AuthBase):
 
-    def __init__(self, auth_token=None):
+    def __init__(self, auth_token: str | None = None) -> None:
         self.auth_token = auth_token
 
-    def __call__(self, r):
+    def __call__(self, r: PreparedRequest) -> PreparedRequest:
         r.headers['Authorization'] = f'Bearer {self.auth_token}'
         return r
 
@@ -532,19 +539,19 @@ class HTTPClient:
 
     def __init__(
         self,
-        endpoint,
-        key=None,
-        secret=None,
-        token=None,
-        username=None,
-        password=None,
-        timeout=30.0,
-        ssl_verify=True,
-        ssl_cert=None,
-        ssl_key=None,
-        headers=None,
-        debug=False,
-    ):
+        endpoint: str,
+        key: str | None = None,
+        secret: str | None = None,
+        token: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        timeout: float = 30.0,
+        ssl_verify: bool = True,
+        ssl_cert: str | None = None,
+        ssl_key: str | None = None,
+        headers: dict[str, str] | None = None,
+        debug: bool = False,
+    ) -> None:
         self.endpoint = endpoint
         self.auth = None
 
@@ -570,13 +577,13 @@ class HTTPClient:
         self.debug = debug
 
     @staticmethod
-    def default_headers():
+    def default_headers() -> dict[str, str]:
         return {
             'X-Request-ID': str(uuid.uuid4()),
             'Content-Type': 'application/json'
         }
 
-    def get(self, path, query=None, **kwargs):
+    def get(self, path: str, query: Query | None = None, **kwargs) -> JSON:
         query = query or []
         if 'page' in kwargs:
             query.append(('page', kwargs.get('page') or self.DEFAULT_PAGE_NUMBER))
@@ -590,7 +597,7 @@ class HTTPClient:
             raise
         return self._handle_error(response)
 
-    def post(self, path, data=None):
+    def post(self, path: str, data: JSON | None = None) -> JSON:
         url = self.endpoint + path
         try:
             response = self.session.post(url, data=json.dumps(data, cls=CustomJsonEncoder),
@@ -599,7 +606,7 @@ class HTTPClient:
             raise
         return self._handle_error(response)
 
-    def put(self, path, data=None):
+    def put(self, path: str, data: JSON | None = None) -> JSON:
         url = self.endpoint + path
         try:
             response = self.session.put(url, data=json.dumps(data, cls=CustomJsonEncoder),
@@ -608,7 +615,7 @@ class HTTPClient:
             raise
         return self._handle_error(response)
 
-    def delete(self, path):
+    def delete(self, path: str) -> JSON:
         url = self.endpoint + path
 
         try:
@@ -617,7 +624,7 @@ class HTTPClient:
             raise
         return self._handle_error(response)
 
-    def _handle_error(self, response):
+    def _handle_error(self, response: Response) -> JSON:
         if self.debug:
             print(f'\nbody: {response.text}')
         resp = response.json()

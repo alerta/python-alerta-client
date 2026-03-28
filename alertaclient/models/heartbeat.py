@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
+from typing import Any
 
 from alertaclient.utils import DateTime
+
+JSON = dict[str, Any]
 
 DEFAULT_MAX_LATENCY = 2000  # ms
 
 
 class Heartbeat:
 
-    def __init__(self, origin=None, tags=None, create_time=None, timeout=None, customer=None, **kwargs):
+    def __init__(self, origin: str | None = None, tags: list[str] | None = None, create_time: datetime | None = None, timeout: int | None = None, customer: str | None = None, **kwargs: Any) -> None:
         if any(['.' in key for key in kwargs.get('attributes', dict()).keys()])\
                 or any(['$' in key for key in kwargs.get('attributes', dict()).keys()]):
             raise ValueError('Attribute keys must not contain "." or "$"')
@@ -25,20 +30,20 @@ class Heartbeat:
         self.customer = customer
 
     @property
-    def latency(self):
+    def latency(self) -> int:
         return int((self.receive_time - self.create_time).total_seconds() * 1000)
 
     @property
-    def since(self):
+    def since(self) -> timedelta:
         since = datetime.utcnow() - self.receive_time
         return since - timedelta(microseconds=since.microseconds)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Heartbeat(id={!r}, origin={!r}, create_time={!r}, timeout={!r}, customer={!r})'.format(
             self.id, self.origin, self.create_time, self.timeout, self.customer)
 
     @classmethod
-    def parse(cls, json):
+    def parse(cls, json: JSON) -> Heartbeat:
         if not isinstance(json.get('tags', []), list):
             raise ValueError('tags must be a list')
         if not isinstance(json.get('attributes', {}), dict):
@@ -60,7 +65,7 @@ class Heartbeat:
             customer=json.get('customer', None)
         )
 
-    def tabular(self, timezone=None):
+    def tabular(self, timezone: str | None = None) -> dict[str, Any]:
         return {
             'id': self.id,
             'origin': self.origin,
