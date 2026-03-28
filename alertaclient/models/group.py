@@ -1,7 +1,7 @@
-from typing import Any, Dict
+from typing import Any
 from uuid import uuid4
 
-JSON = Dict[str, Any]
+JSON = dict[str, Any]
 
 
 # class GroupUser:
