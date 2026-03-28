@@ -21,7 +21,7 @@ def cli(obj, action, ids, query, filters, text):
         else:
             query = build_query(filters)
         total, _, _ = client.get_count(query)
-        ids = [a.id for a in client.get_alerts(query)]
+        ids = [a.id for a in client.get_all_alerts(query)]
 
     label = f'Action ({action}) {total} alerts'
     action_progressbar(client, action=action, ids=ids, label=label, text=text)

@@ -40,7 +40,7 @@ def cli(obj, alert_ids, query, filters, text, delete):
             else:
                 query = build_query(filters)
             total, _, _ = client.get_count(query)
-            alert_ids = [a.id for a in client.get_alerts(query)]
+            alert_ids = [a.id for a in client.get_all_alerts(query)]
 
         with click.progressbar(alert_ids, label=f'Add note to {total} alerts') as bar:
             for id in bar:

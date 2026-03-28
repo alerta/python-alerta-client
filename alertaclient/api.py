@@ -110,6 +110,17 @@ class Client:
         r = self.http.get('/alerts', query, page=page, page_size=page_size)
         return [Alert.parse(a) for a in r['alerts']]
 
+    def get_all_alerts(self, query=None, page_size=1000):
+        alerts = []
+        page = 1
+        while True:
+            r = self.http.get('/alerts', query, page=page, page_size=page_size)
+            alerts.extend([Alert.parse(a) for a in r['alerts']])
+            if len(r['alerts']) < page_size:
+                break
+            page += 1
+        return alerts
+
     def get_history(self, query=None, page=1, page_size=None):
         r = self.http.get('/alerts/history', query, page=page, page_size=page_size)
         return [RichHistory.parse(a) for a in r['history']]

@@ -20,7 +20,7 @@ def cli(obj, ids, query, filters, attributes):
         else:
             query = build_query(filters)
         total, _, _ = client.get_count(query)
-        ids = [a.id for a in client.get_alerts(query)]
+        ids = [a.id for a in client.get_all_alerts(query)]
 
     with click.progressbar(ids, label=f'Updating {total} alerts') as bar:
         for id in bar:
