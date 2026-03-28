@@ -223,7 +223,7 @@ class Client:
         r = self.http.post('/customer', data)
         return Customer.parse(r['customer'])
 
-    def get_customer(self):
+    def get_customer(self, id):
         return Customer.parse(self.http.get('/customer/%s' % id)['customer'])
 
     def get_customers(self, query=None):
@@ -278,7 +278,7 @@ class Client:
         r = self.http.post('/key', data)
         return ApiKey.parse(r['data'])
 
-    def get_key(self):
+    def get_key(self, id):
         return ApiKey.parse(self.http.get('/key/%s' % id)['key'])
 
     def get_keys(self, query=None):
@@ -307,7 +307,7 @@ class Client:
         r = self.http.post('/perm', data)
         return Permission.parse(r['permission'])
 
-    def get_perm(self):
+    def get_perm(self, id):
         return Permission.parse(self.http.get('/perm/%s' % id)['perm'])
 
     def get_perms(self, query=None):
@@ -408,7 +408,7 @@ class Client:
         data = {
             'attributes': attributes
         }
-        return self.http.put('/user/me/attributes' % data)
+        return self.http.put('/user/me/attributes', data)
 
     def delete_user(self, id):
         return self.http.delete('/user/%s' % id)
@@ -448,7 +448,7 @@ class Client:
         r = self.http.post('/group', data)
         return Group.parse(r['group'])
 
-    def get_group(self):
+    def get_group(self, id):
         return Group.parse(self.http.get('/group/%s' % id)['group'])
 
     def get_group_users(self, id):
