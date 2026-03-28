@@ -7,7 +7,6 @@ from alertaclient.models.enums import ChangeType, NoteType, Scope
 from alertaclient.models.group import Group
 from alertaclient.models.heartbeat import Heartbeat
 from alertaclient.models.key import ApiKey
-from alertaclient.models.note import Note
 from alertaclient.models.permission import Permission
 from alertaclient.models.user import User
 
