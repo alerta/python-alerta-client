@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import Any
 
 from alertaclient.utils import DateTime
+
+JSON = dict[str, Any]
 
 
 class Note:
 
-    def __init__(self, text, user, note_type, **kwargs):
+    def __init__(self, text: str, user: str, note_type: str | None, **kwargs: Any) -> None:
 
         self.id = kwargs.get('id', None)
         self.text = text
@@ -18,7 +23,7 @@ class Note:
         self.customer = kwargs.get('customer')
 
     @classmethod
-    def parse(cls, json):
+    def parse(cls, json: JSON) -> Note:
         return Note(
             id=json.get('id', None),
             text=json.get('text', None),
@@ -31,12 +36,12 @@ class Note:
             customer=json.get('customer', None)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Note(id={!r}, text={!r}, user={!r}, type={!r}, customer={!r})'.format(
             self.id, self.text, self.user, self.note_type, self.customer
         )
 
-    def tabular(self, timezone=None):
+    def tabular(self, timezone: str | None = None) -> dict[str, Any]:
         note = {
             'id': self.id,
             'text': self.text,

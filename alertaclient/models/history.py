@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import Any
 
 from alertaclient.utils import DateTime
+
+JSON = dict[str, Any]
 
 
 class History:
 
-    def __init__(self, id, event, **kwargs):
+    def __init__(self, id: str, event: str, **kwargs: Any) -> None:
         self.id = id
         self.event = event
         self.severity = kwargs.get('severity', None)
@@ -16,14 +21,14 @@ class History:
         self.update_time = kwargs.get('update_time', None) or datetime.utcnow()
         self.user = kwargs.get('user', None)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'History(id={!r}, event={!r}, severity={!r}, status={!r}, type={!r})'.format(
             self.id, self.event, self.severity, self.status, self.change_type)
 
 
 class RichHistory:
 
-    def __init__(self, resource, event, **kwargs):
+    def __init__(self, resource: str, event: str, **kwargs: Any) -> None:
 
         self.id = kwargs.get('id', None)
         self.resource = resource
@@ -43,12 +48,12 @@ class RichHistory:
         self.change_type = kwargs.get('change_type', kwargs.get('type', None))
         self.customer = kwargs.get('customer', None)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'RichHistory(id={!r}, environment={!r}, resource={!r}, event={!r}, severity={!r}, status={!r}, type={!r}, customer={!r})'.format(
             self.id, self.environment, self.resource, self.event, self.severity, self.status, self.change_type, self.customer)
 
     @classmethod
-    def parse(cls, json):
+    def parse(cls, json: JSON) -> RichHistory:
         if not isinstance(json.get('service', []), list):
             raise ValueError('service must be a list')
         if not isinstance(json.get('tags', []), list):
@@ -73,7 +78,7 @@ class RichHistory:
             customer=json.get('customer', None)
         )
 
-    def tabular(self, timezone=None):
+    def tabular(self, timezone: str | None = None) -> dict[str, Any]:
         data = {
             'id': self.id,
             'resource': self.resource,

@@ -1,15 +1,18 @@
+from __future__ import annotations
+
 import datetime
 import json
 import os
 import platform
 import sys
+from typing import Any
 
 import click
 import pytz
 
 
 class CustomJsonEncoder(json.JSONEncoder):
-    def default(self, o):  # pylint: disable=method-hidden
+    def default(self, o: Any) -> str | int:  # pylint: disable=method-hidden
         if isinstance(o, (datetime.date, datetime.datetime)):
             return o.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + '.%03dZ' % (o.microsecond // 1000)
         elif isinstance(o, datetime.timedelta):
@@ -20,7 +23,7 @@ class CustomJsonEncoder(json.JSONEncoder):
 
 class DateTime:
     @staticmethod
-    def parse(date_str):
+    def parse(date_str: str | None) -> datetime.datetime | None:
         if not isinstance(date_str, str):
             return
         try:
@@ -29,11 +32,11 @@ class DateTime:
             raise ValueError('dates must be ISO 8601 date format YYYY-MM-DDThh:mm:ss.sssZ')
 
     @staticmethod
-    def iso8601(dt):
+    def iso8601(dt: datetime.datetime) -> str:
         return dt.replace(microsecond=0).strftime('%Y-%m-%dT%H:%M:%S') + '.%03dZ' % (dt.microsecond // 1000)
 
     @staticmethod
-    def localtime(dt, timezone=None, fmt='%Y/%m/%d %H:%M:%S'):
+    def localtime(dt: datetime.datetime | None, timezone: str | None = None, fmt: str = '%Y/%m/%d %H:%M:%S') -> str | None:
         tz = pytz.timezone(timezone)
         try:
             return dt.replace(tzinfo=pytz.UTC).astimezone(tz).strftime(fmt)
@@ -41,14 +44,14 @@ class DateTime:
             return
 
 
-def build_query(filters):
+def build_query(filters: tuple[str, ...]) -> list[tuple[str, str]]:
     return [tuple(f.split('=', 1)) for f in filters if '=' in f]
 
 
-def action_progressbar(client, action, ids, label, text=None, timeout=None):
+def action_progressbar(client: Any, action: str, ids: list[str], label: str, text: str | None = None, timeout: int | None = None) -> None:
     skipped = 0
 
-    def show_skipped(id):
+    def show_skipped(id: str | None) -> str | None:
         if not id and skipped:
             return f'(skipped {skipped})'
 
@@ -60,6 +63,6 @@ def action_progressbar(client, action, ids, label, text=None, timeout=None):
                 skipped += 1
 
 
-def origin():
+def origin() -> str:
     prog = os.path.basename(sys.argv[0])
     return f'{prog}/{platform.uname()[1]}'

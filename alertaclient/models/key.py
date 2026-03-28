@@ -1,9 +1,16 @@
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any
+
 from alertaclient.utils import DateTime
+
+JSON = dict[str, Any]
 
 
 class ApiKey:
 
-    def __init__(self, user, scopes, text='', expire_time=None, customer=None, **kwargs):
+    def __init__(self, user: str, scopes: list[str], text: str | None = '', expire_time: datetime | None = None, customer: str | None = None, **kwargs: Any) -> None:
         self.id = kwargs.get('id', None)
         self.key = kwargs.get('key', None)
         self.user = user
@@ -15,15 +22,15 @@ class ApiKey:
         self.customer = customer
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self.scopes_to_type(self.scopes)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'ApiKey(key={!r}, user={!r}, scopes={!r}, expireTime={!r}, customer={!r})'.format(
             self.key, self.user, self.scopes, self.expire_time, self.customer)
 
     @classmethod
-    def parse(cls, json):
+    def parse(cls, json: JSON) -> ApiKey:
         if not isinstance(json.get('scopes', []), list):
             raise ValueError('scopes must be a list')
 
@@ -39,13 +46,13 @@ class ApiKey:
             customer=json.get('customer', None)
         )
 
-    def scopes_to_type(self, scopes):
+    def scopes_to_type(self, scopes: list[str]) -> str:
         for scope in scopes:
             if scope.startswith('write') or scope.startswith('admin'):
                 return 'read-write'
         return 'read-only'
 
-    def tabular(self, timezone=None):
+    def tabular(self, timezone: str | None = None) -> dict[str, Any]:
         return {
             'id': self.id,
             'key': self.key,

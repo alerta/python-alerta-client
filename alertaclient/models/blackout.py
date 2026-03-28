@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
+from typing import Any
 
 from alertaclient.utils import DateTime
+
+JSON = dict[str, Any]
 
 
 class Blackout:
 
-    def __init__(self, environment, **kwargs):
+    def __init__(self, environment: str, **kwargs: Any) -> None:
         if not environment:
             raise ValueError('Missing mandatory value for "environment"')
 
@@ -62,7 +67,7 @@ class Blackout:
             self.status = 'expired'
             self.remaining = 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         more = ''
         if self.service:
             more += 'service=%r, ' % self.service
@@ -91,7 +96,7 @@ class Blackout:
         )
 
     @classmethod
-    def parse(cls, json):
+    def parse(cls, json: JSON) -> Blackout:
         if not isinstance(json.get('service', []), list):
             raise ValueError('service must be a list')
         if not isinstance(json.get('tags', []), list):
@@ -115,7 +120,7 @@ class Blackout:
             text=json.get('text', None)
         )
 
-    def tabular(self, timezone=None):
+    def tabular(self, timezone: str | None = None) -> dict[str, Any]:
         return {
             'id': self.id,
             'priority': self.priority,
