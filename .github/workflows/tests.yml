@@ -47,9 +47,9 @@ jobs:
       - name: Integration Test
         id: integration-test
         run: |
-          docker-compose -f docker-compose.ci.yaml build sut
-          docker-compose -f docker-compose.ci.yaml up --exit-code-from sut
-          docker-compose -f docker-compose.ci.yaml rm --stop --force
+          docker compose -f docker-compose.ci.yaml build sut
+          docker compose -f docker-compose.ci.yaml up --exit-code-from sut
+          docker compose -f docker-compose.ci.yaml rm --stop --force
       - uses: act10ns/slack@v2
         with:
           status: ${{ job.status }}
