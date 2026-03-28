@@ -21,7 +21,7 @@ def cli(obj, ids, query, filters, timeout, text):
         else:
             query = build_query(filters)
         total, _, _ = client.get_count(query)
-        ids = [a.id for a in client.get_alerts(query)]
+        ids = [a.id for a in client.get_all_alerts(query)]
 
     action_progressbar(client, action='shelve', ids=ids,
                        label=f'Shelving {total} alerts', text=text, timeout=timeout)
