@@ -1,6 +1,6 @@
 Click==8.3.1
 pytz==2026.1.post1
 PyYAML==6.0.3
-requests==2.33.0
+requests==2.33.1
 requests-hawk==1.2.1
 tabulate==0.10.0
