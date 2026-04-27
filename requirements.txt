@@ -1,4 +1,4 @@
-Click==8.3.1
+Click==8.3.3
 pytz==2026.1.post1
 PyYAML==6.0.3
 requests==2.33.0
